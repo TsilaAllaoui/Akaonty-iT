@@ -28,7 +28,13 @@ class _ExpensesState extends State<Expenses> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Text(expenses[index].description),
+                    Text(expenses[index].description,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                    ),
+                    const SizedBox(height: 15,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

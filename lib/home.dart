@@ -1,4 +1,5 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:expense/icons/custom_icons_icons.dart';
 import 'package:expense/model/expense.dart';
 import 'package:flutter/material.dart';
 
@@ -30,13 +31,22 @@ class _HomeState extends State<Home> {
               description: "Vêtements", amount: 200000, date: DateTime.now()),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {  },
+        backgroundColor: Colors.green.shade500,
+        child: const Icon(
+          Icons.add,
+          size: 25,
+        )
+        ),
       bottomNavigationBar: AnimatedBottomNavigationBar(
         backgroundColor: Colors.grey,
         icons: const <IconData>[
-          Icons.sunny,
-          Icons.money,
-          Icons.work,
-          Icons.cabin
+          Icons.date_range_rounded,
+          CustomIcons.piggy_bank,
+          Icons.attach_money_outlined,
+          Icons.money_off_csred_outlined,
         ],
         activeIndex: navIndex,
         gapLocation: GapLocation.center,
