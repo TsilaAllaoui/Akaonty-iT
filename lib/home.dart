@@ -3,6 +3,7 @@ import 'package:expense/icons/custom_icons_icons.dart';
 import 'package:expense/model/expense.dart';
 import 'package:flutter/material.dart';
 
+import 'expense_input.dart';
 import 'expenses.dart';
 
 class Home extends StatefulWidget {
@@ -13,8 +14,42 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
   int navIndex = 0;
   List<Expense> expenses = [];
+  Expense? expenseToAdd;
+
+  void addExpense(BuildContext context) {
+    setState(() {
+      if (expenseToAdd == null) {
+        print("Null expense");
+        showDialog(context: context, builder: (ctx) => AlertDialog(
+          title: const Text("Invalid expense input"),
+          actions: [
+            TextButton(onPressed: () {
+              Navigator.pop(context);
+            }, 
+            child: const Text("Close"))
+          ],
+        ));
+        return;
+      }
+      expenses.add(expenseToAdd!);
+      print("Expense added");
+    });
+  }
+
+  void openExpenseInput() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      context: context, 
+      builder: (ctx) =>
+      const ExpenseInput(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +68,7 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {  },
+        onPressed: openExpenseInput,
         backgroundColor: Colors.green.shade500,
         child: const Icon(
           Icons.add,
