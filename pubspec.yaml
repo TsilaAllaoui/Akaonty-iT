@@ -12,6 +12,11 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   animated_bottom_navigation_bar: ^1.2.0
+  flutter_riverpod: ^2.3.6
+  fluttertoast: ^8.2.2
+  sqflite: ^2.2.8+4
+  path_provider: ^2.0.15
+  permission_handler: ^10.3.0
 
 dev_dependencies:
   flutter_test:
