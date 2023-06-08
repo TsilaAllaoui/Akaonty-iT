@@ -1,4 +1,4 @@
-import 'package:expense/model/expense.dart';
+import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,8 +25,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       ));
       return;
     }
-    Expense expense = Expense(
-        title: titleController.text, amount: amount, date: DateTime.now());
+    ExpenseItem expense = ExpenseItem(
+        title: titleController.text,
+        amount: amount,
+        date: dateFormatter.format(DateTime.now()));
     await ref.read(expensesProvider.notifier).addExpense(expense);
     Navigator.of(context).pop();
   }

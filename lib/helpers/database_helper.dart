@@ -2,16 +2,20 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../model/expense.dart';
+import '../model/expense_model.dart';
 
 class DatabaseHelper {
+  static DatabaseHelper? dbHelper;
   static Database? db;
 
-  static Future<void> createDatabase() async {
-    if (db != null) {
-      return;
-    }
+  DatabaseHelper._createInstance();
 
+  factory DatabaseHelper() {
+    dbHelper ??= DatabaseHelper._createInstance();
+    return dbHelper!;
+  }
+
+  static Future<Database> createDatabase() async {
     var status = await Permission.storage.status;
     if (status.isDenied) {
       await Permission.storage.request();
@@ -28,30 +32,38 @@ class DatabaseHelper {
       version: 1,
     );
 
-    db = database;
+    return database;
   }
 
-  static Future<void> closeDatabase() async {
+  static Future<Database> getDatabase() async {
+    db ??= await createDatabase();
+    return db!;
+  }
+
+  Future<void> closeDatabase() async {
     await DatabaseHelper.db!.close();
   }
 
-  static Future<void> insertExpense(Expense expense) async {
-    var count = await DatabaseHelper.db!.insert("expenses", expense.toMap());
+  static Future<void> insertExpense(ExpenseItem expense) async {
+    var db = await getDatabase();
+    var count = await db.insert("expenses", expense.toMap());
   }
 
-  static Future<List<Expense>> fetchExpense() async {
-    var res = await DatabaseHelper.db!.query("expenses");
-    List<Expense> expenses = [];
+  static Future<void> deleteExpense(ExpenseItem expense) async {
+    var db = await getDatabase();
+    var count = await db.delete("expenses",
+        where:
+            "title = \"${expense.title}\"AND amount = \"${expense.amount}\"");
+  }
+
+  static Future<List<ExpenseItem>> fetchExpense() async {
+    var db = await getDatabase();
+    var res = await db.query("expenses");
+    List<ExpenseItem> expenses = [];
     for (final expenseMap in res) {
-      Expense expense = Expense.fromMap(expenseMap);
+      ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
       expenses.add(expense);
     }
     return expenses;
-  }
-
-  static Future<void> deleteExpense(Expense expense) async {
-    var count = await DatabaseHelper.db!.delete("expenses",
-        where:
-            "title = \"${expense.title}\"AND amount = \"${expense.amount}\"");
   }
 }

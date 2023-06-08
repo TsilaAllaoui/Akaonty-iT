@@ -1,6 +1,6 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:expense/icons/custom_icons_icons.dart';
-import 'package:expense/model/expense.dart';
+import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +18,7 @@ class Home extends ConsumerStatefulWidget {
 
 class _HomeState extends ConsumerState<Home> {
   int navIndex = 0;
-  Expense? expenseToAdd;
+  ExpenseItem? expenseToAdd;
 
   void openExpenseInput() {
     showModalBottomSheet(
@@ -31,7 +31,7 @@ class _HomeState extends ConsumerState<Home> {
     );
   }
 
-  Future<List<Expense>> getExpensesInDb() async {
+  Future<List<ExpenseItem>> getExpensesInDb() async {
     await DatabaseHelper.createDatabase();
     var res = await DatabaseHelper.fetchExpense();
     ref.read(expensesProvider.notifier).setExpenses(res);
