@@ -73,13 +73,13 @@ class DatabaseHelper {
     var db = await getDatabase();
     var count = await db.delete("expenses",
         where:
-            "title = \"${expense.title}\"AND amount = \"${expense.amount}\"");
+            "title = \"${expense.title}\" AND amount = \"${expense.amount}\"");
   }
 
   static Future<void> deleteEntry(EntryItem entry) async {
     var db = await getDatabase();
-    var count = await db.delete("expenses",
-        where: "month = \"${entry.month}\"AND year = \"${entry.year}\"");
+    var count = await db.delete("entries",
+        where: "month = \"${entry.month}\" AND year = \"${entry.year}\"");
   }
 
   static Future<List<ExpenseItem>> fetchExpense() async {
@@ -95,13 +95,32 @@ class DatabaseHelper {
 
   static Future<List<EntryItem>> fetchEntries() async {
     var db = await getDatabase();
-    // var res = await db.query("entries");
-    var res = await db.rawQuery(
-        "SELECT * FROM entries ORDER BY CASE month WHEN 'January' THEN 1 WHEN 'February' THEN 2 WHEN 'March' THEN 3 WHEN 'April' THEN 4 WHEN 'May' THEN 5 WHEN 'June' THEN 6 WHEN 'July' THEN 7 WHEN 'August' THEN 8 WHEN 'September' THEN 9 WHEN 'October' THEN 10 WHEN 'November' THEN 11 WHEN 'December' THEN 12 END ASC, year ASC");
     List<EntryItem> entries = [];
-    for (final entryMap in res) {
-      EntryItem expense = EntryItem.fromMap(entryMap);
-      entries.add(expense);
+
+    var years = await db.query("entries",
+        columns: ["year"], distinct: true, orderBy: "year DESC");
+    for (final year in years) {
+      var res = await db.rawQuery('''SELECT * FROM entries 
+             WHERE year = ${year["year"]} 
+             ORDER BY 
+              CASE month 
+                WHEN 'January' THEN 1 
+                WHEN 'February' THEN 2 
+                WHEN 'March' THEN 3 
+                WHEN 'April' THEN 4 
+                WHEN 'May' THEN 5 
+                WHEN 'June' THEN 6 
+                WHEN 'July' THEN 7 
+                WHEN 'August' THEN 8 
+                WHEN 'September' THEN 9 
+                WHEN 'October' THEN 10 
+                WHEN 'November' THEN 11 
+                WHEN 'December' THEN 12 
+              END DESC''');
+      for (final entryMap in res) {
+        EntryItem expense = EntryItem.fromMap(entryMap);
+        entries.add(expense);
+      }
     }
     return entries;
   }

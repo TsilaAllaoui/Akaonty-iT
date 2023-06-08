@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:pie_menu/pie_menu.dart';
 
 class Entries extends ConsumerStatefulWidget {
   Entries({super.key, required this.entries});
@@ -46,6 +47,7 @@ class _EntriesState extends ConsumerState<Entries> {
         month: splits[1],
         year: splits[2]);
     await ref.read(entriesProvider.notifier).addEntry(entry);
+    transaction = getEntriesFromDb();
     // Navigator.of(context).pop();
   }
 
@@ -70,44 +72,49 @@ class _EntriesState extends ConsumerState<Entries> {
       future: transaction,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Entries"),
-              backgroundColor: Theme.of(context).primaryColor,
-              actions: [
-                Container(
-                  margin: const EdgeInsets.only(right: 20),
-                  child: IconButton(
-                    onPressed: () async {
-                      await DatabaseHelper.clearDatabase();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Database cleared"),
-                        ),
-                      );
+          return PieCanvas(
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text("Entries"),
+                backgroundColor: Theme.of(context).primaryColor,
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 20),
+                    child: IconButton(
+                      onPressed: () async {
+                        await DatabaseHelper.clearDatabase();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Database cleared"),
+                          ),
+                        );
+                        transaction = getEntriesFromDb();
+                      },
+                      icon: const Icon(Icons.menu),
+                      iconSize: 40,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(right: 20),
+                    child: IconButton(
+                      onPressed: createEntry,
+                      icon: const Icon(Icons.add_outlined),
+                      iconSize: 40,
+                    ),
+                  ),
+                ],
+              ),
+              body: ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  return Entry(
+                    entry: ref.watch(entriesProvider)[index],
+                    toggleTransaction: () {
                       transaction = getEntriesFromDb();
                     },
-                    icon: const Icon(Icons.menu),
-                    iconSize: 40,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(right: 20),
-                  child: IconButton(
-                    onPressed: createEntry,
-                    icon: const Icon(Icons.add_outlined),
-                    iconSize: 40,
-                  ),
-                ),
-              ],
-            ),
-            body: ListView.builder(
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                return Entry(
-                  entry: entries[index],
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
           ;
