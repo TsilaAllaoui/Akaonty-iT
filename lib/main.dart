@@ -4,9 +4,13 @@ import 'package:expense/widgets/home.dart';
 
 void main() {
   runApp(
-    const ProviderScope(
+    ProviderScope(
       child: MaterialApp(
-        home: Home(),
+        theme: ThemeData(
+          primaryColor: Colors.grey,
+          fontFamily: "Ubuntu",
+        ),
+        home: const Home(),
       ),
     ),
   );

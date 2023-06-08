@@ -19,6 +19,7 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   int navIndex = 0;
   ExpenseItem? expenseToAdd;
+  late Future<dynamic> pendingTransaction;
 
   void openExpenseInput() {
     showModalBottomSheet(
@@ -31,17 +32,24 @@ class _HomeState extends ConsumerState<Home> {
     );
   }
 
-  Future<List<ExpenseItem>> getExpensesInDb() async {
+  Future<bool> getExpensesInDb() async {
+    debugPrint("In getExpensesInDb");
     await DatabaseHelper.createDatabase();
     var res = await DatabaseHelper.fetchExpense();
     ref.read(expensesProvider.notifier).setExpenses(res);
-    return res;
+    return true;
+  }
+
+  @override
+  void initState() {
+    pendingTransaction = getExpensesInDb();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: getExpensesInDb(),
+      future: pendingTransaction,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
@@ -73,7 +81,9 @@ class _HomeState extends ConsumerState<Home> {
               gapLocation: GapLocation.center,
               leftCornerRadius: 32,
               rightCornerRadius: 32,
-              onTap: (index) => setState(() => navIndex = index),
+              onTap: (index) {
+                // setState(() => navIndex = index
+              },
             ),
           );
         } else {

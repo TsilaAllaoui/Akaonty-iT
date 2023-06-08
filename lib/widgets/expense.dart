@@ -24,7 +24,7 @@ class _ExpenseState extends ConsumerState<Expense> {
       key: Key(expense.id.toString()),
       child: Container(
         margin: const EdgeInsets.all(5),
-        height: 80,
+        height: 90,
         child: Card(
             elevation: 5,
             child: Padding(
@@ -35,7 +35,7 @@ class _ExpenseState extends ConsumerState<Expense> {
                     expense.title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 20,
                     ),
                   ),
                   const SizedBox(
@@ -44,7 +44,12 @@ class _ExpenseState extends ConsumerState<Expense> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(expense.amount.toString()),
+                      Text(
+                        "${expense.amount.toString()} Fmg",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       Text(expense.date.toString()),
                     ],
                   ),
