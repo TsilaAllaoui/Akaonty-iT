@@ -1,3 +1,4 @@
+import 'package:expense/widgets/entries/entries.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:expense/widgets/home.dart';

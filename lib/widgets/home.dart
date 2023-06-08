@@ -1,13 +1,14 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:expense/icons/custom_icons_icons.dart';
 import 'package:expense/model/expense_model.dart';
+import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/widgets/expenses/expense_input.dart';
+import 'package:expense/widgets/expenses/expenses.dart';
+import 'package:expense/widgets/entries/entries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../helpers/database_helper.dart';
-import 'expense_input.dart';
-import 'expenses.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -82,6 +83,13 @@ class _HomeState extends ConsumerState<Home> {
               leftCornerRadius: 32,
               rightCornerRadius: 32,
               onTap: (index) {
+                if (index == 0) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return Entries(entries: ref.watch(entriesProvider));
+                    },
+                  ));
+                }
                 // setState(() => navIndex = index
               },
             ),

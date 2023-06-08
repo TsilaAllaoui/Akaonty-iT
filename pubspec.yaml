@@ -17,7 +17,8 @@ dependencies:
   sqflite: ^2.2.8+4
   path_provider: ^2.0.15
   permission_handler: ^10.3.0
-  intl: ^0.18.1
+  intl: ^0.18.0
+  month_picker_dialog: ^2.0.2
 
 dev_dependencies:
   flutter_test:
