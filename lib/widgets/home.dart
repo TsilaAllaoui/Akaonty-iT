@@ -49,6 +49,13 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = Entries(entries: ref.watch(entriesProvider));
+    if (navIndex == 2) {
+      content = Expenses(
+        expenses: ref.watch(expensesProvider),
+      );
+    }
+
     return FutureBuilder(
       future: pendingTransaction,
       builder: (context, snapshot) {
@@ -58,9 +65,7 @@ class _HomeState extends ConsumerState<Home> {
               backgroundColor: Colors.grey,
               title: const Text("Akaonty-iT"),
             ),
-            body: Expenses(
-              expenses: ref.watch(expensesProvider),
-            ),
+            body: content,
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.miniCenterDocked,
             floatingActionButton: FloatingActionButton(
@@ -83,14 +88,9 @@ class _HomeState extends ConsumerState<Home> {
               leftCornerRadius: 32,
               rightCornerRadius: 32,
               onTap: (index) {
-                if (index == 0) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) {
-                      return Entries(entries: ref.watch(entriesProvider));
-                    },
-                  ));
-                }
-                // setState(() => navIndex = index
+                setState(() {
+                  navIndex = index;
+                });
               },
             ),
           );

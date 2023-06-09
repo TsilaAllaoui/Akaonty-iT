@@ -1,6 +1,5 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/entry_model.dart';
-import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/widgets/entries/entry.dart';
 import 'package:flutter/material.dart';
@@ -47,8 +46,6 @@ class _EntriesState extends ConsumerState<Entries> {
         month: splits[1],
         year: splits[2]);
     await ref.read(entriesProvider.notifier).addEntry(entry);
-    transaction = getEntriesFromDb();
-    // Navigator.of(context).pop();
   }
 
   Future<bool> getEntriesFromDb() async {
@@ -88,7 +85,6 @@ class _EntriesState extends ConsumerState<Entries> {
                             content: Text("Database cleared"),
                           ),
                         );
-                        transaction = getEntriesFromDb();
                       },
                       icon: const Icon(Icons.menu),
                       iconSize: 40,
@@ -108,7 +104,7 @@ class _EntriesState extends ConsumerState<Entries> {
                 itemCount: entries.length,
                 itemBuilder: (context, index) {
                   return Entry(
-                    entry: ref.watch(entriesProvider)[index],
+                    entry: entries[index],
                     toggleTransaction: () {
                       transaction = getEntriesFromDb();
                     },

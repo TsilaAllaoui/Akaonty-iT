@@ -1,4 +1,6 @@
 import 'package:expense/model/entry_model.dart';
+import 'package:expense/widgets/entries/entry.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
@@ -80,6 +82,13 @@ class DatabaseHelper {
     var db = await getDatabase();
     var count = await db.delete("entries",
         where: "month = \"${entry.month}\" AND year = \"${entry.year}\"");
+  }
+
+  static Future<void> updateEntry(EntryItem entry, Color newColor) async {
+    var db = await getDatabase();
+    var count = await db.update("entries",
+        {"red": newColor.red, "green": newColor.green, "blue": newColor.blue},
+        where: "id = ?", whereArgs: [entry.id]);
   }
 
   static Future<List<ExpenseItem>> fetchExpense() async {

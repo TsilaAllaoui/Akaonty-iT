@@ -1,9 +1,11 @@
-import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/entry_model.dart';
+import 'package:expense/provider/entries_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
 
-class Entry extends StatefulWidget {
+class Entry extends ConsumerStatefulWidget {
   Entry({super.key, required this.entry, required this.toggleTransaction});
 
   void Function() toggleTransaction;
@@ -11,13 +13,74 @@ class Entry extends StatefulWidget {
   late EntryItem entry;
 
   @override
-  State<Entry> createState() => _EntryState();
+  ConsumerState<Entry> createState() => _EntryState();
 }
 
-class _EntryState extends State<Entry> {
+class _EntryState extends ConsumerState<Entry> {
+  Color newColor = Colors.black;
+  Color pickedColor = Colors.black;
+
+  Future<void> changeEntryColor() async {
+    var entry = widget.entry;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pick a color!'),
+        content: SingleChildScrollView(
+          child: MaterialPicker(
+            enableLabel: true,
+            pickerColor: pickedColor,
+            onColorChanged: (color) {
+              setState(() {
+                pickedColor = color;
+              });
+            },
+          ),
+          // Use Material color picker:
+          //
+          // child: MaterialPicker(
+          //   pickerColor: pickerColor,
+          //   onColorChanged: changeColor,
+          //   showLabel: true, // only on portrait mode
+          // ),
+          //
+          // Use Block color picker:
+          //
+          // child: BlockPicker(
+          //   pickerColor: currentColor,
+          //   onColorChanged: changeColor,
+          // ),
+          //
+          // child: MultipleChoiceBlockPicker(
+          //   pickerColors: currentColors,
+          //   onColorsChanged: changeColors,
+          // ),
+        ),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  newColor = pickedColor;
+                });
+                ref.read(entriesProvider.notifier).updateEntry(entry, newColor);
+                Navigator.of(context).pop();
+              },
+              child: const Text("Validate")),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel")),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     EntryItem entry = widget.entry;
+
+    Widget content = const Icon(Icons.color_lens);
 
     return PieMenu(
       theme: const PieTheme(
@@ -34,15 +97,14 @@ class _EntryState extends State<Entry> {
               backgroundColor: Colors.red.shade800, iconColor: Colors.white),
           tooltip: "Delete",
           onSelect: () async {
-            await DatabaseHelper.deleteEntry(widget.entry);
-            widget.toggleTransaction();
+            await ref.read(entriesProvider.notifier).removeEntry(entry);
           },
           child: const Icon(Icons.delete),
         ),
         PieAction(
           tooltip: "Change color",
-          onSelect: () => print("Change color pressed"),
-          child: const Icon(Icons.color_lens),
+          onSelect: changeEntryColor,
+          child: content,
         )
       ],
       child: Container(
@@ -52,7 +114,7 @@ class _EntryState extends State<Entry> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
             gradient: LinearGradient(
-                colors: [entry.color, entry.color.withOpacity(0.5)])),
+                colors: [entry.color, darken(entry.color, 0.18)])),
         child: Row(
           children: [
             Container(
@@ -91,4 +153,13 @@ class _EntryState extends State<Entry> {
       ),
     );
   }
+}
+
+Color darken(Color color, [double amount = .1]) {
+  assert(amount >= 0 && amount <= 1);
+
+  final hsl = HSLColor.fromColor(color);
+  final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+
+  return hslDark.toColor();
 }
