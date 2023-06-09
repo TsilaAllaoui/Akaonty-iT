@@ -58,7 +58,7 @@ class _EntryState extends ConsumerState<Entry> {
   }
 
   Future<void> navigateToExpenses() async {
-    ref.read(navBarIndexProvider.notifier).setNavBarIndex(2);
+    ref.read(navBarIndexProvider.notifier).setNavBarIndex(1);
     ref.read(currentEntryProvider.notifier).setCurrentEntry(widget.entry);
     await ref.read(expensesProvider.notifier).setExpenses(widget.entry.id!);
   }

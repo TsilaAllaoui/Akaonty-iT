@@ -110,9 +110,9 @@ class DatabaseHelper {
   static Future<List<ExpenseItem>> fetchExpenses({int entryId = -1}) async {
     var db = await getDatabase();
     var res = entryId == -1
-        ? await db.query("expenses")
-        : await db
-            .query("expenses", where: "entry_id = ?", whereArgs: [entryId]);
+        ? await db.query("expenses", orderBy: "id DESC")
+        : await db.query("expenses",
+            where: "entry_id = ?", whereArgs: [entryId], orderBy: "id DESC");
     List<ExpenseItem> expenses = [];
     for (final expenseMap in res) {
       ExpenseItem expense = ExpenseItem.fromMap(expenseMap);

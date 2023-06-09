@@ -23,9 +23,12 @@ class _ExpenseState extends ConsumerState<Expense> {
       },
       key: Key(expense.id.toString()),
       child: Container(
-        margin: const EdgeInsets.all(5),
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         height: 90,
         child: Card(
+            color: expense.type == ExpenseType.income
+                ? Colors.green.shade100
+                : Colors.red.shade100,
             elevation: 5,
             child: Padding(
               padding: const EdgeInsets.all(8.0),

@@ -28,7 +28,6 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
-  List<String> titles = ["Entries", "Savings", "InCome/OutCome", "Debts"];
 
   void createExpense() {
     showModalBottomSheet(
@@ -70,7 +69,7 @@ class _HomeState extends ConsumerState<Home> {
   void showInput() {
     if (ref.read(navBarIndexProvider) == 0) {
       createEntry();
-    } else if (ref.read(navBarIndexProvider) == 2) {
+    } else if (ref.read(navBarIndexProvider) == 1) {
       createExpense();
     }
   }
@@ -135,9 +134,12 @@ class _HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     int navIndex = ref.watch(navBarIndexProvider);
     Widget content = Entries(entries: ref.watch(entriesProvider));
-    if (navIndex == 2) {
+    EntryItem currentEntryItem = ref.watch(currentEntryProvider);
+    if (navIndex == 1) {
       content = Expenses();
     }
+
+    List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
 
     return FutureBuilder(
       future: pendingTransaction,
@@ -151,9 +153,30 @@ class _HomeState extends ConsumerState<Home> {
                 title: Expanded(
                   child: Row(
                     children: [
-                      const Text("Akaonty-iT"),
+                      const Text(
+                        "Akaonty-iT",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const Spacer(),
-                      Text(titles[navIndex]),
+                      navIndex != 1
+                          ? Text(
+                              titles[navIndex],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          : Column(
+                              children: [
+                                Text(
+                                  currentEntryItem.month,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  currentEntryItem.year,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ],
+                            ),
                       const SizedBox(
                         width: 15,
                       ),
@@ -196,8 +219,8 @@ class _HomeState extends ConsumerState<Home> {
                 backgroundColor: Theme.of(context).primaryColor,
                 icons: const <IconData>[
                   Icons.date_range_rounded,
-                  CustomIcons.bank,
                   Icons.attach_money_outlined,
+                  CustomIcons.bank,
                   Icons.money_off_csred_outlined,
                 ],
                 iconSize: 30,
