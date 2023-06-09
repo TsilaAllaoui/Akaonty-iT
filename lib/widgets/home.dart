@@ -78,7 +78,7 @@ class _HomeState extends ConsumerState<Home> {
   Future<bool> getExpensesInDb() async {
     debugPrint("In getExpensesInDb");
     await DatabaseHelper.createDatabase();
-    var res = await DatabaseHelper.fetchExpense();
+    var res = await DatabaseHelper.fetchExpenses();
     ref.read(expensesProvider.notifier).setExpenses(-1);
     return true;
   }
@@ -136,9 +136,7 @@ class _HomeState extends ConsumerState<Home> {
     int navIndex = ref.watch(navBarIndexProvider);
     Widget content = Entries(entries: ref.watch(entriesProvider));
     if (navIndex == 2) {
-      content = Expenses(
-        expenses: ref.watch(expensesProvider),
-      );
+      content = Expenses();
     }
 
     return FutureBuilder(

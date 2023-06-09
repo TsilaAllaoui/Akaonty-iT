@@ -31,12 +31,27 @@ class _ExpenseState extends ConsumerState<Expense> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  Text(
-                    expense.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      Text(
+                        expense.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const Spacer(),
+                      expense.type == ExpenseType.income
+                          ? const Icon(
+                              Icons.arrow_upward,
+                              color: Colors.green,
+                            )
+                          : const Icon(
+                              Icons.arrow_downward,
+                              color: Colors.red,
+                            )
+                    ],
                   ),
                   const SizedBox(
                     height: 15,

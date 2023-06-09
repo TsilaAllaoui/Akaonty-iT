@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
   ExpensesNotifier() : super([]);
 
-  Future<void> addExpense(ExpenseItem expense) async {
+  Future<void> addExpense(ExpenseItem expense, {int entryId = -1}) async {
     await DatabaseHelper.insertExpense(expense);
-    state = [expense, ...state];
+    var res = await DatabaseHelper.fetchExpenses(entryId: entryId);
+    state = [...res];
   }
 
   Future<void> removeExpense(ExpenseItem expense) async {
@@ -30,7 +31,7 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
 
   Future<void> setExpenses(int entryId) async {
     await DatabaseHelper.createDatabase();
-    var res = await DatabaseHelper.fetchExpense();
+    var res = await DatabaseHelper.fetchExpenses();
     if (entryId < 0) {
       state = res;
       return;

@@ -19,10 +19,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   String selectedDate = dateFormatter.format(DateTime.now());
   ExpenseType selectedType = ExpenseType.outcome;
 
-  void addExpense(BuildContext ctx) async {
+  void addExpense() async {
     var amount = int.tryParse(amountController.text);
     if (amount == null) {
-      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid amount"),
         dismissDirection: DismissDirection.down,
         duration: Duration(seconds: 2),
@@ -36,7 +36,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         date: dateFormatter.format(DateTime.now()),
         entryId: ref.read(currentEntryProvider).id!,
         type: selectedType);
-    await ref.read(expensesProvider.notifier).addExpense(expense);
+    await ref
+        .read(expensesProvider.notifier)
+        .addExpense(expense, entryId: ref.read(currentEntryProvider).id!);
+    // ref.read(navBarIndexProvider.notifier).setNavBarIndex();
     Navigator.of(context).pop();
   }
 
@@ -196,7 +199,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.green),
                       ),
-                      onPressed: () => addExpense(context),
+                      onPressed: addExpense,
                       child: const Text("Save")),
                 ),
                 Container(
