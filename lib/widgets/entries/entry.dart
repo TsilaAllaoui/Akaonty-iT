@@ -6,9 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
 
 class Entry extends ConsumerStatefulWidget {
-  Entry({super.key, required this.entry, required this.toggleTransaction});
-
-  void Function() toggleTransaction;
+  Entry({super.key, required this.entry});
 
   late EntryItem entry;
 
@@ -36,25 +34,6 @@ class _EntryState extends ConsumerState<Entry> {
               });
             },
           ),
-          // Use Material color picker:
-          //
-          // child: MaterialPicker(
-          //   pickerColor: pickerColor,
-          //   onColorChanged: changeColor,
-          //   showLabel: true, // only on portrait mode
-          // ),
-          //
-          // Use Block color picker:
-          //
-          // child: BlockPicker(
-          //   pickerColor: currentColor,
-          //   onColorChanged: changeColor,
-          // ),
-          //
-          // child: MultipleChoiceBlockPicker(
-          //   pickerColors: currentColors,
-          //   onColorsChanged: changeColors,
-          // ),
         ),
         actions: [
           ElevatedButton(
@@ -75,6 +54,8 @@ class _EntryState extends ConsumerState<Entry> {
       ),
     );
   }
+
+  Future<void> navigateToExpenses() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -107,48 +88,51 @@ class _EntryState extends ConsumerState<Entry> {
           child: content,
         )
       ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        margin: const EdgeInsets.only(top: 10, left: 10),
-        height: 125,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            gradient: LinearGradient(
-                colors: [entry.color, darken(entry.color, 0.18)])),
-        child: Row(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.month,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 35,
+      child: GestureDetector(
+        onTap: navigateToExpenses,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          margin: const EdgeInsets.only(top: 10, left: 10),
+          height: 125,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              gradient: LinearGradient(
+                  colors: [entry.color, darken(entry.color, 0.18)])),
+          child: Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.month,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 35,
+                      ),
                     ),
-                  ),
-                  Text(
-                    entry.year,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                    Text(
+                      entry.year,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios_rounded),
-              iconSize: 35,
-              color: Colors.white,
-              onPressed: () {},
-            ),
-          ],
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded),
+                iconSize: 35,
+                color: Colors.white,
+                onPressed: () {},
+              ),
+            ],
+          ),
         ),
       ),
     );

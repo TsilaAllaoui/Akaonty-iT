@@ -77,15 +77,11 @@ class _EntriesState extends ConsumerState<Entries> {
                 itemBuilder: (context, index) {
                   return Entry(
                     entry: entries[index],
-                    toggleTransaction: () {
-                      transaction = getEntriesFromDb();
-                    },
                   );
                 },
               ),
             ),
           );
-          ;
         } else {
           return const Center(
             child: CircularProgressIndicator(),

@@ -22,7 +22,7 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
   Future<void> restoreExpenses() async {
     var res = DatabaseHelper.expensesBackup;
     List<ExpenseItem> elements = [];
-    for (final map in res!) {
+    for (final map in res) {
       elements.add(ExpenseItem.fromMap(map));
     }
     state = elements;

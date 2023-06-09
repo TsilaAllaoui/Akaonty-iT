@@ -46,7 +46,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
           .showSnackBar(const SnackBar(content: Text("Current date used")));
       d = DateTime.now();
     }
-    selectedDate = dateFormatter.format(d!);
+    selectedDate = dateFormatter.format(d);
   }
 
   @override

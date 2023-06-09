@@ -1,22 +1,22 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/icons/custom_icons_icons.dart';
-import 'package:expense/model/entry_model.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/entries_provider.dart';
-import 'package:expense/provider/expenses_provider.dart';
-import 'package:expense/widgets/entries/entry.dart';
-import 'package:expense/widgets/expenses/expense_input.dart';
-import 'package:expense/widgets/expenses/expenses.dart';
-import 'package:expense/widgets/entries/entries.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:month_picker_dialog/month_picker_dialog.dart';
-import 'dart:math' as math;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-
+import 'package:expense/provider/general_settings_provider.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:expense/widgets/expenses/expense_input.dart';
+import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/provider/entries_provider.dart';
+import 'package:expense/widgets/expenses/expenses.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense/icons/custom_icons_icons.dart';
+import 'package:expense/helpers/database_helper.dart';
+import 'package:expense/widgets/entries/entries.dart';
+import 'package:expense/widgets/entries/entry.dart';
+import 'package:expense/model/expense_model.dart';
+import 'package:expense/model/entry_model.dart';
 import 'package:pie_menu/pie_menu.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -26,7 +26,6 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
-  int navIndex = 0;
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
   List<String> titles = ["Entries", "Savings", "InCome/OutCome", "Debts"];
@@ -69,9 +68,9 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   void showInput() {
-    if (navIndex == 0) {
+    if (ref.read(navBarIndexProvider) == 0) {
       createEntry();
-    } else if (navIndex == 2) {
+    } else if (ref.read(navBarIndexProvider) == 2) {
       createExpense();
     }
   }
@@ -134,6 +133,7 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
+    int navIndex = ref.watch(navBarIndexProvider);
     Widget content = Entries(entries: ref.watch(entriesProvider));
     if (navIndex == 2) {
       content = Expenses(
@@ -212,11 +212,9 @@ class _HomeState extends ConsumerState<Home> {
                 gapLocation: GapLocation.center,
                 leftCornerRadius: 32,
                 rightCornerRadius: 32,
-                onTap: (index) {
-                  setState(() {
-                    navIndex = index;
-                  });
-                },
+                onTap: (index) => ref
+                    .read(navBarIndexProvider.notifier)
+                    .setNavBarIndex(index),
               ),
             ),
           );

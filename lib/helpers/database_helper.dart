@@ -1,5 +1,4 @@
 import 'package:expense/model/entry_model.dart';
-import 'package:expense/widgets/entries/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -70,10 +69,10 @@ class DatabaseHelper {
 
   Future<void> restoreDatabase() async {
     var db = await getDatabase();
-    for (final map in expensesBackup!) {
+    for (final map in expensesBackup) {
       await db.insert("expenses", map);
     }
-    for (final map in entriesBackup!) {
+    for (final map in entriesBackup) {
       await db.insert("entries", map);
     }
   }
