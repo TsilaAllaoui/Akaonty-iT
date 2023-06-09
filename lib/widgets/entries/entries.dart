@@ -71,6 +71,7 @@ class _EntriesState extends ConsumerState<Entries> {
         if (snapshot.connectionState == ConnectionState.done) {
           return PieCanvas(
             child: Scaffold(
+              backgroundColor: Colors.white,
               body: ListView.builder(
                 itemCount: entries.length,
                 itemBuilder: (context, index) {

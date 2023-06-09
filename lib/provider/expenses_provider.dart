@@ -15,6 +15,19 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
     state = state.where((element) => element != expense).toList();
   }
 
+  Future<void> removeAllExpenses() async {
+    state = [];
+  }
+
+  Future<void> restoreExpenses() async {
+    var res = DatabaseHelper.expensesBackup;
+    List<ExpenseItem> elements = [];
+    for (final map in res!) {
+      elements.add(ExpenseItem.fromMap(map));
+    }
+    state = elements;
+  }
+
   void setExpenses(List<ExpenseItem> expenses) {
     state = expenses;
   }

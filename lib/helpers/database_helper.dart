@@ -10,6 +10,8 @@ import '../model/expense_model.dart';
 class DatabaseHelper {
   static DatabaseHelper? dbHelper;
   static Database? db;
+  static List<Map<String, dynamic>> expensesBackup = [];
+  static List<Map<String, dynamic>> entriesBackup = [];
 
   DatabaseHelper._createInstance();
 
@@ -53,12 +55,27 @@ class DatabaseHelper {
 
   static Future<void> clearDatabase() async {
     var db = await getDatabase();
+
+    // Backuping tables in case of restoring
+    expensesBackup = await db.query("expenses");
+    entriesBackup = await db.query("entries");
+
     await db.rawQuery("DELETE FROM entries");
     await db.rawQuery("DELETE FROM expenses");
   }
 
   Future<void> closeDatabase() async {
     await DatabaseHelper.db!.close();
+  }
+
+  Future<void> restoreDatabase() async {
+    var db = await getDatabase();
+    for (final map in expensesBackup!) {
+      await db.insert("expenses", map);
+    }
+    for (final map in entriesBackup!) {
+      await db.insert("entries", map);
+    }
   }
 
   static Future<void> insertExpense(ExpenseItem expense) async {

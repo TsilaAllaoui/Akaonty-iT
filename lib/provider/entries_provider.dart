@@ -17,6 +17,19 @@ class EntriesNotifier extends StateNotifier<List<EntryItem>> {
     state = state.where((element) => element != entry).toList();
   }
 
+  Future<void> removeAllEntries() async {
+    state = [];
+  }
+
+  Future<void> restoreEntries() async {
+    var res = DatabaseHelper.entriesBackup;
+    List<EntryItem> elements = [];
+    for (final map in res) {
+      elements.add(EntryItem.fromMap(map));
+    }
+    state = elements;
+  }
+
   Future<void> updateEntry(EntryItem entry, Color newColor) async {
     await DatabaseHelper.updateEntry(entry, newColor);
     List<EntryItem> elements = [];
