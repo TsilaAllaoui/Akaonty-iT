@@ -3,6 +3,7 @@ import 'package:expense/icons/custom_icons_icons.dart';
 import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/widgets/entries/entry.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
 import 'package:expense/widgets/expenses/expenses.dart';
 import 'package:expense/widgets/entries/entries.dart';
@@ -21,6 +22,7 @@ class _HomeState extends ConsumerState<Home> {
   int navIndex = 0;
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
+  List<String> titles = ["Entries", "Savings", "InCome/OutCome", "Debts"];
 
   void openExpenseInput() {
     showModalBottomSheet(
@@ -61,9 +63,28 @@ class _HomeState extends ConsumerState<Home> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
+            extendBody: true,
             appBar: AppBar(
-              backgroundColor: Colors.grey,
-              title: const Text("Akaonty-iT"),
+              backgroundColor: Theme.of(context).primaryColor,
+              title: Row(
+                children: [
+                  const Text("Akaonty-iT"),
+                  const Spacer(),
+                  Text(titles[navIndex]),
+                  IconButton(
+                    onPressed: () async {
+                      await DatabaseHelper.clearDatabase();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Database cleared"),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.menu),
+                    iconSize: 40,
+                  ),
+                ],
+              ),
             ),
             body: content,
             floatingActionButtonLocation:
@@ -76,13 +97,20 @@ class _HomeState extends ConsumerState<Home> {
                   size: 25,
                 )),
             bottomNavigationBar: AnimatedBottomNavigationBar(
-              backgroundColor: Colors.grey,
+              height: 85,
+              backgroundColor: Theme.of(context).primaryColor,
               icons: const <IconData>[
                 Icons.date_range_rounded,
                 CustomIcons.piggy_bank,
                 Icons.attach_money_outlined,
                 Icons.money_off_csred_outlined,
               ],
+              iconSize: 30,
+              shadow: Shadow(
+                color: darken(Theme.of(context).primaryColor, 0.5),
+                blurRadius: 5,
+              ),
+              activeColor: Colors.white,
               activeIndex: navIndex,
               gapLocation: GapLocation.center,
               leftCornerRadius: 32,

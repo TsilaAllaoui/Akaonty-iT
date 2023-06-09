@@ -125,7 +125,7 @@ class _EntryState extends ConsumerState<Entry> {
                   Text(
                     entry.month,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 35,
                     ),
@@ -133,7 +133,7 @@ class _EntryState extends ConsumerState<Entry> {
                   Text(
                     entry.year,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),

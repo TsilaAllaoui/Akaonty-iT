@@ -71,35 +71,6 @@ class _EntriesState extends ConsumerState<Entries> {
         if (snapshot.connectionState == ConnectionState.done) {
           return PieCanvas(
             child: Scaffold(
-              appBar: AppBar(
-                title: const Text("Entries"),
-                backgroundColor: Theme.of(context).primaryColor,
-                actions: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 20),
-                    child: IconButton(
-                      onPressed: () async {
-                        await DatabaseHelper.clearDatabase();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Database cleared"),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.menu),
-                      iconSize: 40,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(right: 20),
-                    child: IconButton(
-                      onPressed: createEntry,
-                      icon: const Icon(Icons.add_outlined),
-                      iconSize: 40,
-                    ),
-                  ),
-                ],
-              ),
               body: ListView.builder(
                 itemCount: entries.length,
                 itemBuilder: (context, index) {
