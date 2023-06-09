@@ -1,6 +1,8 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:expense/provider/general_settings_provider.dart';
+import 'package:expense/widgets/bank/bank.dart';
+import 'package:expense/widgets/debts/debts.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
 import 'package:expense/provider/expenses_provider.dart';
@@ -137,6 +139,10 @@ class _HomeState extends ConsumerState<Home> {
     EntryItem currentEntryItem = ref.watch(currentEntryProvider);
     if (navIndex == 1) {
       content = Expenses();
+    } else if (navIndex == 2) {
+      content = const Bank();
+    } else if (navIndex == 3) {
+      content = Debts();
     }
 
     List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
