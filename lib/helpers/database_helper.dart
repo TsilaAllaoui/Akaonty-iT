@@ -34,7 +34,7 @@ class DatabaseHelper {
       "${appDir.path}/database.db",
       onCreate: (db, version) {
         db.execute(
-          'CREATE TABLE expenses(id INTEGER PRIMARY KEY, title TEXT, amount INTEGER, date TEXT)',
+          'CREATE TABLE expenses(id INTEGER PRIMARY KEY, title TEXT, amount INTEGER, date TEXT, entry_id INTEGER, type TEXT)',
         );
         db.execute(
           'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',

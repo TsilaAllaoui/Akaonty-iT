@@ -1,5 +1,8 @@
+import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:expense/model/expense_model.dart';
+import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +17,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   var titleController = TextEditingController();
   var amountController = TextEditingController();
   String selectedDate = dateFormatter.format(DateTime.now());
+  ExpenseType selectedType = ExpenseType.outcome;
 
   void addExpense(BuildContext ctx) async {
     var amount = int.tryParse(amountController.text);
@@ -29,21 +33,34 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     ExpenseItem expense = ExpenseItem(
         title: titleController.text,
         amount: amount,
-        date: dateFormatter.format(DateTime.now()));
+        date: dateFormatter.format(DateTime.now()),
+        entryId: ref.read(currentEntryProvider).id!,
+        type: selectedType);
     await ref.read(expensesProvider.notifier).addExpense(expense);
     Navigator.of(context).pop();
   }
 
   Future<void> pickDate() async {
     DateTime now = DateTime.now();
+    var a = DateTime(now.year, now.month + 1, 0).day;
     DateTime? d = await showDatePicker(
+        helpText: "Select date in current month",
         context: context,
         initialDate: now,
-        firstDate: DateTime(now.year - 1, now.month, now.day),
-        lastDate: now);
+        firstDate: DateTime(now.year, now.month, 1),
+        lastDate: DateTime(
+            now.year,
+            now.month,
+            now.day < DateTime(now.year, now.month + 1, 0).day
+                ? now.day
+                : DateTime(now.year, now.month + 1, 0).day));
     if (d == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Current date used")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Current date used"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       d = DateTime.now();
     }
     selectedDate = dateFormatter.format(d);
@@ -67,7 +84,6 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               controller: titleController,
-              maxLength: 100,
               decoration: const InputDecoration(
                 counterStyle: TextStyle(color: Colors.blue),
                 label: Text(
@@ -111,22 +127,68 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
               height: 20,
             ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                Container(
-                    margin: const EdgeInsets.only(right: 20),
-                    child: IconButton(
-                      onPressed: pickDate,
-                      icon: const Icon(
-                        Icons.date_range_outlined,
-                        size: 35,
-                        color: Colors.blue,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(left: 10, bottom: 15),
+                      child: const Text(
+                        "Date:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    )),
-                Text(
-                  selectedDate,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: pickDate,
+                          icon: const Icon(
+                            Icons.date_range_outlined,
+                            size: 35,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            selectedDate,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
-                const Spacer(),
+                const SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: DropDownMenu(
+                      title: "Type: ",
+                      onChanged: (value) {
+                        setState(() {
+                          selectedType = value == "Income"
+                              ? ExpenseType.income
+                              : ExpenseType.outcome;
+                        });
+                      },
+                      values: const ["Income", "Outcome"],
+                      value: selectedType == ExpenseType.income
+                          ? "Income"
+                          : "Outcome"),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 5),
                   child: ElevatedButton(

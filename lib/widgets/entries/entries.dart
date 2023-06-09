@@ -1,6 +1,7 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/entry_model.dart';
 import 'package:expense/provider/entries_provider.dart';
+import 'package:expense/provider/general_settings_provider.dart';
 import 'package:expense/widgets/entries/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,6 +65,9 @@ class _EntriesState extends ConsumerState<Entries> {
   @override
   Widget build(BuildContext context) {
     List<EntryItem> entries = ref.watch(entriesProvider);
+    // if (entries.isNotEmpty) {
+    //   ref.read(currentEntryProvider.notifier).setCurrentEntry(entries[0]);
+    // }
 
     return FutureBuilder(
       future: transaction,

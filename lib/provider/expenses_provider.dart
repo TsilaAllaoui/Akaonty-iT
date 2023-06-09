@@ -28,8 +28,14 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
     state = elements;
   }
 
-  void setExpenses(List<ExpenseItem> expenses) {
-    state = expenses;
+  Future<void> setExpenses(int entryId) async {
+    await DatabaseHelper.createDatabase();
+    var res = await DatabaseHelper.fetchExpense();
+    if (entryId < 0) {
+      state = res;
+      return;
+    }
+    state = res.where((element) => element.entryId == entryId).toList();
   }
 }
 

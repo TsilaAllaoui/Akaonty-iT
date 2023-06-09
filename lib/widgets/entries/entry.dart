@@ -1,5 +1,7 @@
 import 'package:expense/model/entry_model.dart';
 import 'package:expense/provider/entries_provider.dart';
+import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,7 +57,11 @@ class _EntryState extends ConsumerState<Entry> {
     );
   }
 
-  Future<void> navigateToExpenses() async {}
+  Future<void> navigateToExpenses() async {
+    ref.read(navBarIndexProvider.notifier).setNavBarIndex(2);
+    ref.read(currentEntryProvider.notifier).setCurrentEntry(widget.entry);
+    await ref.read(expensesProvider.notifier).setExpenses(widget.entry.id!);
+  }
 
   @override
   Widget build(BuildContext context) {

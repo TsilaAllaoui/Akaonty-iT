@@ -79,7 +79,7 @@ class _HomeState extends ConsumerState<Home> {
     debugPrint("In getExpensesInDb");
     await DatabaseHelper.createDatabase();
     var res = await DatabaseHelper.fetchExpense();
-    ref.read(expensesProvider.notifier).setExpenses(res);
+    ref.read(expensesProvider.notifier).setExpenses(-1);
     return true;
   }
 
