@@ -13,22 +13,21 @@ class navBarIndexNotifier extends StateNotifier<int> {
 final navBarIndexProvider = StateNotifierProvider<navBarIndexNotifier, int>(
     (ref) => navBarIndexNotifier());
 
-class currentEntryNotifier extends StateNotifier<EntryItem> {
-  currentEntryNotifier()
-      : super(EntryItem(
-            month: DateTime.now().month.toString(),
-            year: DateTime.now().year.toString(),
-            color: Colors.black));
+class currentEntryNotifier extends StateNotifier<EntryItem?> {
+  currentEntryNotifier() : super(null);
 
-  void setCurrentEntry(EntryItem entry) {
+  void setCurrentEntry(EntryItem? entry) {
     state = entry;
   }
 
   int getCurrentEntryId() {
-    return state.id!;
+    if (state == null) {
+      return -1;
+    }
+    return state!.id!;
   }
 }
 
 final currentEntryProvider =
-    StateNotifierProvider<currentEntryNotifier, EntryItem>(
+    StateNotifierProvider<currentEntryNotifier, EntryItem?>(
         (ref) => currentEntryNotifier());

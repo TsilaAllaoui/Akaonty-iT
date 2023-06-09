@@ -17,14 +17,24 @@ class _ExpensesState extends ConsumerState<Expenses> {
   @override
   Widget build(BuildContext context) {
     List<ExpenseItem> expenses = ref.watch(expensesProvider);
+    if (expenses.isEmpty) {
+      return const Center(
+        child: Text(
+          "No expense found...",
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    }
 
     return ListView.builder(
-      itemCount: expenses.length,
-      itemBuilder: (context, index) {
-        return Expense(
-          expense: expenses[index],
-        );
-      },
-    );
+        itemCount: expenses.length,
+        itemBuilder: (context, index) {
+          return Expense(
+            expense: expenses[index],
+          );
+        });
   }
 }

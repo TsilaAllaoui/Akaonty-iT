@@ -1,3 +1,4 @@
+import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/entry_model.dart';
 import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
@@ -85,6 +86,13 @@ class _EntryState extends ConsumerState<Entry> {
           tooltip: "Delete",
           onSelect: () async {
             await ref.read(entriesProvider.notifier).removeEntry(entry);
+            var entries = await DatabaseHelper.fetchEntries();
+            if (entries.isEmpty) {
+              ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+            } else {
+              var first = entries.first;
+              ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+            }
           },
           child: const Icon(Icons.delete),
         ),

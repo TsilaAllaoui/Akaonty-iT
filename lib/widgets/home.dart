@@ -3,6 +3,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:expense/widgets/bank/bank.dart';
 import 'package:expense/widgets/debts/debts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
 import 'package:expense/provider/expenses_provider.dart';
@@ -32,6 +33,18 @@ class _HomeState extends ConsumerState<Home> {
   late Future<dynamic> pendingTransaction;
 
   void createExpense() {
+    if (ref.read(entriesProvider).isEmpty) {
+      Fluttertoast.showToast(
+          msg: "No entry found. Add at least one to add expanse.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
+
     showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -50,11 +63,14 @@ class _HomeState extends ConsumerState<Home> {
         firstDate: DateTime(now.year - 1, now.month, now.day),
         lastDate: now);
     if (selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please pick a date"),
-        ),
-      );
+      Fluttertoast.showToast(
+          msg: "Please pick a valid date.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
       return;
     }
     DateFormat format = DateFormat("dd MMMM yyyy");
@@ -66,6 +82,14 @@ class _HomeState extends ConsumerState<Home> {
         month: splits[1],
         year: splits[2]);
     await ref.read(entriesProvider.notifier).addEntry(entry);
+
+    var entries = await DatabaseHelper.fetchEntries();
+    if (entries.isEmpty) {
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+    } else {
+      var first = entries.first;
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+    }
   }
 
   void showInput() {
@@ -81,12 +105,27 @@ class _HomeState extends ConsumerState<Home> {
     await DatabaseHelper.createDatabase();
     var res = await DatabaseHelper.fetchExpenses();
     ref.read(expensesProvider.notifier).setExpenses(-1);
+
+    var entries = await DatabaseHelper.fetchEntries();
+    if (entries.isEmpty) {
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+    } else {
+      var first = entries.first;
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+    }
     return true;
   }
 
   Future<void> restoreAll() async {
     ref.read(expensesProvider.notifier).restoreExpenses();
     ref.read(entriesProvider.notifier).restoreEntries();
+    var entries = await DatabaseHelper.fetchEntries();
+    if (entries.isEmpty) {
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+    } else {
+      var first = entries.first;
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+    }
   }
 
   Future<void> clearDatabase() async {
@@ -117,13 +156,21 @@ class _HomeState extends ConsumerState<Home> {
             backgroundColor: Colors.yellow.shade400,
             textColor: Colors.orange.shade800,
           ),
-        )
+        ),
       ],
     );
 
     ScaffoldMessenger.of(context)
       ..hideCurrentMaterialBanner()
       ..showMaterialBanner(materialBanner);
+
+    var entries = await DatabaseHelper.fetchEntries();
+    if (entries.isEmpty) {
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+    } else {
+      var first = entries.first;
+      ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+    }
   }
 
   @override
@@ -136,7 +183,15 @@ class _HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     int navIndex = ref.watch(navBarIndexProvider);
     Widget content = Entries(entries: ref.watch(entriesProvider));
-    EntryItem currentEntryItem = ref.watch(currentEntryProvider);
+    EntryItem? currentEntryItem = ref.watch(currentEntryProvider);
+    // if (currentEntryItem == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text("No entry found. Add one to add expense to."),
+    //     ),
+    //   );
+    //   return Text("");
+    // }
     if (navIndex == 1) {
       content = Expenses();
     } else if (navIndex == 2) {
@@ -166,19 +221,25 @@ class _HomeState extends ConsumerState<Home> {
                       const Spacer(),
                       navIndex != 1
                           ? Text(
-                              titles[navIndex],
+                              currentEntryItem == null ? "" : titles[navIndex],
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             )
                           : Column(
                               children: [
                                 Text(
-                                  currentEntryItem.month,
+                                  // "TAY",
+                                  currentEntryItem == null
+                                      ? ""
+                                      : currentEntryItem!.month,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  currentEntryItem.year,
+                                  // "TAY",
+                                  currentEntryItem == null
+                                      ? ""
+                                      : currentEntryItem!.year,
                                   style: const TextStyle(fontSize: 10),
                                 ),
                               ],
@@ -221,28 +282,29 @@ class _HomeState extends ConsumerState<Home> {
                     size: 25,
                   )),
               bottomNavigationBar: AnimatedBottomNavigationBar(
-                height: 75,
-                backgroundColor: Theme.of(context).primaryColor,
-                icons: const <IconData>[
-                  Icons.date_range_rounded,
-                  Icons.attach_money_outlined,
-                  CustomIcons.bank,
-                  Icons.money_off_csred_outlined,
-                ],
-                iconSize: 30,
-                shadow: Shadow(
-                  color: darken(Theme.of(context).primaryColor, 0.5),
-                  blurRadius: 5,
-                ),
-                activeColor: Colors.white,
-                activeIndex: navIndex,
-                gapLocation: GapLocation.center,
-                leftCornerRadius: 32,
-                rightCornerRadius: 32,
-                onTap: (index) => ref
-                    .read(navBarIndexProvider.notifier)
-                    .setNavBarIndex(index),
-              ),
+                  height: 75,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  icons: const <IconData>[
+                    Icons.date_range_rounded,
+                    Icons.attach_money_outlined,
+                    CustomIcons.bank,
+                    Icons.money_off_csred_outlined,
+                  ],
+                  iconSize: 30,
+                  shadow: Shadow(
+                    color: darken(Theme.of(context).primaryColor, 0.5),
+                    blurRadius: 5,
+                  ),
+                  activeColor: Colors.white,
+                  activeIndex: navIndex,
+                  gapLocation: GapLocation.center,
+                  leftCornerRadius: 32,
+                  rightCornerRadius: 32,
+                  onTap: (index) {
+                    ref
+                        .read(navBarIndexProvider.notifier)
+                        .setNavBarIndex(index);
+                  }),
             ),
           );
         } else {

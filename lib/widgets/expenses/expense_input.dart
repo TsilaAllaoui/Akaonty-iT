@@ -1,10 +1,12 @@
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
+import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ExpenseInput extends ConsumerStatefulWidget {
   const ExpenseInput({super.key});
@@ -20,6 +22,17 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   ExpenseType selectedType = ExpenseType.outcome;
 
   void addExpense() async {
+    if (ref.read(currentEntryProvider) == null) {
+      Fluttertoast.showToast(
+          msg: "No entry found. Add at least one to add expanse.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
     var amount = int.tryParse(amountController.text);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -34,12 +47,12 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         title: titleController.text,
         amount: amount,
         date: dateFormatter.format(DateTime.now()),
-        entryId: ref.read(currentEntryProvider).id!,
+        entryId: ref.read(currentEntryProvider)!.id!,
         type: selectedType);
     await ref
         .read(expensesProvider.notifier)
-        .addExpense(expense, entryId: ref.read(currentEntryProvider).id!);
-    // ref.read(navBarIndexProvider.notifier).setNavBarIndex();
+        .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
+
     Navigator.of(context).pop();
   }
 
