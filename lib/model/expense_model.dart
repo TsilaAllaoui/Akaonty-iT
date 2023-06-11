@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 var dateFormatter = DateFormat("dd/MM/yy HH:mm");
+var numberFormatter = NumberFormat.decimalPattern('vi_VN');
 
 enum ExpenseType { income, outcome }
 

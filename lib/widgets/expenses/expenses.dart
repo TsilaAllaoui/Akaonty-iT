@@ -17,6 +17,10 @@ class _ExpensesState extends ConsumerState<Expenses> {
   @override
   Widget build(BuildContext context) {
     List<ExpenseItem> expenses = ref.watch(expensesProvider);
+    List<ExpenseItem> incomes = [];
+    List<ExpenseItem> outcomes = [];
+    int totalIncome = 0;
+    int totalOutcome = 0;
     if (expenses.isEmpty) {
       return const Center(
         child: Text(
@@ -27,14 +31,152 @@ class _ExpensesState extends ConsumerState<Expenses> {
           ),
         ),
       );
+    } else {
+      for (final expense in expenses) {
+        if (expense.type == ExpenseType.income) {
+          incomes.add(expense);
+          totalIncome += expense.amount;
+        } else {
+          outcomes.add(expense);
+          totalOutcome += expense.amount;
+        }
+      }
     }
 
-    return ListView.builder(
-        itemCount: expenses.length,
-        itemBuilder: (context, index) {
-          return Expense(
-            expense: expenses[index],
-          );
-        });
+    return DefaultTabController(
+        length: 3,
+        child: Scaffold(
+            appBar: TabBar(
+              indicatorColor: Theme.of(context).primaryColor,
+              tabs: [
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+                  height: 50,
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_drop_up,
+                        color: Colors.green,
+                      ),
+                      // SizedBox(
+                      //   width: 25,
+                      // ),
+                      Text("Income"),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+                  height: 50,
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.red,
+                      ),
+                      // SizedBox(
+                      //   width: 25,
+                      // ),
+                      Text("Outcome"),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+                  height: 50,
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.numbers,
+                        color: Colors.blue,
+                      ),
+                      // SizedBox(
+                      //   width: 25,
+                      // ),
+                      Text("Summary"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            body: TabBarView(
+              children: [
+                ExpenseList(
+                  total: totalIncome,
+                  list: incomes,
+                  type: ExpenseType.income,
+                ),
+                ExpenseList(
+                  total: totalOutcome,
+                  list: outcomes,
+                  type: ExpenseType.outcome,
+                ),
+                const Center(
+                  child: Text("Summary"),
+                )
+              ],
+            )));
+  }
+}
+
+class ExpenseList extends StatefulWidget {
+  const ExpenseList(
+      {super.key, required this.total, required this.list, required this.type});
+
+  final int total;
+  final List<ExpenseItem> list;
+  final ExpenseType type;
+
+  @override
+  State<ExpenseList> createState() => _ExpenseListState();
+}
+
+class _ExpenseListState extends State<ExpenseList> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 75,
+          width: double.infinity,
+          margin: const EdgeInsets.all(5),
+          child: Card(
+            elevation: 5,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Total",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  "${numberFormatter.format(widget.total)} Fmg",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: widget.type == ExpenseType.income
+                          ? Colors.green
+                          : Colors.red),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: widget.list.length,
+            itemBuilder: (context, index) {
+              return Expense(expense: widget.list[index]);
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

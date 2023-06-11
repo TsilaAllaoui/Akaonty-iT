@@ -47,11 +47,11 @@ class _ExpenseState extends ConsumerState<Expense> {
                       const Spacer(),
                       expense.type == ExpenseType.income
                           ? const Icon(
-                              Icons.arrow_upward,
+                              Icons.arrow_drop_up,
                               color: Colors.green,
                             )
                           : const Icon(
-                              Icons.arrow_downward,
+                              Icons.arrow_drop_down,
                               color: Colors.red,
                             )
                     ],
@@ -63,7 +63,7 @@ class _ExpenseState extends ConsumerState<Expense> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "${expense.amount.toString()} Fmg",
+                        "${numberFormatter.format(expense.amount)} Fmg",
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                         ),
