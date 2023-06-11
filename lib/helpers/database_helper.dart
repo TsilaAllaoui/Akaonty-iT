@@ -84,7 +84,8 @@ class DatabaseHelper {
 
   static Future<void> insertEntry(EntryItem entry) async {
     var db = await getDatabase();
-    var count = await db.insert("entries", entry.toMap());
+    var count = await db.insert("entries", entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> deleteExpense(ExpenseItem expense) async {
@@ -96,8 +97,11 @@ class DatabaseHelper {
 
   static Future<void> deleteEntry(EntryItem entry) async {
     var db = await getDatabase();
-    var count = await db.delete("entries",
-        where: "month = \"${entry.month}\" AND year = \"${entry.year}\"");
+    var count =
+        await db.delete("entries", where: "id = ?", whereArgs: [entry.id]);
+    count = await db
+        .delete("expenses", where: "entry_id = ?", whereArgs: [entry.id]);
+    // where: "month = \"${entry.month}\" AND year = \"${entry.year}\"");
   }
 
   static Future<void> updateEntry(EntryItem entry, Color newColor) async {

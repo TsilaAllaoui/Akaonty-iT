@@ -288,7 +288,7 @@ class _HomeState extends ConsumerState<Home> {
                     Icons.date_range_rounded,
                     Icons.attach_money_outlined,
                     CustomIcons.bank,
-                    Icons.money_off_csred_outlined,
+                    Icons.currency_exchange_outlined,
                   ],
                   iconSize: 30,
                   shadow: Shadow(

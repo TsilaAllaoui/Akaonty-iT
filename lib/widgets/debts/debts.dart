@@ -13,3 +13,7 @@ class _DebtsState extends State<Debts> {
     return const Column();
   }
 }
+
+/* TODO
+  - Create debts: model, provider, two tabbed widget for sefl debt and other debt to self
+ */

@@ -51,12 +51,7 @@ class _EntriesState extends ConsumerState<Entries> {
         month: splits[1],
         year: splits[2]);
     await ref.read(entriesProvider.notifier).addEntry(entry);
-    // if (ref.read(entriesProvider).length == 1) {
     ref.read(currentEntryProvider.notifier).setCurrentEntry(entry);
-    // } else {
-    //   var first = ref.read(entriesProvider).first;
-    //   ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
-    // }
   }
 
   Future<bool> getEntriesFromDb() async {
@@ -86,9 +81,6 @@ class _EntriesState extends ConsumerState<Entries> {
         ),
       );
     }
-    // if (entries.isNotEmpty) {
-    //   ref.read(currentEntryProvider.notifier).setCurrentEntry(entries[0]);
-    // }
 
     return FutureBuilder(
       future: transaction,

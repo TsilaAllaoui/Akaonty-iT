@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/entry_model.dart';
 import 'package:expense/provider/entries_provider.dart';
@@ -21,6 +23,8 @@ class _EntryState extends ConsumerState<Entry> {
   Color newColor = Colors.black;
   Color pickedColor = Colors.black;
 
+  Stopwatch timer = Stopwatch();
+
   Future<void> changeEntryColor() async {
     var entry = widget.entry;
     showDialog(
@@ -28,8 +32,7 @@ class _EntryState extends ConsumerState<Entry> {
       builder: (context) => AlertDialog(
         title: const Text('Pick a color!'),
         content: SingleChildScrollView(
-          child: MaterialPicker(
-            enableLabel: true,
+          child: BlockPicker(
             pickerColor: pickedColor,
             onColorChanged: (color) {
               setState(() {
@@ -65,12 +68,19 @@ class _EntryState extends ConsumerState<Entry> {
   }
 
   @override
+  void dispose() {
+    timer.stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     EntryItem entry = widget.entry;
 
     Widget content = const Icon(Icons.color_lens);
 
     return PieMenu(
+      onTap: navigateToExpenses,
       theme: const PieTheme(
           buttonThemeHovered: PieButtonTheme(
               backgroundColor: Colors.grey, iconColor: Colors.white),

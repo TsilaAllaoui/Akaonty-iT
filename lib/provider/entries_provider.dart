@@ -14,6 +14,7 @@ class EntriesNotifier extends StateNotifier<List<EntryItem>> {
 
   Future<void> removeEntry(EntryItem entry) async {
     await DatabaseHelper.deleteEntry(entry);
+    var a = state;
     state = state.where((element) => element != entry).toList();
   }
 

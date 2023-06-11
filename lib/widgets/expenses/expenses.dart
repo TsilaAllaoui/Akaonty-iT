@@ -48,57 +48,21 @@ class _ExpensesState extends ConsumerState<Expenses> {
         child: Scaffold(
             appBar: TabBar(
               indicatorColor: Theme.of(context).primaryColor,
-              tabs: [
-                Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
-                  height: 50,
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.arrow_drop_up,
-                        color: Colors.green,
-                      ),
-                      // SizedBox(
-                      //   width: 25,
-                      // ),
-                      Text("Income"),
-                    ],
-                  ),
+              tabs: const [
+                Tab(
+                  color: Colors.green,
+                  icon: Icons.arrow_drop_up,
+                  title: "Income",
                 ),
-                Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
-                  height: 50,
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.red,
-                      ),
-                      // SizedBox(
-                      //   width: 25,
-                      // ),
-                      Text("Outcome"),
-                    ],
-                  ),
+                Tab(
+                  color: Colors.red,
+                  icon: Icons.arrow_drop_down,
+                  title: "Outcome",
                 ),
-                Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
-                  height: 50,
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.numbers,
-                        color: Colors.blue,
-                      ),
-                      // SizedBox(
-                      //   width: 25,
-                      // ),
-                      Text("Summary"),
-                    ],
-                  ),
+                Tab(
+                  color: Colors.blue,
+                  icon: Icons.numbers,
+                  title: "Summary",
                 ),
               ],
             ),
@@ -114,11 +78,57 @@ class _ExpensesState extends ConsumerState<Expenses> {
                   list: outcomes,
                   type: ExpenseType.outcome,
                 ),
-                const Center(
-                  child: Text("Summary"),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Remains"),
+                      Text(
+                        "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               ],
             )));
+  }
+}
+
+class Tab extends StatefulWidget {
+  const Tab(
+      {super.key,
+      required this.color,
+      required this.icon,
+      required this.title});
+
+  final Color color;
+  final IconData icon;
+  final String title;
+
+  @override
+  State<Tab> createState() => _TabState();
+}
+
+class _TabState extends State<Tab> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+      height: 50,
+      child: Row(
+        children: [
+          Icon(
+            widget.icon,
+            color: widget.color,
+          ),
+          Text(widget.title),
+        ],
+      ),
+    );
   }
 }
 

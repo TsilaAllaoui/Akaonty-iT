@@ -222,7 +222,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.red.shade600),
                       ),
-                      onPressed: () {},
+                      onPressed: Navigator.of(context).pop,
                       child: const Text("Cancel")),
                 ),
               ],
