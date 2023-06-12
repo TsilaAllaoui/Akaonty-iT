@@ -197,18 +197,12 @@ class DatabaseHelper {
     List<BankEntryItem> bankEntries = [];
     var db = await getDatabase();
 
-    var years = await db.query("bank_entries",
-        columns: ["year"], distinct: true, orderBy: "year DESC");
-
-    for (final year in years) {
-      var res = await db.query("bank_entries",
-          orderBy:
-              "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
-
-      for (final entry in res) {
-        BankEntryItem bankEntry = BankEntryItem.fromMap(entry);
-        bankEntries.add(bankEntry);
-      }
+    var res = await db.query("bank_entries",
+        orderBy:
+            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+    for (final entry in res) {
+      BankEntryItem bankEntry = BankEntryItem.fromMap(entry);
+      bankEntries.add(bankEntry);
     }
     return bankEntries;
   }

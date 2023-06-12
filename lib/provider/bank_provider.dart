@@ -12,7 +12,7 @@ class BankEntriesNotifier extends StateNotifier<List<BankEntryItem>> {
     state = [...res];
   }
 
-  Future<void> removeExpense(BankEntryItem bankEntry) async {
+  Future<void> removeBankEntry(BankEntryItem bankEntry) async {
     await DatabaseHelper.deleteBankEntry(bankEntry);
     state = state.where((element) => element != bankEntry).toList();
   }
@@ -29,8 +29,37 @@ class BankEntriesNotifier extends StateNotifier<List<BankEntryItem>> {
     }
     state = elements;
   }
+
+  Future<bool> fetchBankEntries() async {
+    var res = await DatabaseHelper.fetchBankEntries();
+    List<BankEntryItem> entries = [];
+    for (final entry in res) {
+      entries.add(entry);
+    }
+    state = [...entries];
+    return true;
+  }
 }
 
 final bankEntriesProvider =
     StateNotifierProvider<BankEntriesNotifier, List<BankEntryItem>>(
         (ref) => BankEntriesNotifier());
+
+class TotalInBankNotifier extends StateNotifier<int> {
+  TotalInBankNotifier() : super(0);
+
+  void add(int n) {
+    state += n;
+  }
+
+  void substract(int n) {
+    state -= n;
+  }
+
+  void setTotalInBank(int n) {
+    state = n;
+  }
+}
+
+final totalInBankProvider = StateNotifierProvider<TotalInBankNotifier, int>(
+    (ref) => TotalInBankNotifier());

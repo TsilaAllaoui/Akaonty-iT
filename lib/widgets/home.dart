@@ -2,7 +2,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:expense/provider/bank_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
-import 'package:expense/widgets/bank/bank.dart';
+import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -116,8 +116,8 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<bool> getExpensesInDb() async {
-    debugPrint("In getExpensesInDb");
     await DatabaseHelper.createDatabase();
+
     var res = await DatabaseHelper.fetchExpenses();
     ref.read(expensesProvider.notifier).setExpenses(-1);
 
@@ -199,14 +199,6 @@ class _HomeState extends ConsumerState<Home> {
     int navIndex = ref.watch(navBarIndexProvider);
     Widget content = Entries(entries: ref.watch(entriesProvider));
     EntryItem? currentEntryItem = ref.watch(currentEntryProvider);
-    // if (currentEntryItem == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text("No entry found. Add one to add expense to."),
-    //     ),
-    //   );
-    //   return Text("");
-    // }
     if (navIndex == 1) {
       content = Expenses();
     } else if (navIndex == 2) {
