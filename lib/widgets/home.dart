@@ -1,7 +1,9 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:expense/provider/bank_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:expense/widgets/bank/bank.dart';
+import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -92,11 +94,24 @@ class _HomeState extends ConsumerState<Home> {
     }
   }
 
+  void createBankEntry() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      context: context,
+      builder: (context) => const BankEntryInput(),
+    );
+  }
+
   void showInput() {
     if (ref.read(navBarIndexProvider) == 0) {
       createEntry();
     } else if (ref.read(navBarIndexProvider) == 1) {
       createExpense();
+    } else if (ref.read(navBarIndexProvider) == 2) {
+      createBankEntry();
     }
   }
 
