@@ -7,6 +7,7 @@ import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 
 class ExpenseInput extends ConsumerStatefulWidget {
   const ExpenseInput({super.key});
@@ -46,7 +47,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     ExpenseItem expense = ExpenseItem(
         title: titleController.text,
         amount: amount,
-        date: dateFormatter.format(DateTime.now()),
+        date: selectedDate,
         entryId: ref.read(currentEntryProvider)!.id!,
         type: selectedType);
     await ref
@@ -58,28 +59,71 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   Future<void> pickDate() async {
     DateTime now = DateTime.now();
-    var a = DateTime(now.year, now.month + 1, 0).day;
-    DateTime? d = await showDatePicker(
-        helpText: "Select date in current month",
-        context: context,
-        initialDate: now,
-        firstDate: DateTime(now.year, now.month, 1),
-        lastDate: DateTime(
-            now.year,
-            now.month,
-            now.day < DateTime(now.year, now.month + 1, 0).day
-                ? now.day
-                : DateTime(now.year, now.month + 1, 0).day));
-    if (d == null) {
+    var daysInCurrentMonth = DateTime(now.year, now.month - 1, 0).day;
+
+    DateTime? pick = await showOmniDateTimePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(now.year, now.month, 1),
+      lastDate: DateTime(now.year, now.month, 0).add(
+        Duration(days: daysInCurrentMonth),
+      ),
+      is24HourMode: true,
+      isShowSeconds: false,
+      minutesInterval: 1,
+      secondsInterval: 1,
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      constraints: const BoxConstraints(
+        maxWidth: 350,
+        maxHeight: 650,
+      ),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1.drive(
+            Tween(
+              begin: 0,
+              end: 1,
+            ),
+          ),
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+      barrierDismissible: true,
+    );
+
+    // DateTime? d = await showDatePicker(
+    //     helpText: "Select date in current month",
+    //     context: context,
+    //     initialDate: now,
+    //     firstDate: DateTime(now.year, now.month, 1),
+    //     lastDate: DateTime(
+    //         now.year,
+    //         now.month,
+    //         now.day < DateTime(now.year, now.month + 1, 0).day
+    //             ? now.day
+    //             : DateTime(now.year, now.month + 1, 0).day));
+    // if (d == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text("Current date used"),
+    //       duration: Duration(seconds: 2),
+    //     ),
+    //   );
+    //   d = DateTime.now();
+    // }
+    if (pick == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Current date used"),
           duration: Duration(seconds: 2),
         ),
       );
-      d = DateTime.now();
+      pick = DateTime.now();
     }
-    selectedDate = dateFormatter.format(d);
+    setState(() {
+      selectedDate = dateFormatter.format(pick!);
+    });
   }
 
   @override

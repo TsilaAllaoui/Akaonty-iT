@@ -1,3 +1,4 @@
+import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,6 +12,7 @@ class DatabaseHelper {
   static Database? db;
   static List<Map<String, dynamic>> expensesBackup = [];
   static List<Map<String, dynamic>> entriesBackup = [];
+  static List<Map<String, dynamic>> bankEntriesBackup = [];
 
   DatabaseHelper._createInstance();
 
@@ -39,6 +41,9 @@ class DatabaseHelper {
         db.execute(
           'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',
         );
+        db.execute(
+          'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT)',
+        );
         return;
       },
       version: 1,
@@ -58,9 +63,11 @@ class DatabaseHelper {
     // Backuping tables in case of restoring
     expensesBackup = await db.query("expenses");
     entriesBackup = await db.query("entries");
+    bankEntriesBackup = await db.query("bank_entries");
 
     await db.rawQuery("DELETE FROM entries");
     await db.rawQuery("DELETE FROM expenses");
+    await db.rawQuery("DELETE FROM bank_entries");
   }
 
   Future<void> closeDatabase() async {
@@ -75,6 +82,9 @@ class DatabaseHelper {
     for (final map in entriesBackup) {
       await db.insert("entries", map);
     }
+    for (final map in bankEntriesBackup) {
+      await db.insert("bank_entries", map);
+    }
   }
 
   static Future<void> insertExpense(ExpenseItem expense) async {
@@ -85,6 +95,12 @@ class DatabaseHelper {
   static Future<void> insertEntry(EntryItem entry) async {
     var db = await getDatabase();
     var count = await db.insert("entries", entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<void> insertBankEntry(BankEntryItem entry) async {
+    var db = await getDatabase();
+    var count = await db.insert("bank_entries", entry.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -101,7 +117,12 @@ class DatabaseHelper {
         await db.delete("entries", where: "id = ?", whereArgs: [entry.id]);
     count = await db
         .delete("expenses", where: "entry_id = ?", whereArgs: [entry.id]);
-    // where: "month = \"${entry.month}\" AND year = \"${entry.year}\"");
+  }
+
+  static Future<void> deleteBankEntry(BankEntryItem entry) async {
+    var db = await getDatabase();
+    var count =
+        await db.delete("bank_entries", where: "id = ?", whereArgs: [entry.id]);
   }
 
   static Future<void> updateEntry(EntryItem entry, Color newColor) async {
@@ -112,15 +133,30 @@ class DatabaseHelper {
   }
 
   static Future<List<ExpenseItem>> fetchExpenses({int entryId = -1}) async {
-    var db = await getDatabase();
-    var res = entryId == -1
-        ? await db.query("expenses", orderBy: "id DESC")
-        : await db.query("expenses",
-            where: "entry_id = ?", whereArgs: [entryId], orderBy: "id DESC");
     List<ExpenseItem> expenses = [];
-    for (final expenseMap in res) {
-      ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
-      expenses.add(expense);
+    var db = await getDatabase();
+
+    var years = await db.query("entries",
+        columns: ["year"], distinct: true, orderBy: "year DESC");
+
+    for (final year in years) {
+      var res = [];
+      if (entryId == -1) {
+        res = await db.query("expenses",
+            orderBy:
+                "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+      } else {
+        res = await db.query("expenses",
+            orderBy:
+                "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+            where: "entry_id = ?",
+            whereArgs: [entryId]);
+      }
+
+      for (final expenseMap in res) {
+        ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
+        expenses.add(expense);
+      }
     }
     return expenses;
   }
@@ -156,4 +192,18 @@ class DatabaseHelper {
     }
     return entries;
   }
+
+  // static Future<List<ExpenseItem>> fetchBankEntries({int entryId = -1}) async {
+  //   var db = await getDatabase();
+  //   var res = entryId == -1
+  //       ? await db.query("bank_entries", orderBy: "id DESC")
+  //       : await db.query("bank_entries",
+  //           where: "entry_id = ?", whereArgs: [entryId], orderBy: "id DESC");
+  //   List<ExpenseItem> expenses = [];
+  //   for (final expenseMap in res) {
+  //     ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
+  //     expenses.add(expense);
+  //   }
+  //   return expenses;
+  // }
 }
