@@ -1,4 +1,5 @@
 import 'package:expense/model/bank_entry_model.dart';
+import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,6 +14,7 @@ class DatabaseHelper {
   static List<Map<String, dynamic>> expensesBackup = [];
   static List<Map<String, dynamic>> entriesBackup = [];
   static List<Map<String, dynamic>> bankEntriesBackup = [];
+  static List<Map<String, dynamic>> debtsBackup = [];
 
   DatabaseHelper._createInstance();
 
@@ -44,6 +46,9 @@ class DatabaseHelper {
         db.execute(
           'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
         );
+        db.execute(
+          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
+        );
         return;
       },
       version: 1,
@@ -64,10 +69,12 @@ class DatabaseHelper {
     expensesBackup = await db.query("expenses");
     entriesBackup = await db.query("entries");
     bankEntriesBackup = await db.query("bank_entries");
+    debtsBackup = await db.query("debts");
 
     await db.rawQuery("DELETE FROM entries");
     await db.rawQuery("DELETE FROM expenses");
     await db.rawQuery("DELETE FROM bank_entries");
+    await db.rawQuery("DELETE FROM debts");
   }
 
   Future<void> closeDatabase() async {
@@ -84,6 +91,9 @@ class DatabaseHelper {
     }
     for (final map in bankEntriesBackup) {
       await db.insert("bank_entries", map);
+    }
+    for (final map in debtsBackup) {
+      await db.insert("debts", map);
     }
   }
 
@@ -104,11 +114,16 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
+  static Future<void> insertDebt(DebtItem debt) async {
+    var db = await getDatabase();
+    var count = await db.insert("debts", debt.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   static Future<void> deleteExpense(ExpenseItem expense) async {
     var db = await getDatabase();
-    var count = await db.delete("expenses",
-        where:
-            "title = \"${expense.title}\" AND amount = \"${expense.amount}\"");
+    var count =
+        await db.delete("expenses", where: "id = ?", whereArgs: [expense.id]);
   }
 
   static Future<void> deleteEntry(EntryItem entry) async {
@@ -123,6 +138,11 @@ class DatabaseHelper {
     var db = await getDatabase();
     var count =
         await db.delete("bank_entries", where: "id = ?", whereArgs: [entry.id]);
+  }
+
+  static Future<void> deleteDebt(DebtItem debt) async {
+    var db = await getDatabase();
+    var count = await db.delete("debts", where: "id = ?", whereArgs: [debt.id]);
   }
 
   static Future<void> updateEntry(EntryItem entry, Color newColor) async {
@@ -205,5 +225,19 @@ class DatabaseHelper {
       bankEntries.add(bankEntry);
     }
     return bankEntries;
+  }
+
+  static Future<List<DebtItem>> fetchDebts() async {
+    List<DebtItem> debts = [];
+    var db = await getDatabase();
+
+    var res = await db.query("debts",
+        orderBy:
+            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+    for (final entry in res) {
+      DebtItem debt = DebtItem.fromMap(entry);
+      debts.add(debt);
+    }
+    return debts;
   }
 }

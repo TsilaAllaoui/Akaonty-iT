@@ -1,7 +1,9 @@
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:expense/model/bank_entry_model.dart';
+import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/bank_provider.dart';
+import 'package:expense/provider/debts_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
@@ -9,20 +11,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 
-class BankEntryInput extends ConsumerStatefulWidget {
-  const BankEntryInput({super.key});
+class DebtInput extends ConsumerStatefulWidget {
+  const DebtInput({super.key});
 
   @override
-  ConsumerState<BankEntryInput> createState() => _ExpenseInputState();
+  ConsumerState<DebtInput> createState() => _ExpenseInputState();
 }
 
-class _ExpenseInputState extends ConsumerState<BankEntryInput> {
+class _ExpenseInputState extends ConsumerState<DebtInput> {
   var amountController = TextEditingController();
 
   String selectedDate = dateFormatter.format(DateTime.now());
-  BankEntryType selectedType = BankEntryType.withdrawal;
+  DebtType selectedType = DebtType.self;
 
-  void addBankEntry() async {
+  void addDebt() async {
     var amount = int.tryParse(amountController.text);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -33,9 +35,9 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
       ));
       return;
     }
-    BankEntryItem bankEntry =
-        BankEntryItem(amount: amount, date: selectedDate, type: selectedType);
-    await ref.read(bankEntriesProvider.notifier).addBankEntry(bankEntry);
+    DebtItem debt =
+        DebtItem(date: selectedDate, amount: amount, type: selectedType);
+    await ref.read(debtsProvider.notifier).addDebt(debt);
 
     Navigator.of(context).pop();
   }
@@ -175,15 +177,12 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                       title: "Type: ",
                       onChanged: (value) {
                         setState(() {
-                          selectedType = value == "Deposit"
-                              ? BankEntryType.deposit
-                              : BankEntryType.withdrawal;
+                          selectedType =
+                              value == "Self" ? DebtType.self : DebtType.other;
                         });
                       },
-                      values: const ["Deposit", "Withdrawal"],
-                      value: selectedType == ExpenseType.income
-                          ? "Deposit"
-                          : "Withdrawal"),
+                      values: const ["Self", "Other"],
+                      value: selectedType == DebtType.self ? "Self" : "Other"),
                 ),
               ],
             ),
@@ -200,7 +199,7 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.green),
                       ),
-                      onPressed: addBankEntry,
+                      onPressed: addDebt,
                       child: const Text("Save")),
                 ),
                 Container(

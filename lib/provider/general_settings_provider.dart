@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class navBarIndexNotifier extends StateNotifier<int> {
-  navBarIndexNotifier() : super(2);
+  navBarIndexNotifier() : super(3);
 
   void setNavBarIndex(int index) {
     state = index;
