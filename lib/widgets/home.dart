@@ -203,6 +203,8 @@ class _HomeState extends ConsumerState<Home> {
     }
   }
 
+  // void backupDatabase() {}
+
   @override
   void initState() {
     pendingTransaction = getExpensesInDb();
@@ -285,6 +287,11 @@ class _HomeState extends ConsumerState<Home> {
                               onSelect: clearDatabase,
                               child: const Icon(Icons.delete),
                             ),
+                            // PieAction(
+                            //   tooltip: "Backup database",
+                            //   onSelect: backupDatabase,
+                            //   child: const Icon(Icons.backup_outlined),
+                            // ),
                           ],
                           child: const Icon(CustomIcons.cog),
                         ),

@@ -57,6 +57,14 @@ class DatabaseHelper {
     return database;
   }
 
+  static Future<void> backupDatabase() async {
+    // var appDir = await getApplicationDocumentsDirectory();
+    // var files = appDir.listSync(recursive: true, followLinks: true);
+    // for (final file in files) {
+    //   if (file.path == "${appDir.path}/database.db") {}
+    // }
+  }
+
   static Future<Database> getDatabase() async {
     db ??= await createDatabase();
     return db!;
