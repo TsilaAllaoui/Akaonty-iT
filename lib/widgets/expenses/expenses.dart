@@ -44,57 +44,59 @@ class _ExpensesState extends ConsumerState<Expenses> {
     }
 
     return DefaultTabController(
-        length: 3,
-        child: Scaffold(
-            appBar: TabBar(
-              indicatorColor: Theme.of(context).primaryColor,
-              tabs: const [
-                Tab(
-                  color: Colors.green,
-                  icon: Icons.arrow_drop_up,
-                  title: "Income",
-                ),
-                Tab(
-                  color: Colors.red,
-                  icon: Icons.arrow_drop_down,
-                  title: "Outcome",
-                ),
-                Tab(
-                  color: Colors.blue,
-                  icon: Icons.numbers,
-                  title: "Summary",
-                ),
-              ],
+      length: 3,
+      child: Scaffold(
+        appBar: TabBar(
+          indicatorColor: Theme.of(context).primaryColor,
+          tabs: const [
+            Tab(
+              color: Colors.green,
+              icon: Icons.arrow_drop_up,
+              title: "Income",
             ),
-            body: TabBarView(
-              children: [
-                ExpenseList(
-                  total: totalIncome,
-                  list: incomes,
-                  type: ExpenseType.income,
-                ),
-                ExpenseList(
-                  total: totalOutcome,
-                  list: outcomes,
-                  type: ExpenseType.outcome,
-                ),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Remains"),
-                      Text(
-                        "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25,
-                        ),
-                      ),
-                    ],
+            Tab(
+              color: Colors.red,
+              icon: Icons.arrow_drop_down,
+              title: "Outcome",
+            ),
+            Tab(
+              color: Colors.blue,
+              icon: Icons.numbers,
+              title: "Summary",
+            ),
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            ExpenseList(
+              total: totalIncome,
+              list: incomes,
+              type: ExpenseType.income,
+            ),
+            ExpenseList(
+              total: totalOutcome,
+              list: outcomes,
+              type: ExpenseType.outcome,
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Remains"),
+                  Text(
+                    "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                    ),
                   ),
-                )
-              ],
-            )));
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 

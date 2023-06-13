@@ -238,73 +238,70 @@ class _HomeState extends ConsumerState<Home> {
               extendBody: true,
               appBar: AppBar(
                 backgroundColor: Theme.of(context).primaryColor,
-                title: Expanded(
-                  child: Row(
-                    children: [
-                      const Text(
-                        "Akaonty-iT",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const Spacer(),
-                      navIndex != 1
-                          ? Text(
-                              currentEntryItem == null ? "" : titles[navIndex],
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          : Column(
-                              children: [
-                                Text(
-                                  // "TAY",
-                                  currentEntryItem == null
-                                      ? ""
-                                      : currentEntryItem!.month,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  // "TAY",
-                                  currentEntryItem == null
-                                      ? ""
-                                      : currentEntryItem!.year,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ],
-                            ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: PieMenu(
-                          theme: const PieTheme(
-                            pointerColor: Colors.transparent,
-                            buttonTheme: PieButtonTheme(
-                                backgroundColor: Colors.red,
-                                iconColor: Colors.white),
-                          ),
-                          actions: [
-                            PieAction(
-                              tooltip: "Clear database",
-                              onSelect: clearDatabase,
-                              child: const Icon(Icons.delete),
-                            ),
-                            PieAction(
-                              buttonTheme: const PieButtonTheme(
-                                backgroundColor: Colors.green,
-                                iconColor: Colors.white,
+                title: Row(
+                  children: [
+                    const Text(
+                      "Akaonty-iT",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    navIndex != 1
+                        ? Text(
+                            currentEntryItem == null ? "" : titles[navIndex],
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        : Column(
+                            children: [
+                              Text(
+                                // "TAY",
+                                currentEntryItem == null
+                                    ? ""
+                                    : currentEntryItem!.month,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
-                              tooltip: "Backup database",
-                              onSelect: backupDatabase,
-                              child: const Icon(Icons.backup_outlined),
-                            ),
-                          ],
-                          child: const Icon(CustomIcons.cog),
+                              Text(
+                                // "TAY",
+                                currentEntryItem == null
+                                    ? ""
+                                    : currentEntryItem!.year,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ],
+                          ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: PieMenu(
+                        theme: const PieTheme(
+                          pointerColor: Colors.transparent,
+                          buttonTheme: PieButtonTheme(
+                              backgroundColor: Colors.red,
+                              iconColor: Colors.white),
                         ),
+                        actions: [
+                          PieAction(
+                            tooltip: "Clear database",
+                            onSelect: clearDatabase,
+                            child: const Icon(Icons.delete),
+                          ),
+                          PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Colors.green,
+                              iconColor: Colors.white,
+                            ),
+                            tooltip: "Backup database",
+                            onSelect: backupDatabase,
+                            child: const Icon(Icons.backup_outlined),
+                          ),
+                        ],
+                        child: const Icon(CustomIcons.cog),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               body: content,
