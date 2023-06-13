@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense/model/expense_model.dart';
@@ -13,14 +15,82 @@ class Expense extends ConsumerStatefulWidget {
 }
 
 class _ExpenseState extends ConsumerState<Expense> {
+  Completer completer = Completer();
+
+  Future<bool> dismissExpense(direction) async {
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (completer.isCompleted) {
+        timer.cancel();
+      }
+    });
+    var res = await completer.future;
+    completer = Completer<bool>();
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
     ExpenseItem expense = widget.expense;
 
     return Dismissible(
-      onDismissed: (DismissDirection direction) async {
+      confirmDismiss: dismissExpense,
+      onDismissed: (direction) async {
+        completer = Completer<bool>();
         await ref.read(expensesProvider.notifier).removeExpense(expense);
       },
+      background: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        elevation: 5,
+        child: Container(
+          height: 75,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 5),
+            child: Column(
+              children: [
+                const Text(
+                  "Delete expense?",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Colors.white),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade400),
+                        onPressed: () {
+                          completer.complete(true);
+                        },
+                        child: const Text("Yes"),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade400),
+                        onPressed: () {
+                          completer.complete(false);
+                        },
+                        child: const Text("No"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       key: Key(expense.id.toString()),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
