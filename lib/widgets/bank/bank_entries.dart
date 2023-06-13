@@ -31,10 +31,28 @@ class _BankState extends ConsumerState<Bank> {
   @override
   Widget build(BuildContext context) {
     List<BankEntryItem> bankEntries = ref.watch(bankEntriesProvider);
-    int totalInBank = ref.watch(totalInBankProvider);
+
+    List<BankEntryItem> deposits = [];
+    List<BankEntryItem> withdrawals = [];
     for (final entry in bankEntries) {
-      totalInBank += entry.amount;
+      if (entry.type == BankEntryType.deposit) {
+        deposits.add(entry);
+      } else {
+        withdrawals.add(entry);
+      }
     }
+
+    // int totalInBank = ref.watch(totalInBankProvider);
+
+    int depositsTotal = 0;
+    for (final entry in deposits) {
+      depositsTotal += entry.amount;
+    }
+    int withdrawalTotal = 0;
+    for (final entry in withdrawals) {
+      withdrawalTotal += entry.amount;
+    }
+    int totalInBank = depositsTotal - withdrawalTotal;
 
     return Scaffold(
         key: ref.read(bankScaffoldKeyProvider),
@@ -85,14 +103,73 @@ class _BankState extends ConsumerState<Bank> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: bankEntries.length,
-                itemBuilder: (context, index) {
-                  return BankEntry(bankEntries[index]);
-                },
+            DefaultTabController(
+              length: 2,
+              child: Expanded(
+                child: Column(
+                  children: [
+                    const TabBar(
+                      indicatorColor: Colors.grey,
+                      indicatorWeight: 3,
+                      tabs: [
+                        Tab(
+                          child: Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.green,
+                                ),
+                                Text("Deposited")
+                              ],
+                            ),
+                          ),
+                        ),
+                        Tab(
+                          child: Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.arrow_drop_up,
+                                  color: Colors.red,
+                                ),
+                                Text("Withdrawn")
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                            itemCount: deposits.length,
+                            itemBuilder: (context, index) {
+                              return BankEntry(deposits[index]);
+                            },
+                          ),
+                          ListView.builder(
+                            itemCount: withdrawals.length,
+                            itemBuilder: (context, index) {
+                              return BankEntry(withdrawals[index]);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+            // Expanded(
+            //   child: ListView.builder(
+            //     itemCount: bankEntries.length,
+            //     itemBuilder: (context, index) {
+            //       return BankEntry(bankEntries[index]);
+            //     },
+            //   ),
+            // ),
           ],
         ));
   }

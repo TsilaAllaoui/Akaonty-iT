@@ -41,51 +41,55 @@ class _BankEntryState extends ConsumerState<BankEntry> {
 
     return Dismissible(
       key: UniqueKey(),
-      background: Container(
-        height: 75,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        child: Column(
-          children: [
-            const Text(
-              "Delete entry?",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Colors.white),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade400),
-                    onPressed: () {
-                      completer.complete(true);
-                    },
-                    child: const Text("Yes"),
+      background: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        elevation: 5,
+        child: Container(
+          height: 75,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          // margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Column(
+            children: [
+              const Text(
+                "Delete entry?",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade400),
+                      onPressed: () {
+                        completer.complete(true);
+                      },
+                      child: const Text("Yes"),
+                    ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade400),
-                    onPressed: () {
-                      completer.complete(false);
-                    },
-                    child: const Text("No"),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade400),
+                      onPressed: () {
+                        completer.complete(false);
+                      },
+                      child: const Text("No"),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       confirmDismiss: dismissBankEntry,
@@ -107,32 +111,37 @@ class _BankEntryState extends ConsumerState<BankEntry> {
         //   ),
         // );
       },
-      child: Container(
-        height: 75,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.green,
-          borderRadius: BorderRadius.circular(10),
-        ),
+      child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          leading: Text(
-            "${numberFormatter.format(bankEntry.amount)} Fmg",
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
+        elevation: 5,
+        child: Container(
+          height: 75,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: bankEntry.type == BankEntryType.deposit
+                ? Colors.green.shade300
+                : Colors.red.shade300,
+            borderRadius: BorderRadius.circular(4),
           ),
-          trailing: Text(
-            bankEntry.date,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            leading: Text(
+              "${numberFormatter.format(bankEntry.amount)} Fmg",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            trailing: Text(
+              bankEntry.date,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+              ),
             ),
           ),
         ),

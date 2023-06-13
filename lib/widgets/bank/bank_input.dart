@@ -18,8 +18,9 @@ class BankEntryInput extends ConsumerStatefulWidget {
 
 class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   var amountController = TextEditingController();
+
   String selectedDate = dateFormatter.format(DateTime.now());
-  ExpenseType selectedType = ExpenseType.outcome;
+  BankEntryType selectedType = BankEntryType.withdrawal;
 
   void addBankEntry() async {
     var amount = int.tryParse(amountController.text);
@@ -32,10 +33,8 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
       ));
       return;
     }
-    BankEntryItem bankEntry = BankEntryItem(
-      amount: amount,
-      date: selectedDate,
-    );
+    BankEntryItem bankEntry =
+        BankEntryItem(amount: amount, date: selectedDate, type: selectedType);
     await ref.read(bankEntriesProvider.notifier).addBankEntry(bankEntry);
 
     Navigator.of(context).pop();
@@ -177,8 +176,8 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                       onChanged: (value) {
                         setState(() {
                           selectedType = value == "Income"
-                              ? ExpenseType.income
-                              : ExpenseType.outcome;
+                              ? BankEntryType.deposit
+                              : BankEntryType.withdrawal;
                         });
                       },
                       values: const ["Income", "Outcome"],

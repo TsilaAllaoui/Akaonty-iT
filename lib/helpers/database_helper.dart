@@ -42,7 +42,7 @@ class DatabaseHelper {
           'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',
         );
         db.execute(
-          'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT)',
+          'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
         );
         return;
       },
