@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/bank_provider.dart';
 import 'package:expense/provider/debts_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -98,20 +96,6 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
       onDismissed: (direction) async {
         completer = Completer<bool>();
         await ref.read(debtsProvider.notifier).removeDebt(debt);
-        // ScaffoldMessenger.of(ref.read(bankScaffoldKeyProvider).currentContext!)
-        //     .showSnackBar(
-        //   SnackBar(
-        //     content: const Text('Entry deleted'),
-        //     action: SnackBarAction(
-        //       label: 'Undo',
-        //       onPressed: () async {
-        //         await ref
-        //             .read(bankEntriesProvider.notifier)
-        //             .addBankEntry(bankEntry);
-        //       },
-        //     ),
-        //   ),
-        // );
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -126,13 +110,23 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
             borderRadius: BorderRadius.circular(4),
           ),
           child: ListTile(
+            title: debt.type == DebtType.other
+                ? Text(
+                    debt.name!,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  )
+                : null,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             leading: Text(
               "${numberFormatter.format(debt.amount)} Fmg",
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -141,7 +135,7 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               debt.date,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 15,
               ),
             ),

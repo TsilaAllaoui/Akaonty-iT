@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/entry_model.dart';
@@ -47,7 +49,7 @@ class DatabaseHelper {
           'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
         );
         db.execute(
-          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
+          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT, name TEXT)',
         );
         return;
       },
@@ -58,11 +60,14 @@ class DatabaseHelper {
   }
 
   static Future<void> backupDatabase() async {
-    // var appDir = await getApplicationDocumentsDirectory();
-    // var files = appDir.listSync(recursive: true, followLinks: true);
-    // for (final file in files) {
-    //   if (file.path == "${appDir.path}/database.db") {}
-    // }
+    await DatabaseHelper.db!.close();
+    var appDir = await getApplicationDocumentsDirectory();
+    File dbFile = File("${appDir.path}/database.db");
+    if (await dbFile.exists()) {
+      await dbFile.copy("/storage/emulated/0/database.db");
+    }
+    final database = await openDatabase("${appDir.path}/database.db");
+    DatabaseHelper.db = database;
   }
 
   static Future<Database> getDatabase() async {

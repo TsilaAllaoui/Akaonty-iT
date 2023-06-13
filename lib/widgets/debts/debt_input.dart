@@ -20,6 +20,7 @@ class DebtInput extends ConsumerStatefulWidget {
 
 class _ExpenseInputState extends ConsumerState<DebtInput> {
   var amountController = TextEditingController();
+  var nameController = TextEditingController();
 
   String selectedDate = dateFormatter.format(DateTime.now());
   DebtType selectedType = DebtType.self;
@@ -35,8 +36,21 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
       ));
       return;
     }
+    if (selectedType == DebtType.other && nameController.text == "") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Invalid name"),
+        dismissDirection: DismissDirection.down,
+        duration: Duration(seconds: 2),
+        elevation: 5,
+      ));
+      return;
+    }
     DebtItem debt =
         DebtItem(date: selectedDate, amount: amount, type: selectedType);
+    if (selectedType == DebtType.other) {
+      debt.name = nameController.text;
+      debt.name = debt.name![0].toUpperCase() + debt.name!.substring(1);
+    }
     await ref.read(debtsProvider.notifier).addDebt(debt);
 
     Navigator.of(context).pop();
@@ -94,6 +108,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   @override
   void dispose() {
     amountController.dispose();
+    nameController.dispose();
     super.dispose();
   }
 
@@ -104,31 +119,45 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
+            Container(
+              height: 75,
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              child: TextField(
+                onTapOutside: (PointerDownEvent e) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  suffixText: "Fmg",
+                  label: Text(
+                    "Amount",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+            selectedType == DebtType.self
+                ? const Text("")
+                : Container(
+                    height: 75,
                     margin:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                     child: TextField(
                       onTapOutside: (PointerDownEvent e) {
                         FocusManager.instance.primaryFocus?.unfocus();
                       },
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
+                      controller: nameController,
+                      keyboardType: TextInputType.text,
                       decoration: const InputDecoration(
-                        suffixText: "Fmg",
                         label: Text(
-                          "Amount",
+                          "Name",
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
             const SizedBox(
               height: 20,
             ),

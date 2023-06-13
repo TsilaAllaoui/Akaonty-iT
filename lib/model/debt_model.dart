@@ -7,9 +7,14 @@ class DebtItem {
   String date = dateFormatter.format(DateTime.now());
   int amount = -1;
   DebtType type = DebtType.self;
+  String? name;
 
   DebtItem(
-      {required this.date, required this.amount, required this.type, this.id});
+      {required this.date,
+      required this.amount,
+      required this.type,
+      this.id,
+      this.name});
 
   DebtItem.fromMap(Map<String, dynamic> map) {
     id = map["id"];
@@ -20,6 +25,7 @@ class DebtItem {
       date = dateFormatter.format(DateTime.now());
     }
     type = map["type"] == "self" ? DebtType.self : DebtType.other;
+    name = map["name"];
   }
 
   Map<String, dynamic> toMap() {
@@ -27,7 +33,8 @@ class DebtItem {
       "id": id,
       "date": date,
       "amount": amount,
-      "type": type == DebtType.self ? "self" : "other"
+      "type": type == DebtType.self ? "self" : "other",
+      "name": name
     };
   }
 }

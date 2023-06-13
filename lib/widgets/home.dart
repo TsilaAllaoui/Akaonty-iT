@@ -1,7 +1,5 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:expense/provider/bank_provider.dart';
-import 'package:expense/provider/debts_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
@@ -203,7 +201,12 @@ class _HomeState extends ConsumerState<Home> {
     }
   }
 
-  // void backupDatabase() {}
+  void backupDatabase() async {
+    await DatabaseHelper.backupDatabase();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content:
+            Text("Databse backup at \"/storage/emulated/0/database.db\"")));
+  }
 
   @override
   void initState() {
@@ -287,11 +290,15 @@ class _HomeState extends ConsumerState<Home> {
                               onSelect: clearDatabase,
                               child: const Icon(Icons.delete),
                             ),
-                            // PieAction(
-                            //   tooltip: "Backup database",
-                            //   onSelect: backupDatabase,
-                            //   child: const Icon(Icons.backup_outlined),
-                            // ),
+                            PieAction(
+                              buttonTheme: const PieButtonTheme(
+                                backgroundColor: Colors.green,
+                                iconColor: Colors.white,
+                              ),
+                              tooltip: "Backup database",
+                              onSelect: backupDatabase,
+                              child: const Icon(Icons.backup_outlined),
+                            ),
                           ],
                           child: const Icon(CustomIcons.cog),
                         ),

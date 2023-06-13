@@ -1,5 +1,6 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/debt_model.dart';
+import 'package:expense/model/expense_model.dart';
 import 'package:expense/provider/debts_provider.dart';
 import 'package:expense/widgets/debts/debt.dart';
 import 'package:flutter/material.dart';
@@ -171,6 +172,9 @@ class _SumBannerState extends ConsumerState<SumBanner> {
   }
 
   void editTotal() async {
+    if (widget.type == DebtType.other) {
+      return;
+    }
     await showDialog(
       context: context,
       builder: (context) {
@@ -227,6 +231,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
   @override
   Widget build(BuildContext context) {
     var totals = ref.watch(totalDebtsProvider);
+    var type = widget.type;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -258,11 +263,10 @@ class _SumBannerState extends ConsumerState<SumBanner> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  ((widget.type == DebtType.self
-                              ? ref.read(totalDebtsProvider)[0]
-                              : ref.read(totalDebtsProvider)[1]) -
-                          totalDebtsOftype(widget.type))
-                      .toString(),
+                  numberFormatter.format((widget.type == DebtType.self
+                      ? ref.read(totalDebtsProvider)[0] -
+                          totalDebtsOftype(widget.type)
+                      : totalDebtsOftype(widget.type))),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 25,
