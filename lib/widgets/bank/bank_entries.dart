@@ -113,29 +113,25 @@ class _BankState extends ConsumerState<Bank> {
                       indicatorWeight: 3,
                       tabs: [
                         Tab(
-                          child: Expanded(
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  color: Colors.green,
-                                ),
-                                Text("Deposited")
-                              ],
-                            ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.green,
+                              ),
+                              Text("Deposited")
+                            ],
                           ),
                         ),
                         Tab(
-                          child: Expanded(
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.arrow_drop_up,
-                                  color: Colors.red,
-                                ),
-                                Text("Withdrawn")
-                              ],
-                            ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_up,
+                                color: Colors.red,
+                              ),
+                              Text("Withdrawn")
+                            ],
                           ),
                         ),
                       ],

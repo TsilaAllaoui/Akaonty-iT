@@ -52,29 +52,25 @@ class _DebtsState extends ConsumerState<Debts> {
                   indicatorWeight: 3,
                   tabs: [
                     Tab(
-                      child: Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.red,
-                            ),
-                            Text("Self")
-                          ],
-                        ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.red,
+                          ),
+                          Text("Self")
+                        ],
                       ),
                     ),
                     Tab(
-                      child: Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.arrow_drop_up,
-                              color: Colors.green,
-                            ),
-                            Text("Other")
-                          ],
-                        ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_drop_up,
+                            color: Colors.green,
+                          ),
+                          Text("Other")
+                        ],
                       ),
                     ),
                   ],
