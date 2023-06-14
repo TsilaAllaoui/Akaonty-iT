@@ -5,6 +5,7 @@ import 'package:expense/provider/general_settings_provider.dart';
 import 'package:expense/widgets/entries/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
@@ -101,7 +102,10 @@ class _EntriesState extends ConsumerState<Entries> {
           );
         } else {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: SpinKitPulsingGrid(
+              color: Colors.grey,
+              size: 25,
+            ),
           );
         }
       },

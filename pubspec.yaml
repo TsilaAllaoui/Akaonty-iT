@@ -26,6 +26,7 @@ dependencies:
   omni_datetime_picker: ^1.0.7
   flutter_flushbar: ^0.0.2
   external_path: ^1.0.3
+  flutter_spinkit: ^5.2.0
 
 dev_dependencies:
   flutter_test:

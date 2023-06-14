@@ -13,6 +13,7 @@ import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/widgets/expenses/expenses.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense/icons/custom_icons_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/widgets/entries/entries.dart';
 import 'package:expense/widgets/entries/entry.dart';
@@ -345,8 +346,13 @@ class _HomeState extends ConsumerState<Home> {
             ),
           );
         } else {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const Scaffold(
+            body: Center(
+              child: SpinKitPulsingGrid(
+                color: Colors.grey,
+                size: 25,
+              ),
+            ),
           );
         }
       },
