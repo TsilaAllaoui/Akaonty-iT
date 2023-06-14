@@ -127,16 +127,28 @@ class _ExpenseState extends ConsumerState<Expense> {
                     ],
                   ),
                   const SizedBox(
-                    height: 15,
+                    height: 8,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "${numberFormatter.format(expense.amount)} Fmg",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
+                      Column(
+                        children: [
+                          Text(
+                            "${numberFormatter.format(expense.amount)} Fmg",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            "${numberFormatter.format(expense.amount / 5)} Ar",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
                       ),
                       Text(expense.date.toString()),
                     ],

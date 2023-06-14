@@ -81,13 +81,28 @@ class _ExpensesState extends ConsumerState<Expenses> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Remains"),
-                  Text(
-                    "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25,
+                          ),
+                        ),
+                        Text(
+                          "${numberFormatter.format((totalIncome - totalOutcome) / 5)} Ar",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
                 ],
               ),
             )
@@ -152,27 +167,45 @@ class _ExpenseListState extends State<ExpenseList> {
         Container(
           height: 75,
           width: double.infinity,
-          margin: const EdgeInsets.all(5),
+          margin: const EdgeInsets.only(top: 5),
           child: Card(
             elevation: 5,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  "Total",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  child: const Text(
+                    "Total",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-                Text(
-                  "${numberFormatter.format(widget.total)} Fmg",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: widget.type == ExpenseType.income
-                          ? Colors.green
-                          : Colors.red),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        "${numberFormatter.format(widget.total)} Fmg",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: widget.type == ExpenseType.income
+                                ? Colors.green
+                                : Colors.red),
+                      ),
+                      Text(
+                        "${numberFormatter.format(widget.total / 5)} Ar",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: widget.type == ExpenseType.income
+                                ? Colors.green.shade300
+                                : Colors.red.shade300),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

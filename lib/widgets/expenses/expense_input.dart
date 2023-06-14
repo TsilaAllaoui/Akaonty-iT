@@ -20,6 +20,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   String selectedDate = dateFormatter.format(DateTime.now());
   ExpenseType selectedType = ExpenseType.outcome;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  String selectedDevise = "Fmg";
 
   void addExpense() async {
     if (ref.read(currentEntryProvider) == null) {
@@ -33,7 +34,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
           fontSize: 16.0);
       return;
     }
-    var amount = int.tryParse(amountController.text);
+    int? amount = int.tryParse(amountController.text);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid amount"),
@@ -45,7 +46,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     }
     ExpenseItem expense = ExpenseItem(
         title: titleController.text,
-        amount: amount,
+        amount: selectedDevise == "Fmg" ? amount : amount * 5,
         date: selectedDate,
         entryId: ref.read(currentEntryProvider)!.id!,
         type: selectedType);
@@ -114,11 +115,12 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
-        child: Column(
-          children: [
-            TextField(
+      body: Column(
+        children: [
+          Container(
+            margin:
+                const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 10),
+            child: TextField(
               onTapOutside: (PointerDownEvent e) {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
@@ -134,42 +136,68 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    child: TextField(
-                      onTapOutside: (PointerDownEvent e) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        suffixText: "Fmg",
-                        label: Text(
-                          "Amount",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(
+                      left: 20, top: 20, right: 20, bottom: 10),
+                  child: Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            child: TextField(
+                              onTapOutside: (PointerDownEvent e) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              },
+                              controller: amountController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                suffixText: "Fmg",
+                                label: Text(
+                                  "Amount",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: DropDownMenu(
+                            onChanged: (value) {
+                              setState(() {
+                                selectedDevise = value!;
+                              });
+                            },
+                            values: const ["Fmg", "Ar"],
+                            value: selectedDevise,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Column(
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -202,33 +230,35 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                     )
                   ],
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Expanded(
-                  child: DropDownMenu(
-                      title: "Type: ",
-                      onChanged: (value) {
-                        setState(() {
-                          selectedType = value == "Income"
-                              ? ExpenseType.income
-                              : ExpenseType.outcome;
-                        });
-                      },
-                      values: const ["Income", "Outcome"],
-                      value: selectedType == ExpenseType.income
-                          ? "Income"
-                          : "Outcome"),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              Expanded(
+                child: DropDownMenu(
+                    title: "Type: ",
+                    onChanged: (value) {
+                      setState(() {
+                        selectedType = value == "Income"
+                            ? ExpenseType.income
+                            : ExpenseType.outcome;
+                      });
+                    },
+                    values: const ["Income", "Outcome"],
+                    value: selectedType == ExpenseType.income
+                        ? "Income"
+                        : "Outcome"),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 25,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 5),
                   child: ElevatedButton(
                       style: ButtonStyle(
@@ -238,7 +268,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       onPressed: addExpense,
                       child: const Text("Save")),
                 ),
-                Container(
+              ),
+              Expanded(
+                child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   child: ElevatedButton(
                       style: ButtonStyle(
@@ -248,10 +280,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       onPressed: Navigator.of(context).pop,
                       child: const Text("Cancel")),
                 ),
-              ],
-            )
-          ],
-        ),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
