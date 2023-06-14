@@ -33,7 +33,7 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void createExpense() {
     if (ref.read(entriesProvider).isEmpty) {
@@ -189,7 +189,7 @@ class _HomeState extends ConsumerState<Home> {
       ],
     );
 
-    ScaffoldMessenger.of(scaffoldKey.currentContext!)
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!)
       ..hideCurrentMaterialBanner()
       ..showMaterialBanner(materialBanner);
 
@@ -204,7 +204,7 @@ class _HomeState extends ConsumerState<Home> {
 
   void backupDatabase() async {
     await DatabaseHelper.backupDatabase();
-    ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
             content:
                 Text("Databse backup at \"/storage/emulated/0/database.db\"")));
@@ -212,6 +212,7 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   void initState() {
+    _scaffoldKey = GlobalKey<ScaffoldState>();
     pendingTransaction = getExpensesInDb();
     super.initState();
   }
@@ -237,6 +238,7 @@ class _HomeState extends ConsumerState<Home> {
         if (snapshot.connectionState == ConnectionState.done) {
           return PieCanvas(
             child: Scaffold(
+              key: _scaffoldKey,
               extendBody: true,
               appBar: AppBar(
                 backgroundColor: Theme.of(context).primaryColor,

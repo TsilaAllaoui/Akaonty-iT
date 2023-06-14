@@ -17,7 +17,7 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   var amountController = TextEditingController();
 
   String selectedDate = dateFormatter.format(DateTime.now());
-  BankEntryType selectedType = BankEntryType.withdrawal;
+  BankEntryType selectedType = BankEntryType.deposit;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedDevise = "Fmg";
 
@@ -120,7 +120,6 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                                 controller: amountController,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
-                                  suffixText: "Fmg",
                                   label: Text(
                                     "Amount",
                                     style: TextStyle(

@@ -51,7 +51,6 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
             color: Colors.red,
             borderRadius: BorderRadius.circular(4),
           ),
-          // margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Column(
             children: [
               const Text(
@@ -122,14 +121,27 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
                 : null,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            leading: Text(
-              "${numberFormatter.format(debt.amount)} Fmg",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+            leading: Column(
+              children: [
+                Text(
+                  "${numberFormatter.format(debt.amount)} Fmg",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  "${numberFormatter.format(debt.amount / 5)} Ar",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
             ),
             trailing: Text(
               debt.date,

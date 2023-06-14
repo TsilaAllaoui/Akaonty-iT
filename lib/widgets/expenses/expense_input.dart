@@ -18,7 +18,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   var titleController = TextEditingController();
   var amountController = TextEditingController();
   String selectedDate = dateFormatter.format(DateTime.now());
-  ExpenseType selectedType = ExpenseType.outcome;
+  ExpenseType selectedType = ExpenseType.income;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedDevise = "Fmg";
 
@@ -160,7 +160,6 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                               controller: amountController,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
-                                suffixText: "Fmg",
                                 label: Text(
                                   "Amount",
                                   style: TextStyle(

@@ -20,6 +20,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   String selectedDate = dateFormatter.format(DateTime.now());
   DebtType selectedType = DebtType.self;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  String selectedDevise = "Fmg";
 
   void addDebt() async {
     var amount = int.tryParse(amountController.text);
@@ -41,8 +42,11 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
       ));
       return;
     }
-    DebtItem debt =
-        DebtItem(date: selectedDate, amount: amount, type: selectedType);
+    DebtItem debt = DebtItem(
+      date: selectedDate,
+      amount: selectedDevise == "Fmg" ? amount : amount * 5,
+      type: selectedType,
+    );
     if (selectedType == DebtType.other) {
       debt.name = nameController.text;
       debt.name = debt.name![0].toUpperCase() + debt.name!.substring(1);
@@ -111,23 +115,42 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(
           children: [
-            Container(
-              height: 75,
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-              child: TextField(
-                onTapOutside: (PointerDownEvent e) {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  suffixText: "Fmg",
-                  label: Text(
-                    "Amount",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    height: 75,
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    child: TextField(
+                      onTapOutside: (PointerDownEvent e) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      },
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        label: Text(
+                          "Amount",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Expanded(
+                  child: DropDownMenu(
+                    onChanged: (value) {
+                      setState(() {
+                        selectedDevise = value!;
+                      });
+                    },
+                    values: const ["Fmg", "Ar"],
+                    value: selectedDevise,
+                  ),
+                ),
+              ],
             ),
             selectedType == DebtType.self
                 ? const Text("")

@@ -1,3 +1,4 @@
+import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/expense_model.dart';
@@ -6,7 +7,7 @@ import 'package:expense/widgets/debts/debt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+final scaffoldKeyProvider = Provider((ref) => GlobalKey<ScaffoldState>());
 
 class Debts extends ConsumerStatefulWidget {
   const Debts({super.key});
@@ -42,7 +43,7 @@ class _DebtsState extends ConsumerState<Debts> {
     }
 
     return Scaffold(
-        key: _scaffoldKey,
+        key: ref.watch(scaffoldKeyProvider),
         body: Column(
           children: [
             DefaultTabController(
@@ -104,14 +105,11 @@ class _DebtsState extends ConsumerState<Debts> {
                                 type: DebtType.other,
                               ),
                               Expanded(
-                                child: Card(
-                                  elevation: 5,
-                                  child: ListView.builder(
-                                    itemCount: others.length,
-                                    itemBuilder: (context, index) {
-                                      return DebtEntry(others[index]);
-                                    },
-                                  ),
+                                child: ListView.builder(
+                                  itemCount: others.length,
+                                  itemBuilder: (context, index) {
+                                    return DebtEntry(others[index]);
+                                  },
                                 ),
                               ),
                             ],
@@ -144,6 +142,7 @@ class SumBanner extends ConsumerStatefulWidget {
 
 class _SumBannerState extends ConsumerState<SumBanner> {
   var totalAmountcontroller = TextEditingController();
+  String selectedDevise = "Fmg";
 
   int totalDebtsOftype(DebtType debtType) {
     var debts = ref.watch(debtsProvider);
@@ -158,10 +157,11 @@ class _SumBannerState extends ConsumerState<SumBanner> {
   }
 
   void updateTotal() async {
+    int amount = selectedDevise == "Fmg"
+        ? int.parse(totalAmountcontroller.text)
+        : int.parse(totalAmountcontroller.text) * 5;
     if (widget.type == DebtType.self) {
-      ref
-          .read(totalDebtsProvider.notifier)
-          .setSelfDebt(int.parse(totalAmountcontroller.text));
+      ref.read(totalDebtsProvider.notifier).setSelfDebt(amount);
 
       var db = await DatabaseHelper.getDatabase();
       await db.update(
@@ -173,11 +173,9 @@ class _SumBannerState extends ConsumerState<SumBanner> {
         whereArgs: ["self_total"],
       );
     } else {
-      ref
-          .read(totalDebtsProvider.notifier)
-          .setOthersDebt(int.parse(totalAmountcontroller.text));
+      ref.read(totalDebtsProvider.notifier).setOthersDebt(amount);
     }
-    Navigator.of(_scaffoldKey.currentContext!).pop();
+    Navigator.of(ref.watch(scaffoldKeyProvider).currentContext!).pop();
   }
 
   void editTotal() async {
@@ -189,21 +187,42 @@ class _SumBannerState extends ConsumerState<SumBanner> {
       builder: (context) {
         return Scaffold(
           body: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TextField(
-                  decoration: const InputDecoration(
-                    label: Text("New Total amount:"),
-                  ),
-                  controller: totalAmountcontroller,
-                  keyboardType: TextInputType.number,
-                  onEditingComplete: updateTotal,
-                  // onTapOutside: (eventDetails) {
-                  //   Navigator.of(context).pop();
-                  // },
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          label: Text("New Total amount:"),
+                        ),
+                        controller: totalAmountcontroller,
+                        keyboardType: TextInputType.number,
+                        onEditingComplete: updateTotal,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: DropDownMenu(
+                        onChanged: (value) {
+                          setState(() {
+                            selectedDevise = value!;
+                          });
+                        },
+                        values: const ["Fmg", "Ar"],
+                        value: selectedDevise,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 30,
                 ),
                 SizedBox(
                   height: 75,
@@ -212,12 +231,23 @@ class _SumBannerState extends ConsumerState<SumBanner> {
                     children: [
                       ElevatedButton(
                         onPressed: updateTotal,
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.green),
+                        ),
                         child: const Text("Validate"),
+                      ),
+                      const SizedBox(
+                        width: 20,
                       ),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red),
+                        ),
                         child: const Text("Cancel"),
                       ),
                     ],
@@ -265,9 +295,13 @@ class _SumBannerState extends ConsumerState<SumBanner> {
 
   @override
   Widget build(BuildContext context) {
+    int sum = widget.type == DebtType.self
+        ? ref.watch(totalDebtsProvider)[0] - totalDebtsOftype(widget.type)
+        : totalDebtsOftype(widget.type);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      height: 75,
+      height: 100,
       width: double.infinity,
       decoration: BoxDecoration(
         boxShadow: [BoxShadow(color: widget.color, spreadRadius: 2)],
@@ -287,29 +321,49 @@ class _SumBannerState extends ConsumerState<SumBanner> {
             ),
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           InkWell(
             onTap: editTotal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
-                Text(
-                  numberFormatter.format((widget.type == DebtType.self
-                      ? ref.watch(totalDebtsProvider)[0] -
-                          totalDebtsOftype(widget.type)
-                      : totalDebtsOftype(widget.type))),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      numberFormatter.format(sum),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
+                      ),
+                    ),
+                    const Text(
+                      " Fmg",
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    )
+                  ],
                 ),
-                const Text(
-                  " Fmg",
-                  style: TextStyle(
-                    fontSize: 15,
-                  ),
-                )
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      numberFormatter.format(sum / 5),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.black54),
+                    ),
+                    const Text(
+                      " Ar",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.black54,
+                      ),
+                    )
+                  ],
+                ),
               ],
             ),
           ),
