@@ -6,6 +6,8 @@ import 'package:expense/widgets/debts/debt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
 class Debts extends ConsumerStatefulWidget {
   const Debts({super.key});
 
@@ -40,88 +42,89 @@ class _DebtsState extends ConsumerState<Debts> {
     }
 
     return Scaffold(
+        key: _scaffoldKey,
         body: Column(
-      children: [
-        DefaultTabController(
-          length: 2,
-          child: Expanded(
-            child: Column(
-              children: [
-                const TabBar(
-                  indicatorColor: Colors.grey,
-                  indicatorWeight: 3,
-                  tabs: [
-                    Tab(
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.red,
+          children: [
+            DefaultTabController(
+              length: 2,
+              child: Expanded(
+                child: Column(
+                  children: [
+                    const TabBar(
+                      indicatorColor: Colors.grey,
+                      indicatorWeight: 3,
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.red,
+                              ),
+                              Text("Self")
+                            ],
                           ),
-                          Text("Self")
-                        ],
-                      ),
+                        ),
+                        Tab(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_drop_up,
+                                color: Colors.green,
+                              ),
+                              Text("Other")
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Tab(
-                      child: Row(
+                    Expanded(
+                      child: TabBarView(
                         children: [
-                          Icon(
-                            Icons.arrow_drop_up,
-                            color: Colors.green,
+                          Column(
+                            children: [
+                              SumBanner(
+                                color: Colors.blue.shade400,
+                                type: DebtType.self,
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: selfs.length,
+                                  itemBuilder: (context, index) {
+                                    return DebtEntry(selfs[index]);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          Text("Other")
+                          Column(
+                            children: [
+                              SumBanner(
+                                color: Colors.orange.shade400,
+                                type: DebtType.other,
+                              ),
+                              Expanded(
+                                child: Card(
+                                  elevation: 5,
+                                  child: ListView.builder(
+                                    itemCount: others.length,
+                                    itemBuilder: (context, index) {
+                                      return DebtEntry(others[index]);
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      Column(
-                        children: [
-                          SumBanner(
-                            color: Colors.blue.shade400,
-                            type: DebtType.self,
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: selfs.length,
-                              itemBuilder: (context, index) {
-                                return DebtEntry(selfs[index]);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SumBanner(
-                            color: Colors.orange.shade400,
-                            type: DebtType.other,
-                          ),
-                          Expanded(
-                            child: Card(
-                              elevation: 5,
-                              child: ListView.builder(
-                                itemCount: others.length,
-                                itemBuilder: (context, index) {
-                                  return DebtEntry(others[index]);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
-    ));
+          ],
+        ));
   }
 }
 
@@ -161,7 +164,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
           .setSelfDebt(int.parse(totalAmountcontroller.text));
 
       var db = await DatabaseHelper.getDatabase();
-      var res = await db.update(
+      await db.update(
         "debts",
         {
           "amount": int.parse(totalAmountcontroller.text),
@@ -174,7 +177,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
           .read(totalDebtsProvider.notifier)
           .setOthersDebt(int.parse(totalAmountcontroller.text));
     }
-    Navigator.of(context).pop();
+    Navigator.of(_scaffoldKey.currentContext!).pop();
   }
 
   void editTotal() async {
@@ -202,7 +205,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
                   //   Navigator.of(context).pop();
                   // },
                 ),
-                Container(
+                SizedBox(
                   height: 75,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -262,9 +265,6 @@ class _SumBannerState extends ConsumerState<SumBanner> {
 
   @override
   Widget build(BuildContext context) {
-    var totals = ref.watch(totalDebtsProvider);
-    var type = widget.type;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       height: 75,
@@ -296,7 +296,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
               children: [
                 Text(
                   numberFormatter.format((widget.type == DebtType.self
-                      ? ref.read(totalDebtsProvider)[0] -
+                      ? ref.watch(totalDebtsProvider)[0] -
                           totalDebtsOftype(widget.type)
                       : totalDebtsOftype(widget.type))),
                   style: const TextStyle(

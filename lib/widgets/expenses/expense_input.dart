@@ -1,7 +1,5 @@
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
-import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/entries_provider.dart';
 import 'package:expense/provider/expenses_provider.dart';
 import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +19,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   var amountController = TextEditingController();
   String selectedDate = dateFormatter.format(DateTime.now());
   ExpenseType selectedType = ExpenseType.outcome;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   void addExpense() async {
     if (ref.read(currentEntryProvider) == null) {
@@ -54,7 +53,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         .read(expensesProvider.notifier)
         .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
 
-    Navigator.of(context).pop();
+    Navigator.of(scaffoldKey.currentContext!).pop();
   }
 
   Future<void> pickDate() async {
@@ -91,29 +90,8 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       transitionDuration: const Duration(milliseconds: 200),
       barrierDismissible: true,
     );
-
-    // DateTime? d = await showDatePicker(
-    //     helpText: "Select date in current month",
-    //     context: context,
-    //     initialDate: now,
-    //     firstDate: DateTime(now.year, now.month, 1),
-    //     lastDate: DateTime(
-    //         now.year,
-    //         now.month,
-    //         now.day < DateTime(now.year, now.month + 1, 0).day
-    //             ? now.day
-    //             : DateTime(now.year, now.month + 1, 0).day));
-    // if (d == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text("Current date used"),
-    //       duration: Duration(seconds: 2),
-    //     ),
-    //   );
-    //   d = DateTime.now();
-    // }
     if (pick == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
           content: Text("Current date used"),
           duration: Duration(seconds: 2),
@@ -135,6 +113,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(

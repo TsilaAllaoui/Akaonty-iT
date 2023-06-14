@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/entry_model.dart';
-import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -127,55 +126,51 @@ class DatabaseHelper {
 
   static Future<void> insertExpense(ExpenseItem expense) async {
     var db = await getDatabase();
-    var count = await db.insert("expenses", expense.toMap());
+    await db.insert("expenses", expense.toMap());
   }
 
   static Future<void> insertEntry(EntryItem entry) async {
     var db = await getDatabase();
-    var count = await db.insert("entries", entry.toMap(),
+    await db.insert("entries", entry.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> insertBankEntry(BankEntryItem entry) async {
     var db = await getDatabase();
-    var count = await db.insert("bank_entries", entry.toMap(),
+    await db.insert("bank_entries", entry.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> insertDebt(DebtItem debt) async {
     var db = await getDatabase();
-    var count = await db.insert("debts", debt.toMap(),
+    await db.insert("debts", debt.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> deleteExpense(ExpenseItem expense) async {
     var db = await getDatabase();
-    var count =
-        await db.delete("expenses", where: "id = ?", whereArgs: [expense.id]);
+    await db.delete("expenses", where: "id = ?", whereArgs: [expense.id]);
   }
 
   static Future<void> deleteEntry(EntryItem entry) async {
     var db = await getDatabase();
-    var count =
-        await db.delete("entries", where: "id = ?", whereArgs: [entry.id]);
-    count = await db
-        .delete("expenses", where: "entry_id = ?", whereArgs: [entry.id]);
+    await db.delete("entries", where: "id = ?", whereArgs: [entry.id]);
+    await db.delete("expenses", where: "entry_id = ?", whereArgs: [entry.id]);
   }
 
   static Future<void> deleteBankEntry(BankEntryItem entry) async {
     var db = await getDatabase();
-    var count =
-        await db.delete("bank_entries", where: "id = ?", whereArgs: [entry.id]);
+    await db.delete("bank_entries", where: "id = ?", whereArgs: [entry.id]);
   }
 
   static Future<void> deleteDebt(DebtItem debt) async {
     var db = await getDatabase();
-    var count = await db.delete("debts", where: "id = ?", whereArgs: [debt.id]);
+    await db.delete("debts", where: "id = ?", whereArgs: [debt.id]);
   }
 
   static Future<void> updateEntry(EntryItem entry, Color newColor) async {
     var db = await getDatabase();
-    var count = await db.update("entries",
+    await db.update("entries",
         {"red": newColor.red, "green": newColor.green, "blue": newColor.blue},
         where: "id = ?", whereArgs: [entry.id]);
   }
@@ -184,28 +179,24 @@ class DatabaseHelper {
     List<ExpenseItem> expenses = [];
     var db = await getDatabase();
 
-    var years = await db.query("entries",
-        columns: ["year"], distinct: true, orderBy: "year DESC");
-
-    for (final year in years) {
-      var res = [];
-      if (entryId == -1) {
-        res = await db.query("expenses",
-            orderBy:
-                "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
-      } else {
-        res = await db.query("expenses",
-            orderBy:
-                "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
-            where: "entry_id = ?",
-            whereArgs: [entryId]);
-      }
-
-      for (final expenseMap in res) {
-        ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
-        expenses.add(expense);
-      }
+    var res = [];
+    if (entryId == -1) {
+      res = await db.query("expenses",
+          orderBy:
+              "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+    } else {
+      res = await db.query("expenses",
+          orderBy:
+              "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+          where: "entry_id = ?",
+          whereArgs: [entryId]);
     }
+
+    for (final expenseMap in res) {
+      ExpenseItem expense = ExpenseItem.fromMap(expenseMap);
+      expenses.add(expense);
+    }
+
     return expenses;
   }
 

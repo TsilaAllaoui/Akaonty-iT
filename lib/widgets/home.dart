@@ -33,6 +33,7 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   void createExpense() {
     if (ref.read(entriesProvider).isEmpty) {
@@ -131,7 +132,7 @@ class _HomeState extends ConsumerState<Home> {
   Future<bool> getExpensesInDb() async {
     await DatabaseHelper.createDatabase();
 
-    var res = await DatabaseHelper.fetchExpenses();
+    await DatabaseHelper.fetchExpenses();
     ref.read(expensesProvider.notifier).setExpenses(-1);
 
     var entries = await DatabaseHelper.fetchEntries();
@@ -188,7 +189,7 @@ class _HomeState extends ConsumerState<Home> {
       ],
     );
 
-    ScaffoldMessenger.of(context)
+    ScaffoldMessenger.of(scaffoldKey.currentContext!)
       ..hideCurrentMaterialBanner()
       ..showMaterialBanner(materialBanner);
 
@@ -203,9 +204,10 @@ class _HomeState extends ConsumerState<Home> {
 
   void backupDatabase() async {
     await DatabaseHelper.backupDatabase();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-            Text("Databse backup at \"/storage/emulated/0/database.db\"")));
+    ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+            content:
+                Text("Databse backup at \"/storage/emulated/0/database.db\"")));
   }
 
   @override
@@ -220,11 +222,11 @@ class _HomeState extends ConsumerState<Home> {
     Widget content = Entries(entries: ref.watch(entriesProvider));
     EntryItem? currentEntryItem = ref.watch(currentEntryProvider);
     if (navIndex == 1) {
-      content = Expenses();
+      content = const Expenses();
     } else if (navIndex == 2) {
       content = const Bank();
     } else if (navIndex == 3) {
-      content = Debts();
+      content = const Debts();
     }
 
     List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
@@ -256,7 +258,7 @@ class _HomeState extends ConsumerState<Home> {
                                 // "TAY",
                                 currentEntryItem == null
                                     ? ""
-                                    : currentEntryItem!.month,
+                                    : currentEntryItem.month,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
@@ -264,7 +266,7 @@ class _HomeState extends ConsumerState<Home> {
                                 // "TAY",
                                 currentEntryItem == null
                                     ? ""
-                                    : currentEntryItem!.year,
+                                    : currentEntryItem.year,
                                 style: const TextStyle(fontSize: 10),
                               ),
                             ],

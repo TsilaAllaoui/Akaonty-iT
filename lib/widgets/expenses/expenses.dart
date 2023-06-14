@@ -5,9 +5,7 @@ import 'package:expense/model/expense_model.dart';
 import 'package:flutter/material.dart';
 
 class Expenses extends ConsumerStatefulWidget {
-  List<ExpenseItem> expenses = [];
-
-  Expenses({super.key});
+  const Expenses({super.key});
 
   @override
   ConsumerState<Expenses> createState() => _ExpensesState();

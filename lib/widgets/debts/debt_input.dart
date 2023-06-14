@@ -1,14 +1,9 @@
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
-import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/bank_provider.dart';
 import 'package:expense/provider/debts_provider.dart';
-import 'package:expense/provider/expenses_provider.dart';
-import 'package:expense/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 
 class DebtInput extends ConsumerStatefulWidget {
@@ -24,6 +19,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
 
   String selectedDate = dateFormatter.format(DateTime.now());
   DebtType selectedType = DebtType.self;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   void addDebt() async {
     var amount = int.tryParse(amountController.text);
@@ -53,13 +49,10 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
     }
     await ref.read(debtsProvider.notifier).addDebt(debt);
 
-    Navigator.of(context).pop();
+    Navigator.of(scaffoldKey.currentContext!).pop();
   }
 
   Future<void> pickDate() async {
-    DateTime now = DateTime.now();
-    var daysInCurrentMonth = DateTime(now.year, now.month - 1, 0).day;
-
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -90,7 +83,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
     );
 
     if (pick == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
           content: Text("Current date used"),
           duration: Duration(seconds: 2),
@@ -113,6 +106,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(

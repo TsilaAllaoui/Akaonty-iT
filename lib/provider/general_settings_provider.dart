@@ -1,20 +1,19 @@
 import 'package:expense/model/entry_model.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class navBarIndexNotifier extends StateNotifier<int> {
-  navBarIndexNotifier() : super(0);
+class NavBarIndexNotifier extends StateNotifier<int> {
+  NavBarIndexNotifier() : super(0);
 
   void setNavBarIndex(int index) {
     state = index;
   }
 }
 
-final navBarIndexProvider = StateNotifierProvider<navBarIndexNotifier, int>(
-    (ref) => navBarIndexNotifier());
+final navBarIndexProvider = StateNotifierProvider<NavBarIndexNotifier, int>(
+    (ref) => NavBarIndexNotifier());
 
-class currentEntryNotifier extends StateNotifier<EntryItem?> {
-  currentEntryNotifier() : super(null);
+class CurrentEntryNotifier extends StateNotifier<EntryItem?> {
+  CurrentEntryNotifier() : super(null);
 
   void setCurrentEntry(EntryItem? entry) {
     state = entry;
@@ -29,5 +28,5 @@ class currentEntryNotifier extends StateNotifier<EntryItem?> {
 }
 
 final currentEntryProvider =
-    StateNotifierProvider<currentEntryNotifier, EntryItem?>(
-        (ref) => currentEntryNotifier());
+    StateNotifierProvider<CurrentEntryNotifier, EntryItem?>(
+        (ref) => CurrentEntryNotifier());

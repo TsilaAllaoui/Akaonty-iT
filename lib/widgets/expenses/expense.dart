@@ -6,9 +6,9 @@ import 'package:expense/model/expense_model.dart';
 import 'package:flutter/material.dart';
 
 class Expense extends ConsumerStatefulWidget {
-  Expense({super.key, required this.expense});
+  const Expense({super.key, required this.expense});
 
-  late ExpenseItem expense;
+  final ExpenseItem expense;
 
   @override
   ConsumerState<Expense> createState() => _ExpenseState();

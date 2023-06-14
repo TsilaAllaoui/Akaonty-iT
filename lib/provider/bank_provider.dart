@@ -1,6 +1,5 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/bank_entry_model.dart';
-import 'package:expense/model/expense_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

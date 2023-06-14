@@ -11,9 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
 
 class Entry extends ConsumerStatefulWidget {
-  Entry({super.key, required this.entry});
+  const Entry({super.key, required this.entry});
 
-  late EntryItem entry;
+  final EntryItem entry;
 
   @override
   ConsumerState<Entry> createState() => _EntryState();
@@ -120,23 +120,6 @@ class _EntryState extends ConsumerState<Entry> {
         )
       ],
       child: InkWell(
-        // onTapDown: (details) {
-        //   print("Time start...");
-        //   timer.stop();
-        //   timer.start();
-        // },
-        // onTapUp: (details) {
-        //   print("Time stopped after ${timer.elapsedMilliseconds}");
-        //   if (timer.elapsedMilliseconds > 0 &&
-        //       timer.elapsedMilliseconds < 2000) {
-        //     timer.stop();
-        //     timer.reset();
-        //     navigateToExpenses();
-        //   } else {
-        //     timer.stop();
-        //     timer.reset();
-        //   }
-        // },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           margin: const EdgeInsets.only(top: 10, left: 10),

@@ -13,9 +13,9 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:pie_menu/pie_menu.dart';
 
 class Entries extends ConsumerStatefulWidget {
-  Entries({super.key, required this.entries});
+  const Entries({super.key, required this.entries});
 
-  List<EntryItem> entries = [];
+  final List<EntryItem> entries;
 
   @override
   ConsumerState<Entries> createState() => _EntriesState();
