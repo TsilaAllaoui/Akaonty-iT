@@ -42,8 +42,6 @@ class _BankState extends ConsumerState<Bank> {
       }
     }
 
-    // int totalInBank = ref.watch(totalInBankProvider);
-
     int depositsTotal = 0;
     for (final entry in deposits) {
       depositsTotal += entry.amount;
@@ -86,7 +84,7 @@ class _BankState extends ConsumerState<Bank> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "${numberFormatter.format(totalInBank)}",
+                        numberFormatter.format(totalInBank),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 25,
@@ -158,14 +156,6 @@ class _BankState extends ConsumerState<Bank> {
                 ),
               ),
             ),
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: bankEntries.length,
-            //     itemBuilder: (context, index) {
-            //       return BankEntry(bankEntries[index]);
-            //     },
-            //   ),
-            // ),
           ],
         ));
   }

@@ -154,11 +154,21 @@ class _SumBannerState extends ConsumerState<SumBanner> {
     return sum;
   }
 
-  void updateTotal() {
+  void updateTotal() async {
     if (widget.type == DebtType.self) {
       ref
           .read(totalDebtsProvider.notifier)
           .setSelfDebt(int.parse(totalAmountcontroller.text));
+
+      var db = await DatabaseHelper.getDatabase();
+      var res = await db.update(
+        "debts",
+        {
+          "amount": int.parse(totalAmountcontroller.text),
+        },
+        where: "type = ?",
+        whereArgs: ["self_total"],
+      );
     } else {
       ref
           .read(totalDebtsProvider.notifier)
@@ -216,6 +226,32 @@ class _SumBannerState extends ConsumerState<SumBanner> {
         );
       },
     );
+  }
+
+  Future<void> initDebtsTotal() async {
+    var db = await DatabaseHelper.getDatabase();
+    var res =
+        await db.query("debts", where: "type = ?", whereArgs: ["self_total"]);
+    dynamic selfTotal = 0;
+    if (res.isNotEmpty) {
+      var first = res.first;
+      selfTotal = first["amount"];
+    } else {
+      await DatabaseHelper.insertDebt(
+        DebtItem(
+          date: dateFormatter.format(DateTime.now()),
+          amount: 0,
+          type: DebtType.selfTotal,
+        ),
+      );
+    }
+    ref.read(totalDebtsProvider.notifier).setSelfDebt(selfTotal);
+  }
+
+  @override
+  void initState() {
+    initDebtsTotal();
+    super.initState();
   }
 
   @override

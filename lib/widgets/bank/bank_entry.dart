@@ -51,7 +51,6 @@ class _BankEntryState extends ConsumerState<BankEntry> {
             color: Colors.red,
             borderRadius: BorderRadius.circular(4),
           ),
-          // margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Column(
             children: [
               const Text(
@@ -96,20 +95,12 @@ class _BankEntryState extends ConsumerState<BankEntry> {
       onDismissed: (direction) async {
         completer = Completer<bool>();
         await ref.read(bankEntriesProvider.notifier).removeBankEntry(bankEntry);
-        // ScaffoldMessenger.of(ref.read(bankScaffoldKeyProvider).currentContext!)
-        //     .showSnackBar(
-        //   SnackBar(
-        //     content: const Text('Entry deleted'),
-        //     action: SnackBarAction(
-        //       label: 'Undo',
-        //       onPressed: () async {
-        //         await ref
-        //             .read(bankEntriesProvider.notifier)
-        //             .addBankEntry(bankEntry);
-        //       },
-        //     ),
-        //   ),
-        // );
+        ScaffoldMessenger.of(ref.read(bankScaffoldKeyProvider).currentContext!)
+            .showSnackBar(
+          const SnackBar(
+            content: Text('Entry deleted'),
+          ),
+        );
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

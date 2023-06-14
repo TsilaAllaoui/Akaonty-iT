@@ -1,6 +1,6 @@
 import 'package:expense/model/expense_model.dart';
 
-enum DebtType { self, other }
+enum DebtType { self, other, selfTotal }
 
 class DebtItem {
   int? id;
@@ -17,6 +17,19 @@ class DebtItem {
       this.name});
 
   DebtItem.fromMap(Map<String, dynamic> map) {
+    switch (map["type"]) {
+      case "self":
+        type = DebtType.self;
+        break;
+      case "other":
+        type = DebtType.other;
+        break;
+      case "self_total":
+        type = DebtType.selfTotal;
+        break;
+      default:
+    }
+
     id = map["id"];
     amount = map["amount"];
     try {
@@ -24,16 +37,28 @@ class DebtItem {
     } catch (e) {
       date = dateFormatter.format(DateTime.now());
     }
-    type = map["type"] == "self" ? DebtType.self : DebtType.other;
     name = map["name"];
   }
 
   Map<String, dynamic> toMap() {
+    String typeString = "";
+    switch (type) {
+      case DebtType.self:
+        typeString = "self";
+        break;
+      case DebtType.other:
+        typeString = "other";
+        break;
+      case DebtType.selfTotal:
+        typeString = "self_total";
+        break;
+      default:
+    }
     return {
       "id": id,
       "date": date,
       "amount": amount,
-      "type": type == DebtType.self ? "self" : "other",
+      "type": typeString,
       "name": name
     };
   }

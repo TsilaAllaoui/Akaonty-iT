@@ -47,10 +47,8 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(now.year, now.month, 1),
-      lastDate: DateTime(now.year, now.month, 0).add(
-        Duration(days: daysInCurrentMonth),
-      ),
+      firstDate: DateTime(1998, 1, 1),
+      lastDate: DateTime.now(),
       is24HourMode: true,
       isShowSeconds: false,
       minutesInterval: 1,

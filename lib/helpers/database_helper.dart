@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/entry_model.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,6 +35,10 @@ class DatabaseHelper {
     if (status.isDenied) {
       await Permission.storage.request();
     }
+    status = await Permission.manageExternalStorage.status;
+    if (status.isDenied) {
+      await Permission.storage.request();
+    }
     var appDir = await getApplicationDocumentsDirectory();
 
     final database = await openDatabase(
@@ -51,11 +56,17 @@ class DatabaseHelper {
         db.execute(
           'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT, name TEXT)',
         );
+        insertDebt(
+          DebtItem(
+            date: dateFormatter.format(DateTime.now()),
+            amount: 0,
+            type: DebtType.selfTotal,
+          ),
+        );
         return;
       },
       version: 1,
     );
-
     return database;
   }
 
@@ -64,7 +75,11 @@ class DatabaseHelper {
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
     if (await dbFile.exists()) {
-      await dbFile.copy("/storage/emulated/0/database.db");
+      try {
+        await dbFile.copy("/storage/emulated/0/database.db");
+      } catch (e) {
+        print("Permission denied to copy db");
+      }
     }
     final database = await openDatabase("${appDir.path}/database.db");
     DatabaseHelper.db = database;
