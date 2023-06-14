@@ -19,6 +19,7 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   String selectedDate = dateFormatter.format(DateTime.now());
   BankEntryType selectedType = BankEntryType.withdrawal;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  String selectedDevise = "Fmg";
 
   void addBankEntry() async {
     var amount = int.tryParse(amountController.text);
@@ -31,8 +32,11 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
       ));
       return;
     }
-    BankEntryItem bankEntry =
-        BankEntryItem(amount: amount, date: selectedDate, type: selectedType);
+    BankEntryItem bankEntry = BankEntryItem(
+      amount: selectedDevise == "Fmg" ? amount : amount * 5,
+      date: selectedDate,
+      type: selectedType,
+    );
     await ref.read(bankEntriesProvider.notifier).addBankEntry(bankEntry);
 
     Navigator.of(scaffoldKey.currentContext!).pop();
@@ -100,21 +104,45 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
               children: [
                 Expanded(
                   child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    child: TextField(
-                      onTapOutside: (PointerDownEvent e) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        suffixText: "Fmg",
-                        label: Text(
-                          "Amount",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                    margin: const EdgeInsets.only(
+                        left: 20, top: 20, right: 20, bottom: 10),
+                    child: Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              child: TextField(
+                                onTapOutside: (PointerDownEvent e) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                },
+                                controller: amountController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  suffixText: "Fmg",
+                                  label: Text(
+                                    "Amount",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: DropDownMenu(
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedDevise = value!;
+                                });
+                              },
+                              values: const ["Fmg", "Ar"],
+                              value: selectedDevise,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

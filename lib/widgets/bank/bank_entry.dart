@@ -117,14 +117,27 @@ class _BankEntryState extends ConsumerState<BankEntry> {
           child: ListTile(
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            leading: Text(
-              "${numberFormatter.format(bankEntry.amount)} Fmg",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
+            leading: Column(
+              children: [
+                Text(
+                  "${numberFormatter.format(bankEntry.amount)} Fmg",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  "${numberFormatter.format(bankEntry.amount / 5)} Ar",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
             ),
             trailing: Text(
               bankEntry.date,

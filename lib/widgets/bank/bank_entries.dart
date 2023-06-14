@@ -98,6 +98,26 @@ class _BankState extends ConsumerState<Bank> {
                       )
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        numberFormatter.format(totalInBank / 5),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      Text(
+                        " Ar",
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey.shade800,
+                        ),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),
