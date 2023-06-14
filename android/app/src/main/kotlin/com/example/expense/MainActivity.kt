@@ -1,4 +1,4 @@
-package com.example.expense
+package com.allaoui.akaontyit
 
 import io.flutter.embedding.android.FlutterActivity
 

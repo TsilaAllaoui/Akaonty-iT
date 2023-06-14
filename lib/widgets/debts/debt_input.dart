@@ -111,7 +111,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(
           children: [

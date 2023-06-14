@@ -96,7 +96,7 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
         child: Column(
           children: [
@@ -106,43 +106,41 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                   child: Container(
                     margin: const EdgeInsets.only(
                         left: 20, top: 20, right: 20, bottom: 10),
-                    child: Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 10),
-                              child: TextField(
-                                onTapOutside: (PointerDownEvent e) {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                },
-                                controller: amountController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  label: Text(
-                                    "Amount",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            child: TextField(
+                              onTapOutside: (PointerDownEvent e) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              },
+                              controller: amountController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                label: Text(
+                                  "Amount",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: DropDownMenu(
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedDevise = value!;
-                                });
-                              },
-                              values: const ["Fmg", "Ar"],
-                              value: selectedDevise,
-                            ),
+                        ),
+                        Expanded(
+                          child: DropDownMenu(
+                            onChanged: (value) {
+                              setState(() {
+                                selectedDevise = value!;
+                              });
+                            },
+                            values: const ["Fmg", "Ar"],
+                            value: selectedDevise,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

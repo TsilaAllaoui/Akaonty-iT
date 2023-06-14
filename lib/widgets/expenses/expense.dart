@@ -100,8 +100,8 @@ class _ExpenseState extends ConsumerState<Expense> {
                 ? Colors.green.shade100
                 : Colors.red.shade100,
             elevation: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
                   Row(
