@@ -1,6 +1,7 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/expense_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
   ExpensesNotifier() : super([]);
@@ -30,7 +31,6 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
   }
 
   Future<void> setExpenses(int entryId) async {
-    await DatabaseHelper.createDatabase();
     var res = await DatabaseHelper.fetchExpenses();
     if (entryId < 0) {
       state = res;
@@ -38,8 +38,33 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
     }
     state = res.where((element) => element.entryId == entryId).toList();
   }
+
+  Future<void> updateExpense(int id, Map<String, dynamic> map) async {
+    var db = await DatabaseHelper.getDatabase();
+    await db.update(
+      "expenses",
+      map,
+      where: "id = ?",
+      whereArgs: [id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    var expenses = await DatabaseHelper.fetchExpenses();
+    state = [...expenses];
+  }
 }
 
 final expensesProvider =
     StateNotifierProvider<ExpensesNotifier, List<ExpenseItem>>(
         (ref) => ExpensesNotifier());
+
+class CurrentExpenseNotifier extends StateNotifier<ExpenseItem?> {
+  CurrentExpenseNotifier() : super(null);
+
+  void setCurrentExpense(ExpenseItem? expense) {
+    state = expense;
+  }
+}
+
+final currentExpenseProvider =
+    StateNotifierProvider<CurrentExpenseNotifier, ExpenseItem?>(
+        (ref) => CurrentExpenseNotifier());

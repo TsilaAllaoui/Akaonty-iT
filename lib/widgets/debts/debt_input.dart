@@ -202,11 +202,15 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                             color: Colors.blue,
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            selectedDate,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                        InkWell(
+                          onTap: pickDate,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              selectedDate,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                       ],

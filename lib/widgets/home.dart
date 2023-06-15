@@ -55,7 +55,7 @@ class _HomeState extends ConsumerState<Home> {
         borderRadius: BorderRadius.circular(25.0),
       ),
       context: context,
-      builder: (context) => const ExpenseInput(),
+      builder: (context) => ExpenseInput(),
     );
   }
 
@@ -64,7 +64,7 @@ class _HomeState extends ConsumerState<Home> {
     var selectedDate = await showMonthPicker(
         context: context,
         initialDate: now,
-        firstDate: DateTime(now.year - 1, now.month, now.day),
+        firstDate: DateTime(1998, 1, 1),
         lastDate: now);
     if (selectedDate == null) {
       Fluttertoast.showToast(

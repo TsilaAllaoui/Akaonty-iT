@@ -10,6 +10,8 @@ import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 class ExpenseInput extends ConsumerStatefulWidget {
   const ExpenseInput({super.key});
 
+  // final bool? isUpdate;
+
   @override
   ConsumerState<ExpenseInput> createState() => _ExpenseInputState();
 }
@@ -23,7 +25,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   String selectedDevise = "Fmg";
 
   void addExpense() async {
-    if (ref.read(currentEntryProvider) == null) {
+    if (ref.watch(currentEntryProvider) == null) {
       Fluttertoast.showToast(
           msg: "No entry found. Add at least one to add expanse.",
           toastLength: Toast.LENGTH_SHORT,
@@ -50,24 +52,33 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         date: selectedDate,
         entryId: ref.read(currentEntryProvider)!.id!,
         type: selectedType);
-    await ref
-        .read(expensesProvider.notifier)
-        .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
+    var currentExpense = ref.watch(currentExpenseProvider);
+
+    if (currentExpense != null) {
+      var values = expense.toMap();
+
+      values["id"] = currentExpense.id;
+      await ref.read(expensesProvider.notifier).updateExpense(
+            currentExpense.id!,
+            values,
+          );
+      ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
+    } else {
+      await ref
+          .read(expensesProvider.notifier)
+          .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
+    }
 
     Navigator.of(scaffoldKey.currentContext!).pop();
   }
 
   Future<void> pickDate() async {
     DateTime now = DateTime.now();
-    var daysInCurrentMonth = DateTime(now.year, now.month - 1, 0).day;
-
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: now,
       firstDate: DateTime(now.year, now.month, 1),
-      lastDate: DateTime(now.year, now.month, 0).add(
-        Duration(days: daysInCurrentMonth),
-      ),
+      lastDate: now,
       is24HourMode: true,
       isShowSeconds: false,
       minutesInterval: 1,
@@ -102,7 +113,26 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     }
     setState(() {
       selectedDate = dateFormatter.format(pick!);
+      if (ref.read(currentExpenseProvider) != null) {
+        ref.read(currentExpenseProvider)!.date = selectedDate;
+      }
     });
+  }
+
+  @override
+  void initState() {
+    var currentExpense = ref.read(currentExpenseProvider);
+    if (currentExpense != null) {
+      titleController.text = currentExpense.title;
+      titleController.selection = TextSelection.fromPosition(
+        TextPosition(offset: titleController.text.length),
+      );
+      amountController.text = currentExpense.amount.toString();
+      amountController.selection = TextSelection.fromPosition(
+        TextPosition(offset: amountController.text.length),
+      );
+    }
+    super.initState();
   }
 
   @override
@@ -217,11 +247,15 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                             color: Colors.blue,
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            selectedDate,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                        InkWell(
+                          onTap: pickDate,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              selectedDate,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                       ],
@@ -234,18 +268,21 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
               ),
               Expanded(
                 child: DropDownMenu(
-                    title: "Type: ",
-                    onChanged: (value) {
-                      setState(() {
-                        selectedType = value == "Income"
-                            ? ExpenseType.income
-                            : ExpenseType.outcome;
-                      });
-                    },
-                    values: const ["Income", "Outcome"],
-                    value: selectedType == ExpenseType.income
-                        ? "Income"
-                        : "Outcome"),
+                  title: "Type: ",
+                  onChanged: (value) {
+                    setState(() {
+                      selectedType = value == "Income"
+                          ? ExpenseType.income
+                          : ExpenseType.outcome;
+                      if (ref.read(currentExpenseProvider) != null) {
+                        ref.read(currentExpenseProvider)!.type = selectedType;
+                      }
+                    });
+                  },
+                  values: const ["Income", "Outcome"],
+                  value:
+                      selectedType == ExpenseType.income ? "Income" : "Outcome",
+                ),
               ),
             ],
           ),

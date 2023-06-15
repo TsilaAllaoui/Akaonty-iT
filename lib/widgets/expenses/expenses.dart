@@ -1,8 +1,10 @@
 import 'package:expense/provider/expenses_provider.dart';
+import 'package:expense/widgets/expenses/expense_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense/widgets/expenses/expense.dart';
 import 'package:expense/model/expense_model.dart';
 import 'package:flutter/material.dart';
+import 'package:pie_menu/pie_menu.dart';
 
 class Expenses extends ConsumerStatefulWidget {
   const Expenses({super.key});
@@ -147,7 +149,7 @@ class _TabState extends State<Tab> {
   }
 }
 
-class ExpenseList extends StatefulWidget {
+class ExpenseList extends ConsumerStatefulWidget {
   const ExpenseList(
       {super.key, required this.total, required this.list, required this.type});
 
@@ -156,10 +158,24 @@ class ExpenseList extends StatefulWidget {
   final ExpenseType type;
 
   @override
-  State<ExpenseList> createState() => _ExpenseListState();
+  ConsumerState<ExpenseList> createState() => _ExpenseListState();
 }
 
-class _ExpenseListState extends State<ExpenseList> {
+class _ExpenseListState extends ConsumerState<ExpenseList> {
+  void showUpdateInput(int index) {
+    ref
+        .read(currentExpenseProvider.notifier)
+        .setCurrentExpense(widget.list[index]);
+    showModalBottomSheet(
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      context: context,
+      builder: (context) => const ExpenseInput(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -215,7 +231,35 @@ class _ExpenseListState extends State<ExpenseList> {
           child: ListView.builder(
             itemCount: widget.list.length,
             itemBuilder: (context, index) {
-              return Expense(expense: widget.list[index]);
+              return PieMenu(
+                actions: [
+                  PieAction(
+                    buttonTheme: const PieButtonTheme(
+                      backgroundColor: Colors.red,
+                      iconColor: Colors.white,
+                    ),
+                    tooltip: "Delete",
+                    onSelect: () async {
+                      await ref
+                          .read(expensesProvider.notifier)
+                          .removeExpense(widget.list[index]);
+                    },
+                    child: const Icon(Icons.delete),
+                  ),
+                  PieAction(
+                    buttonTheme: const PieButtonTheme(
+                      backgroundColor: Colors.orange,
+                      iconColor: Colors.white,
+                    ),
+                    tooltip: "Update",
+                    onSelect: () => showUpdateInput(index),
+                    child: const Icon(Icons.edit),
+                  ),
+                ],
+                child: Expense(
+                  expense: widget.list[index],
+                ),
+              );
             },
           ),
         ),
