@@ -37,7 +37,7 @@ class _DebtsState extends ConsumerState<Debts> {
     for (final debt in debts) {
       if (debt.type == DebtType.self) {
         selfs.add(debt);
-      } else {
+      } else if (debt.type == DebtType.other) {
         others.add(debt);
       }
     }

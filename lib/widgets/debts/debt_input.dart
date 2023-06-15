@@ -51,7 +51,16 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
       debt.name = nameController.text;
       debt.name = debt.name![0].toUpperCase() + debt.name!.substring(1);
     }
-    await ref.read(debtsProvider.notifier).addDebt(debt);
+
+    var currentDebt = ref.read(currentDebtProvider);
+    if (currentDebt == null) {
+      await ref.read(debtsProvider.notifier).addDebt(debt);
+    } else {
+      var map = debt.toMap();
+      map["id"] = currentDebt.id!;
+      await ref.read(debtsProvider.notifier).updateDebt(map);
+      ref.read(currentDebtProvider.notifier).setCurrentDebt(null);
+    }
 
     Navigator.of(scaffoldKey.currentContext!).pop();
   }
@@ -98,6 +107,24 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
     setState(() {
       selectedDate = dateFormatter.format(pick!);
     });
+  }
+
+  @override
+  void initState() {
+    var currentDebt = ref.read(currentDebtProvider);
+    if (currentDebt != null) {
+      if (currentDebt.type == DebtType.other) {
+        nameController.text = currentDebt.name.toString();
+        nameController.selection = TextSelection.fromPosition(
+          TextPosition(offset: nameController.text.length),
+        );
+      }
+      amountController.text = currentDebt.amount.toString();
+      amountController.selection = TextSelection.fromPosition(
+        TextPosition(offset: amountController.text.length),
+      );
+    }
+    super.initState();
   }
 
   @override

@@ -232,6 +232,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
             itemCount: widget.list.length,
             itemBuilder: (context, index) {
               return PieMenu(
+                theme: const PieTheme(pointerColor: Colors.transparent),
                 actions: [
                   PieAction(
                     buttonTheme: const PieButtonTheme(

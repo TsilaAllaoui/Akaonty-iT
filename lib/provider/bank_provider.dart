@@ -2,6 +2,7 @@ import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/bank_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 
 class BankEntriesNotifier extends StateNotifier<List<BankEntryItem>> {
   BankEntriesNotifier() : super([]);
@@ -39,6 +40,19 @@ class BankEntriesNotifier extends StateNotifier<List<BankEntryItem>> {
     state = [...entries];
     return true;
   }
+
+  Future<void> updateBankEntry(Map<String, dynamic> map) async {
+    var db = await DatabaseHelper.getDatabase();
+    await db.update(
+      "bank_entries",
+      map,
+      where: "id = ?",
+      whereArgs: [map["id"]],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    var entries = await DatabaseHelper.fetchBankEntries();
+    state = [...entries];
+  }
 }
 
 final bankEntriesProvider =
@@ -65,3 +79,15 @@ final totalInBankProvider = StateNotifierProvider<TotalInBankNotifier, int>(
     (ref) => TotalInBankNotifier());
 
 final bankScaffoldKeyProvider = Provider((ref) => GlobalKey<ScaffoldState>());
+
+class CurrentBankEntryNotifier extends StateNotifier<BankEntryItem?> {
+  CurrentBankEntryNotifier() : super(null);
+
+  void setCurrentBankEntry(BankEntryItem? bankEntry) {
+    state = bankEntry;
+  }
+}
+
+final currentBankEntryProvider =
+    StateNotifierProvider<CurrentBankEntryNotifier, BankEntryItem?>(
+        (ref) => CurrentBankEntryNotifier());

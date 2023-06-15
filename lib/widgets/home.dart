@@ -55,7 +55,7 @@ class _HomeState extends ConsumerState<Home> {
         borderRadius: BorderRadius.circular(25.0),
       ),
       context: context,
-      builder: (context) => ExpenseInput(),
+      builder: (context) => const ExpenseInput(),
     );
   }
 

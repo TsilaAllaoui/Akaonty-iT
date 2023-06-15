@@ -37,7 +37,15 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
       date: selectedDate,
       type: selectedType,
     );
-    await ref.read(bankEntriesProvider.notifier).addBankEntry(bankEntry);
+    if (ref.read(currentBankEntryProvider) == null) {
+      await ref.read(bankEntriesProvider.notifier).addBankEntry(bankEntry);
+    } else {
+      var map = bankEntry.toMap();
+      var id = ref.read(currentBankEntryProvider)!.id!;
+      map["id"] = id;
+      await ref.read(bankEntriesProvider.notifier).updateBankEntry(map);
+      ref.read(currentBankEntryProvider.notifier).setCurrentBankEntry(null);
+    }
 
     Navigator.of(scaffoldKey.currentContext!).pop();
   }
@@ -83,7 +91,22 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
     }
     setState(() {
       selectedDate = dateFormatter.format(pick!);
+      if (ref.read(currentBankEntryProvider) != null) {
+        ref.read(currentBankEntryProvider)!.date = selectedDate;
+      }
     });
+  }
+
+  @override
+  void initState() {
+    var currentBankEntry = ref.read(currentBankEntryProvider);
+    if (currentBankEntry != null) {
+      amountController.text = currentBankEntry.amount.toString();
+      amountController.selection = TextSelection.fromPosition(
+        TextPosition(offset: amountController.text.length),
+      );
+    }
+    super.initState();
   }
 
   @override
@@ -201,6 +224,10 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                           selectedType = value == "Deposit"
                               ? BankEntryType.deposit
                               : BankEntryType.withdrawal;
+                          if (ref.read(currentBankEntryProvider) != null) {
+                            ref.read(currentBankEntryProvider)!.type =
+                                selectedType;
+                          }
                         });
                       },
                       values: const ["Deposit", "Withdrawal"],

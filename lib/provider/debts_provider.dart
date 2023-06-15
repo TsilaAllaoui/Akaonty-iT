@@ -1,6 +1,7 @@
 import 'package:expense/helpers/database_helper.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DebtsNotifier extends StateNotifier<List<DebtItem>> {
   DebtsNotifier() : super([]);
@@ -38,6 +39,19 @@ class DebtsNotifier extends StateNotifier<List<DebtItem>> {
     state = [...debts];
     return true;
   }
+
+  Future<void> updateDebt(Map<String, dynamic> map) async {
+    var db = await DatabaseHelper.getDatabase();
+    await db.update(
+      "debts",
+      map,
+      where: "id = ?",
+      whereArgs: [map["id"]],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    var entries = await DatabaseHelper.fetchDebts();
+    state = [...entries];
+  }
 }
 
 final debtsProvider = StateNotifierProvider<DebtsNotifier, List<DebtItem>>(
@@ -74,3 +88,15 @@ class TotalSelfDebtsNotifier extends StateNotifier<List<int>> {
 final totalDebtsProvider =
     StateNotifierProvider<TotalSelfDebtsNotifier, List<int>>(
         (ref) => TotalSelfDebtsNotifier());
+
+class CurrentDebtNotifier extends StateNotifier<DebtItem?> {
+  CurrentDebtNotifier() : super(null);
+
+  void setCurrentDebt(DebtItem? debt) {
+    state = debt;
+  }
+}
+
+final currentDebtProvider =
+    StateNotifierProvider<CurrentDebtNotifier, DebtItem?>(
+        (ref) => CurrentDebtNotifier());
