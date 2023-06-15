@@ -5,6 +5,7 @@ import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debt_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
+import 'package:expense/widgets/notification.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -37,8 +38,7 @@ class _HomeState extends ConsumerState<Home> {
   late Future<dynamic> pendingTransaction;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final NotificationScheduler notificationScheduler = NotificationScheduler();
 
   void createExpense() {
     if (ref.read(entriesProvider).isEmpty) {
@@ -215,39 +215,27 @@ class _HomeState extends ConsumerState<Home> {
                 Text("Databse backup at \"/storage/emulated/0/database.db\"")));
   }
 
+  Future<void> initializeNotificationScheduler() async {
+    await notificationScheduler.initialize();
+  }
+
+  Future<void> scheduleMonthlyNotification() async {
+    await notificationScheduler.scheduleMonthlyNotification();
+  }
+
   @override
   void initState() {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     pendingTransaction = getExpensesInDb();
 
-    var initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    initializeNotificationScheduler();
+    scheduleMonthlyNotification();
 
     super.initState();
   }
 
-  Future<void> showNotification() async {
-    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-      'channel_id',
-      'channel_name',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    var platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'Notification Title',
-      'Notification Body',
-      platformChannelSpecifics,
-      payload: 'notification_payload',
-    );
+  Future<void> cancelNotifications() async {
+    await notificationScheduler.cancelNotifications();
   }
 
   @override
