@@ -5,6 +5,7 @@ import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debt_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
@@ -215,16 +216,19 @@ class _HomeState extends ConsumerState<Home> {
       var first = entries.first;
       ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
     }
+    ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
   }
 
-  void backupDatabase() async {
+  Future<void> backupDatabase({bool showSnackBar = true}) async {
     await DatabaseHelper.backupDatabase();
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      const SnackBar(
-        content: Text(
-            "Databse backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\""),
-      ),
-    );
+    if (showSnackBar) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Databse backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\""),
+        ),
+      );
+    }
   }
 
   Future<void> restoreDatabase() async {
@@ -235,6 +239,74 @@ class _HomeState extends ConsumerState<Home> {
       ),
     );
     pendingTransaction = getExpensesInDb();
+    ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
+  }
+
+  Future<bool> quitApp() async {
+    bool value = false;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              height: 150,
+              width: MediaQuery.of(context).size.width - 20,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 15),
+                    child: const Text(
+                      "Exit?",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          await backupDatabase(showSnackBar: false);
+                          SystemChannels.platform
+                              .invokeMethod('SystemNavigator.pop');
+                          value = true;
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red),
+                        ),
+                        child: const Text("Yes"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.blueGrey),
+                        ),
+                        child: const Text("No"),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    return value;
   }
 
   @override
@@ -259,142 +331,146 @@ class _HomeState extends ConsumerState<Home> {
 
     List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
 
-    return FutureBuilder(
-      future: pendingTransaction,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return PieCanvas(
-            child: Scaffold(
-              key: _scaffoldKey,
-              extendBody: true,
-              appBar: AppBar(
-                backgroundColor: Theme.of(context).primaryColor,
-                title: Row(
-                  children: [
-                    const Text(
-                      "Akaonty-iT",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    navIndex != 1
-                        ? Text(
-                            currentEntryItem == null ? "" : titles[navIndex],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          )
-                        : Column(
-                            children: [
-                              Text(
-                                // "TAY",
-                                currentEntryItem == null
-                                    ? ""
-                                    : currentEntryItem.month,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                // "TAY",
-                                currentEntryItem == null
-                                    ? ""
-                                    : currentEntryItem.year,
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                            ],
-                          ),
-                    const SizedBox(
-                      width: 15,
-                    ),
-                    SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: PieMenu(
-                        theme: const PieTheme(
-                          pointerColor: Colors.transparent,
-                          buttonTheme: PieButtonTheme(
-                              backgroundColor: Colors.red,
-                              iconColor: Colors.white),
-                        ),
-                        actions: [
-                          PieAction(
-                            buttonTheme: const PieButtonTheme(
-                              backgroundColor: Colors.red,
-                              iconColor: Colors.white,
-                            ),
-                            tooltip: "Clear database",
-                            onSelect: clearDatabase,
-                            child: const Icon(Icons.delete),
-                          ),
-                          PieAction(
-                            buttonTheme: const PieButtonTheme(
-                              backgroundColor: Colors.green,
-                              iconColor: Colors.white,
-                            ),
-                            tooltip: "Backup database",
-                            onSelect: backupDatabase,
-                            child: const Icon(Icons.backup_outlined),
-                          ),
-                          PieAction(
-                            buttonTheme: const PieButtonTheme(
-                              backgroundColor: Colors.purple,
-                              iconColor: Colors.white,
-                            ),
-                            tooltip: "Restore database",
-                            onSelect: restoreDatabase,
-                            child: const Icon(Icons.restart_alt_rounded),
-                          ),
-                        ],
-                        child: const Icon(CustomIcons.cog),
+    return WillPopScope(
+      onWillPop: quitApp,
+      child: FutureBuilder(
+        future: pendingTransaction,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return PieCanvas(
+              child: Scaffold(
+                key: _scaffoldKey,
+                extendBody: true,
+                appBar: AppBar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  title: Row(
+                    children: [
+                      const Text(
+                        "Akaonty-iT",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      const Spacer(),
+                      navIndex != 1
+                          ? Text(
+                              currentEntryItem == null ? "" : titles[navIndex],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          : Column(
+                              children: [
+                                Text(
+                                  // "TAY",
+                                  currentEntryItem == null
+                                      ? ""
+                                      : currentEntryItem.month,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  // "TAY",
+                                  currentEntryItem == null
+                                      ? ""
+                                      : currentEntryItem.year,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ],
+                            ),
+                      const SizedBox(
+                        width: 15,
+                      ),
+                      SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: PieMenu(
+                          theme: const PieTheme(
+                            pointerColor: Colors.transparent,
+                            buttonTheme: PieButtonTheme(
+                                backgroundColor: Colors.red,
+                                iconColor: Colors.white),
+                          ),
+                          actions: [
+                            PieAction(
+                              buttonTheme: const PieButtonTheme(
+                                backgroundColor: Colors.red,
+                                iconColor: Colors.white,
+                              ),
+                              tooltip: "Clear database",
+                              onSelect: clearDatabase,
+                              child: const Icon(Icons.delete),
+                            ),
+                            PieAction(
+                              buttonTheme: const PieButtonTheme(
+                                backgroundColor: Colors.green,
+                                iconColor: Colors.white,
+                              ),
+                              tooltip: "Backup database",
+                              onSelect: backupDatabase,
+                              child: const Icon(Icons.backup_outlined),
+                            ),
+                            PieAction(
+                              buttonTheme: const PieButtonTheme(
+                                backgroundColor: Colors.purple,
+                                iconColor: Colors.white,
+                              ),
+                              tooltip: "Restore database",
+                              onSelect: restoreDatabase,
+                              child: const Icon(Icons.restart_alt_rounded),
+                            ),
+                          ],
+                          child: const Icon(CustomIcons.cog),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                body: content,
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.miniCenterDocked,
+                floatingActionButton: FloatingActionButton(
+                    onPressed: showInput,
+                    backgroundColor: Colors.green.shade500,
+                    child: const Icon(
+                      Icons.add,
+                      size: 25,
+                    )),
+                bottomNavigationBar: AnimatedBottomNavigationBar(
+                    height: 75,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    icons: const <IconData>[
+                      Icons.date_range_rounded,
+                      Icons.attach_money_outlined,
+                      CustomIcons.bank,
+                      Icons.currency_exchange_outlined,
+                    ],
+                    iconSize: 30,
+                    shadow: Shadow(
+                      color: darken(Theme.of(context).primaryColor, 0.5),
+                      blurRadius: 5,
                     ),
-                  ],
+                    activeColor: Colors.white,
+                    activeIndex: navIndex,
+                    gapLocation: GapLocation.center,
+                    leftCornerRadius: 32,
+                    rightCornerRadius: 32,
+                    onTap: (index) {
+                      ref
+                          .read(navBarIndexProvider.notifier)
+                          .setNavBarIndex(index);
+                    }),
+              ),
+            );
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: SpinKitPulsingGrid(
+                  color: Colors.grey,
+                  size: 25,
                 ),
               ),
-              body: content,
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.miniCenterDocked,
-              floatingActionButton: FloatingActionButton(
-                  onPressed: showInput,
-                  backgroundColor: Colors.green.shade500,
-                  child: const Icon(
-                    Icons.add,
-                    size: 25,
-                  )),
-              bottomNavigationBar: AnimatedBottomNavigationBar(
-                  height: 75,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  icons: const <IconData>[
-                    Icons.date_range_rounded,
-                    Icons.attach_money_outlined,
-                    CustomIcons.bank,
-                    Icons.currency_exchange_outlined,
-                  ],
-                  iconSize: 30,
-                  shadow: Shadow(
-                    color: darken(Theme.of(context).primaryColor, 0.5),
-                    blurRadius: 5,
-                  ),
-                  activeColor: Colors.white,
-                  activeIndex: navIndex,
-                  gapLocation: GapLocation.center,
-                  leftCornerRadius: 32,
-                  rightCornerRadius: 32,
-                  onTap: (index) {
-                    ref
-                        .read(navBarIndexProvider.notifier)
-                        .setNavBarIndex(index);
-                  }),
-            ),
-          );
-        } else {
-          return const Scaffold(
-            body: Center(
-              child: SpinKitPulsingGrid(
-                color: Colors.grey,
-                size: 25,
-              ),
-            ),
-          );
-        }
-      },
+            );
+          }
+        },
+      ),
     );
   }
 }
