@@ -1,3 +1,4 @@
+import 'package:currency_textfield/currency_textfield.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:expense/model/bank_entry_model.dart';
 import 'package:expense/model/expense_model.dart';
@@ -14,7 +15,13 @@ class BankEntryInput extends ConsumerStatefulWidget {
 }
 
 class _ExpenseInputState extends ConsumerState<BankEntryInput> {
-  var amountController = TextEditingController();
+  var amountController = CurrencyTextFieldController(
+    currencySymbol: "",
+    initIntValue: 0,
+    thousandSymbol: ".",
+    decimalSymbol: "",
+    numberOfDecimals: 0,
+  );
 
   String selectedDate = dateFormatter.format(DateTime.now());
   BankEntryType selectedType = BankEntryType.deposit;
@@ -22,7 +29,8 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   String selectedDevise = "Fmg";
 
   void addBankEntry() async {
-    var amount = int.tryParse(amountController.text);
+    var value = amountController.text.replaceAll(".", "");
+    var amount = int.tryParse(value);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid amount"),
@@ -51,9 +59,12 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
   }
 
   Future<void> pickDate() async {
+    var currentBankEntry = ref.read(currentBankEntryProvider);
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: currentBankEntry == null
+          ? DateTime.now()
+          : dateFormatter.parse(currentBankEntry.date),
       firstDate: DateTime(1998, 1, 1),
       lastDate: DateTime.now(),
       is24HourMode: true,
@@ -95,6 +106,11 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
         ref.read(currentBankEntryProvider)!.date = selectedDate;
       }
     });
+  }
+
+  void cancelInput() {
+    ref.read(currentBankEntryProvider.notifier).setCurrentBankEntry(null);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -203,7 +219,9 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              selectedDate,
+                              ref.read(currentBankEntryProvider) == null
+                                  ? selectedDate
+                                  : ref.read(currentBankEntryProvider)!.date,
                               style:
                                   const TextStyle(fontWeight: FontWeight.w600),
                             ),
@@ -218,22 +236,28 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                 ),
                 Expanded(
                   child: DropDownMenu(
-                      title: "Type: ",
-                      onChanged: (value) {
-                        setState(() {
-                          selectedType = value == "Deposit"
-                              ? BankEntryType.deposit
-                              : BankEntryType.withdrawal;
-                          if (ref.read(currentBankEntryProvider) != null) {
-                            ref.read(currentBankEntryProvider)!.type =
-                                selectedType;
-                          }
-                        });
-                      },
-                      values: const ["Deposit", "Withdrawal"],
-                      value: selectedType == BankEntryType.deposit
-                          ? "Deposit"
-                          : "Withdrawal"),
+                    title: "Type: ",
+                    onChanged: (value) {
+                      setState(() {
+                        selectedType = value == "Deposit"
+                            ? BankEntryType.deposit
+                            : BankEntryType.withdrawal;
+                        if (ref.read(currentBankEntryProvider) != null) {
+                          ref.read(currentBankEntryProvider)!.type =
+                              selectedType;
+                        }
+                      });
+                    },
+                    values: const ["Deposit", "Withdrawal"],
+                    value: ref.read(currentBankEntryProvider) == null
+                        ? (selectedType == BankEntryType.deposit
+                            ? "Deposit"
+                            : "Withdrawal")
+                        : (ref.read(currentBankEntryProvider)!.type ==
+                                BankEntryType.deposit
+                            ? "Deposit"
+                            : "Withdrawal"),
+                  ),
                 ),
               ],
             ),
@@ -260,7 +284,7 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.red.shade600),
                       ),
-                      onPressed: Navigator.of(context).pop,
+                      onPressed: cancelInput,
                       child: const Text("Cancel")),
                 ),
               ],

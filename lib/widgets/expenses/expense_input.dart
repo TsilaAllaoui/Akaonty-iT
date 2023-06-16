@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:currency_textfield/currency_textfield.dart';
 
 class ExpenseInput extends ConsumerStatefulWidget {
   const ExpenseInput({super.key});
@@ -18,7 +19,13 @@ class ExpenseInput extends ConsumerStatefulWidget {
 
 class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   var titleController = TextEditingController();
-  var amountController = TextEditingController();
+  var amountController = CurrencyTextFieldController(
+    currencySymbol: "",
+    initIntValue: 0,
+    thousandSymbol: ".",
+    decimalSymbol: "",
+    numberOfDecimals: 0,
+  );
   String selectedDate = dateFormatter.format(DateTime.now());
   ExpenseType selectedType = ExpenseType.income;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -36,7 +43,8 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
           fontSize: 16.0);
       return;
     }
-    int? amount = int.tryParse(amountController.text);
+    var value = amountController.text.replaceAll(".", "");
+    int? amount = int.tryParse(value);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid amount"),
@@ -69,14 +77,19 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
           .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
     }
 
+    var currentEntryId = ref.read(currentEntryProvider)!.id!;
+    ref.read(expensesProvider.notifier).setExpenses(currentEntryId);
     Navigator.of(scaffoldKey.currentContext!).pop();
   }
 
   Future<void> pickDate() async {
     DateTime now = DateTime.now();
+    var currentExpense = ref.read(currentExpenseProvider);
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
-      initialDate: now,
+      initialDate: currentExpense == null
+          ? now
+          : dateFormatter.parse(currentExpense.date),
       firstDate: DateTime(now.year, now.month, 1),
       lastDate: now,
       is24HourMode: true,
@@ -119,6 +132,11 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     });
   }
 
+  void cancelInput() {
+    ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
+    Navigator.of(context).pop();
+  }
+
   @override
   void initState() {
     var currentExpense = ref.read(currentExpenseProvider);
@@ -131,6 +149,8 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       amountController.selection = TextSelection.fromPosition(
         TextPosition(offset: amountController.text.length),
       );
+      selectedType = currentExpense.type;
+      selectedDate = currentExpense.date;
     }
     super.initState();
   }
@@ -150,13 +170,14 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         children: [
           Container(
             margin:
-                const EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 10),
+                const EdgeInsets.only(left: 20, top: 50, right: 20, bottom: 10),
             width: MediaQuery.of(context).size.width,
             child: TextField(
               onTapOutside: (PointerDownEvent e) {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               controller: titleController,
+              maxLength: 30,
               decoration: const InputDecoration(
                 counterStyle: TextStyle(color: Colors.blue),
                 label: Text(
@@ -252,7 +273,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              selectedDate,
+                              ref.read(currentExpenseProvider) == null
+                                  ? selectedDate
+                                  : ref.read(currentExpenseProvider)!.date,
                               style:
                                   const TextStyle(fontWeight: FontWeight.w600),
                             ),
@@ -312,7 +335,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.red.shade600),
                       ),
-                      onPressed: Navigator.of(context).pop,
+                      onPressed: cancelInput,
                       child: const Text("Cancel")),
                 ),
               ),

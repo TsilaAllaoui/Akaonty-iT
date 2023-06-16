@@ -42,7 +42,7 @@ class _ExpenseState extends ConsumerState<Expense> {
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         elevation: 5,
         child: Container(
-          height: 75,
+          height: 91,
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.red,
@@ -94,7 +94,7 @@ class _ExpenseState extends ConsumerState<Expense> {
       key: Key(expense.id.toString()),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        height: 90,
+        height: 91,
         child: Card(
             color: expense.type == ExpenseType.income
                 ? Colors.green.shade100
@@ -109,9 +109,9 @@ class _ExpenseState extends ConsumerState<Expense> {
                       const Spacer(),
                       Text(
                         expense.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: expense.title.length > 6 ? 10 : 20,
                         ),
                       ),
                       const Spacer(),

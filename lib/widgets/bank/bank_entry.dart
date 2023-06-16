@@ -144,11 +144,6 @@ class _BankEntryState extends ConsumerState<BankEntry> {
             ),
             tooltip: "Update",
             onSelect: showUpdateInput,
-            // onSelect: () {
-            //   ref
-            //       .read(currentBankEntryProvider.notifier)
-            //       .setCurrentBankentry(bankEntry);
-            // },
             child: const Icon(Icons.edit),
           )
         ],

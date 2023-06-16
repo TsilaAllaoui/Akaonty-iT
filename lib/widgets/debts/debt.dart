@@ -153,10 +153,10 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               title: debt.type == DebtType.other
                   ? Text(
                       debt.name!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                        fontSize: debt.name!.length > 6 ? 10 : 20,
                       ),
                     )
                   : null,

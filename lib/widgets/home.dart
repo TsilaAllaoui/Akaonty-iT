@@ -5,7 +5,6 @@ import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debt_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
@@ -36,9 +35,6 @@ class _HomeState extends ConsumerState<Home> {
   ExpenseItem? expenseToAdd;
   late Future<dynamic> pendingTransaction;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   void createExpense() {
     if (ref.read(entriesProvider).isEmpty) {
@@ -149,16 +145,18 @@ class _HomeState extends ConsumerState<Home> {
   Future<bool> getExpensesInDb() async {
     await DatabaseHelper.createDatabase();
 
-    await DatabaseHelper.fetchExpenses();
-    ref.read(expensesProvider.notifier).setExpenses(-1);
-
     var entries = await DatabaseHelper.fetchEntries();
     if (entries.isEmpty) {
       ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+      ref.read(expensesProvider.notifier).setExpenses(-1);
     } else {
       var first = entries.first;
       ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+      ref
+          .read(expensesProvider.notifier)
+          .setExpenses(ref.read(currentEntryProvider)!.id!);
     }
+
     return true;
   }
 
@@ -231,35 +229,7 @@ class _HomeState extends ConsumerState<Home> {
   void initState() {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     pendingTransaction = getExpensesInDb();
-
-    var initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
     super.initState();
-  }
-
-  Future<void> showNotification() async {
-    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-      'channel_id',
-      'channel_name',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    var platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'Notification Title',
-      'Notification Body',
-      platformChannelSpecifics,
-      payload: 'notification_payload',
-    );
   }
 
   @override

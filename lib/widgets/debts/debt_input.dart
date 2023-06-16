@@ -1,3 +1,4 @@
+import 'package:currency_textfield/currency_textfield.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:expense/model/debt_model.dart';
 import 'package:expense/model/expense_model.dart';
@@ -14,7 +15,13 @@ class DebtInput extends ConsumerStatefulWidget {
 }
 
 class _ExpenseInputState extends ConsumerState<DebtInput> {
-  var amountController = TextEditingController();
+  var amountController = CurrencyTextFieldController(
+    currencySymbol: "",
+    initIntValue: 0,
+    thousandSymbol: ".",
+    decimalSymbol: "",
+    numberOfDecimals: 0,
+  );
   var nameController = TextEditingController();
 
   String selectedDate = dateFormatter.format(DateTime.now());
@@ -23,7 +30,8 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   String selectedDevise = "Fmg";
 
   void addDebt() async {
-    var amount = int.tryParse(amountController.text);
+    var value = amountController.text.replaceAll(".", "");
+    var amount = int.tryParse(value);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid amount"),
@@ -109,6 +117,11 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
     });
   }
 
+  void cancelInput() {
+    ref.read(currentDebtProvider.notifier).setCurrentDebt(null);
+    Navigator.of(context).pop();
+  }
+
   @override
   void initState() {
     var currentDebt = ref.read(currentDebtProvider);
@@ -123,6 +136,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
       amountController.selection = TextSelection.fromPosition(
         TextPosition(offset: amountController.text.length),
       );
+      selectedDate = currentDebt.date;
     }
     super.initState();
   }
@@ -190,6 +204,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                         FocusManager.instance.primaryFocus?.unfocus();
                       },
                       controller: nameController,
+                      maxLength: 30,
                       keyboardType: TextInputType.text,
                       decoration: const InputDecoration(
                         label: Text(
@@ -284,7 +299,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.red.shade600),
                       ),
-                      onPressed: Navigator.of(context).pop,
+                      onPressed: cancelInput,
                       child: const Text("Cancel")),
                 ),
               ],
