@@ -1,16 +1,19 @@
-# expense
+# Akaonty-iT
 
-A new Flutter project.
+Flutter app to manage expense, economy and debts.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Managet expenses by month supporting income and outcome
+- Manage personal economy account with support of deposit and withdrawal
+- Manage personal debts with support of self debts and others debts to self
 
-A few resources to get you started if this is your first Flutter project:
+## How to build
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Clone the repo
+- cd to the project folder and run dart pub get
+- run "flutter run"
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Future plan
+
+- Add online synchronization 
