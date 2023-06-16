@@ -73,11 +73,30 @@ class DatabaseHelper {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
+    Directory("/storage/emulated/0/Android/data/com.allaoui.akaontyit/")
+        .createSync();
     if (await dbFile.exists()) {
       try {
-        await dbFile.copy("/storage/emulated/0/database.db");
+        await dbFile.copy(
+            "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db");
       } catch (e) {
         print("Permission denied to copy db");
+      }
+    }
+    final database = await openDatabase("${appDir.path}/database.db");
+    DatabaseHelper.db = database;
+  }
+
+  static Future<void> restoreDatabaseFromFile() async {
+    await DatabaseHelper.db!.close();
+    var appDir = await getApplicationDocumentsDirectory();
+    File dbFile = File(
+        "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db");
+    if (await dbFile.exists()) {
+      try {
+        await dbFile.copy("${appDir.path}/database.db");
+      } catch (e) {
+        print("Permission denied to read db");
       }
     }
     final database = await openDatabase("${appDir.path}/database.db");

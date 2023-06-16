@@ -28,6 +28,7 @@ dependencies:
   external_path: ^1.0.3
   flutter_spinkit: ^5.2.0
   currency_textfield: ^4.0.0
+  file_picker: ^5.3.2
 
 dev_dependencies:
   flutter_test:

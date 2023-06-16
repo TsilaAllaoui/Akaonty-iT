@@ -409,6 +409,5 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
         ),
       ),
     );
-    ;
   }
 }

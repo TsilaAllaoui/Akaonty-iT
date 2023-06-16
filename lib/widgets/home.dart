@@ -6,6 +6,7 @@ import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debt_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
 import 'package:expense/provider/expenses_provider.dart';
@@ -220,9 +221,21 @@ class _HomeState extends ConsumerState<Home> {
   void backupDatabase() async {
     await DatabaseHelper.backupDatabase();
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-            content:
-                Text("Databse backup at \"/storage/emulated/0/database.db\"")));
+      const SnackBar(
+        content: Text(
+            "Databse backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\""),
+      ),
+    );
+  }
+
+  Future<void> restoreDatabase() async {
+    await DatabaseHelper.restoreDatabaseFromFile();
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      const SnackBar(
+        content: Text("Database restored from file."),
+      ),
+    );
+    pendingTransaction = getExpensesInDb();
   }
 
   @override
@@ -303,6 +316,10 @@ class _HomeState extends ConsumerState<Home> {
                         ),
                         actions: [
                           PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Colors.red,
+                              iconColor: Colors.white,
+                            ),
                             tooltip: "Clear database",
                             onSelect: clearDatabase,
                             child: const Icon(Icons.delete),
@@ -315,6 +332,15 @@ class _HomeState extends ConsumerState<Home> {
                             tooltip: "Backup database",
                             onSelect: backupDatabase,
                             child: const Icon(Icons.backup_outlined),
+                          ),
+                          PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Colors.purple,
+                              iconColor: Colors.white,
+                            ),
+                            tooltip: "Restore database",
+                            onSelect: restoreDatabase,
+                            child: const Icon(Icons.restart_alt_rounded),
                           ),
                         ],
                         child: const Icon(CustomIcons.cog),
