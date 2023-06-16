@@ -89,15 +89,27 @@ class _HomeState extends ConsumerState<Home> {
             .withOpacity(1.0),
         month: splits[1],
         year: splits[2]);
-    await ref.read(entriesProvider.notifier).addEntry(entry);
 
     var entries = await DatabaseHelper.fetchEntries();
     if (entries.isEmpty) {
-      ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
+      await ref.read(entriesProvider.notifier).addEntry(entry);
     } else {
-      var first = entries.first;
-      ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+      for (final currEntry in entries) {
+        if (currEntry.year == entry.year && currEntry.month == entry.month) {
+          Fluttertoast.showToast(
+              msg: "Entry already exits.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.black,
+              textColor: Colors.white,
+              fontSize: 16.0);
+          return;
+        }
+      }
+      await ref.read(entriesProvider.notifier).addEntry(entry);
     }
+    ref.read(currentEntryProvider.notifier).setCurrentEntry(entry);
   }
 
   void createBankEntry() {
