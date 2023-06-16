@@ -5,8 +5,7 @@ import 'package:expense/widgets/bank/bank_entries.dart';
 import 'package:expense/widgets/bank/bank_input.dart';
 import 'package:expense/widgets/debts/debt_input.dart';
 import 'package:expense/widgets/debts/debts.dart';
-import 'package:expense/widgets/notification.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:expense/widgets/notification_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:expense/widgets/expenses/expense_input.dart';
@@ -215,27 +214,11 @@ class _HomeState extends ConsumerState<Home> {
                 Text("Databse backup at \"/storage/emulated/0/database.db\"")));
   }
 
-  Future<void> initializeNotificationScheduler() async {
-    await notificationScheduler.initialize();
-  }
-
-  Future<void> scheduleMonthlyNotification() async {
-    await notificationScheduler.scheduleMonthlyNotification();
-  }
-
   @override
   void initState() {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     pendingTransaction = getExpensesInDb();
-
-    initializeNotificationScheduler();
-    scheduleMonthlyNotification();
-
     super.initState();
-  }
-
-  Future<void> cancelNotifications() async {
-    await notificationScheduler.cancelNotifications();
   }
 
   @override
