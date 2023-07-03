@@ -1,25 +1,25 @@
-# Akaonty-iT
+# 💰 **Akaonty-iT**
 
-Flutter app to manage expense, economy and debts.
+**Flutter app to manage expense, economy and debts.**
 
-## Features
+## ✔️ **Features**
 
-- Managet expenses by month supporting income and outcome
-- Manage personal economy account with support of deposit and withdrawal
-- Manage personal debts with support of self debts and others debts to self
+- [x] Managet expenses by month supporting income and outcome
+- [x] Manage personal economy account with support of deposit and withdrawal
+- [x] Manage personal debts with support of self debts and others debts to self
 
-## How to build
+## 🛠️ **How to build**
 
 - Clone the repo
 - cd to the project folder and run dart pub get
 - run "flutter run"
 
-## Future plan
+## 📝 **Future plan**
 
-- Add online synchronization 
+- [ ] Add online synchronization 
 
 
-## Screenshots
+## 📷 **Screenshots**
 
 <table>
     <tr>
