@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:expense/model/debt_model.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/debts_provider.dart';
-import 'package:expense/widgets/debts/debt_input.dart';
+import 'package:akaontyit/model/debt_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
+import 'package:akaontyit/provider/debts_provider.dart';
+import 'package:akaontyit/widgets/debts/debt_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
@@ -35,9 +35,7 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
     ref.read(currentDebtProvider.notifier).setCurrentDebt(widget.debt);
     showModalBottomSheet(
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
       builder: (context) => const DebtInput(),
     );
@@ -70,9 +68,10 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               const Text(
                 "Delete debt?",
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Colors.white),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -81,7 +80,8 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
                     margin: const EdgeInsets.symmetric(horizontal: 10),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade400),
+                        backgroundColor: Colors.blue.shade400,
+                      ),
                       onPressed: () {
                         completer.complete(true);
                       },
@@ -92,7 +92,8 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
                     margin: const EdgeInsets.symmetric(horizontal: 5),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400),
+                        backgroundColor: Colors.red.shade400,
+                      ),
                       onPressed: () {
                         completer.complete(false);
                       },
@@ -121,7 +122,7 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               backgroundColor: Colors.red,
               iconColor: Colors.white,
             ),
-            tooltip: "Delete",
+            tooltip: Text("Delete"),
             onSelect: () async {
               await ref.read(debtsProvider.notifier).removeDebt(debt);
             },
@@ -132,7 +133,7 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               backgroundColor: Colors.purple,
               iconColor: Colors.white,
             ),
-            tooltip: "Update",
+            tooltip: Text("Update"),
             onSelect: showUpdateInput,
             child: const Icon(Icons.edit),
           ),
@@ -144,24 +145,28 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
             height: 75,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: debt.type == DebtType.self
-                  ? Colors.blue.shade200
-                  : Colors.orange.shade200,
+              color:
+                  debt.type == DebtType.self
+                      ? Colors.blue.shade200
+                      : Colors.orange.shade200,
               borderRadius: BorderRadius.circular(4),
             ),
             child: ListTile(
-              title: debt.type == DebtType.other
-                  ? Text(
-                      debt.name!,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: debt.name!.length > 6 ? 10 : 20,
-                      ),
-                    )
-                  : null,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              title:
+                  debt.type == DebtType.other
+                      ? Text(
+                        debt.name!,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: debt.name!.length > 6 ? 10 : 20,
+                        ),
+                      )
+                      : null,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
               leading: Column(
                 children: [
                   Text(
@@ -187,10 +192,7 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
               trailing: Text(
                 debt.date,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 15,
-                ),
+                style: const TextStyle(color: Colors.black, fontSize: 15),
               ),
             ),
           ),

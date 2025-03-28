@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:expense/model/bank_entry_model.dart';
-import 'package:expense/model/debt_model.dart';
-import 'package:expense/model/entry_model.dart';
+import 'package:akaontyit/model/bank_entry_model.dart';
+import 'package:akaontyit/model/debt_model.dart';
+import 'package:akaontyit/model/entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -73,12 +73,14 @@ class DatabaseHelper {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
-    Directory("/storage/emulated/0/Android/data/com.allaoui.akaontyit/")
-        .createSync();
+    Directory(
+      "/storage/emulated/0/Android/data/com.allaoui.akaontyit/",
+    ).createSync();
     if (await dbFile.exists()) {
       try {
         await dbFile.copy(
-            "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db");
+          "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db",
+        );
       } catch (e) {
         print("Permission denied to copy db");
       }
@@ -91,7 +93,8 @@ class DatabaseHelper {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File(
-        "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db");
+      "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db",
+    );
     if (await dbFile.exists()) {
       try {
         await dbFile.copy("${appDir.path}/database.db");
@@ -150,20 +153,29 @@ class DatabaseHelper {
 
   static Future<void> insertEntry(EntryItem entry) async {
     var db = await getDatabase();
-    await db.insert("entries", entry.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      "entries",
+      entry.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> insertBankEntry(BankEntryItem entry) async {
     var db = await getDatabase();
-    await db.insert("bank_entries", entry.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      "bank_entries",
+      entry.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> insertDebt(DebtItem debt) async {
     var db = await getDatabase();
-    await db.insert("debts", debt.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      "debts",
+      debt.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> deleteExpense(ExpenseItem expense) async {
@@ -189,9 +201,12 @@ class DatabaseHelper {
 
   static Future<void> updateEntry(EntryItem entry, Color newColor) async {
     var db = await getDatabase();
-    await db.update("entries",
-        {"red": newColor.red, "green": newColor.green, "blue": newColor.blue},
-        where: "id = ?", whereArgs: [entry.id]);
+    await db.update(
+      "entries",
+      {"red": newColor.red, "green": newColor.green, "blue": newColor.blue},
+      where: "id = ?",
+      whereArgs: [entry.id],
+    );
   }
 
   static Future<List<ExpenseItem>> fetchExpenses({int entryId = -1}) async {
@@ -200,15 +215,19 @@ class DatabaseHelper {
 
     var res = [];
     if (entryId == -1) {
-      res = await db.query("expenses",
-          orderBy:
-              "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+      res = await db.query(
+        "expenses",
+        orderBy:
+            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+      );
     } else {
-      res = await db.query("expenses",
-          orderBy:
-              "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
-          where: "entry_id = ?",
-          whereArgs: [entryId]);
+      res = await db.query(
+        "expenses",
+        orderBy:
+            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+        where: "entry_id = ?",
+        whereArgs: [entryId],
+      );
     }
 
     for (final expenseMap in res) {
@@ -223,8 +242,12 @@ class DatabaseHelper {
     var db = await getDatabase();
     List<EntryItem> entries = [];
 
-    var years = await db.query("entries",
-        columns: ["year"], distinct: true, orderBy: "year DESC");
+    var years = await db.query(
+      "entries",
+      columns: ["year"],
+      distinct: true,
+      orderBy: "year DESC",
+    );
     for (final year in years) {
       var res = await db.rawQuery('''SELECT * FROM entries 
              WHERE year = ${year["year"]} 
@@ -255,9 +278,11 @@ class DatabaseHelper {
     List<BankEntryItem> bankEntries = [];
     var db = await getDatabase();
 
-    var res = await db.query("bank_entries",
-        orderBy:
-            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+    var res = await db.query(
+      "bank_entries",
+      orderBy:
+          "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+    );
     for (final entry in res) {
       BankEntryItem bankEntry = BankEntryItem.fromMap(entry);
       bankEntries.add(bankEntry);
@@ -269,9 +294,11 @@ class DatabaseHelper {
     List<DebtItem> debts = [];
     var db = await getDatabase();
 
-    var res = await db.query("debts",
-        orderBy:
-            "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC");
+    var res = await db.query(
+      "debts",
+      orderBy:
+          "substr(date, 7, 2) || '-' || substr(date, 4, 2) || '-' || substr(date, 1, 2) || ' ' || substr(date, 10, 5) DESC",
+    );
     for (final entry in res) {
       DebtItem debt = DebtItem.fromMap(entry);
       debts.add(debt);

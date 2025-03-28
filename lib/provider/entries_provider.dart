@@ -1,5 +1,5 @@
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/entry_model.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,4 +48,5 @@ class EntriesNotifier extends StateNotifier<List<EntryItem>> {
 }
 
 final entriesProvider = StateNotifierProvider<EntriesNotifier, List<EntryItem>>(
-    (ref) => EntriesNotifier());
+  (ref) => EntriesNotifier(),
+);

@@ -1,5 +1,5 @@
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/expense_model.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/expense_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,7 +55,8 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
 
 final expensesProvider =
     StateNotifierProvider<ExpensesNotifier, List<ExpenseItem>>(
-        (ref) => ExpensesNotifier());
+      (ref) => ExpensesNotifier(),
+    );
 
 class CurrentExpenseNotifier extends StateNotifier<ExpenseItem?> {
   CurrentExpenseNotifier() : super(null);
@@ -67,4 +68,5 @@ class CurrentExpenseNotifier extends StateNotifier<ExpenseItem?> {
 
 final currentExpenseProvider =
     StateNotifierProvider<CurrentExpenseNotifier, ExpenseItem?>(
-        (ref) => CurrentExpenseNotifier());
+      (ref) => CurrentExpenseNotifier(),
+    );

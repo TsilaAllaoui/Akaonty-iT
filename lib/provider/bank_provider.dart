@@ -1,5 +1,5 @@
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/bank_entry_model.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/bank_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
@@ -57,7 +57,8 @@ class BankEntriesNotifier extends StateNotifier<List<BankEntryItem>> {
 
 final bankEntriesProvider =
     StateNotifierProvider<BankEntriesNotifier, List<BankEntryItem>>(
-        (ref) => BankEntriesNotifier());
+      (ref) => BankEntriesNotifier(),
+    );
 
 class TotalInBankNotifier extends StateNotifier<int> {
   TotalInBankNotifier() : super(0);
@@ -76,7 +77,8 @@ class TotalInBankNotifier extends StateNotifier<int> {
 }
 
 final totalInBankProvider = StateNotifierProvider<TotalInBankNotifier, int>(
-    (ref) => TotalInBankNotifier());
+  (ref) => TotalInBankNotifier(),
+);
 
 final bankScaffoldKeyProvider = Provider((ref) => GlobalKey<ScaffoldState>());
 
@@ -90,4 +92,5 @@ class CurrentBankEntryNotifier extends StateNotifier<BankEntryItem?> {
 
 final currentBankEntryProvider =
     StateNotifierProvider<CurrentBankEntryNotifier, BankEntryItem?>(
-        (ref) => CurrentBankEntryNotifier());
+      (ref) => CurrentBankEntryNotifier(),
+    );

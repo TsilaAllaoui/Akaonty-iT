@@ -1,7 +1,7 @@
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/entry_model.dart';
-import 'package:expense/provider/entries_provider.dart';
-import 'package:expense/widgets/entries/entry.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/entry_model.dart';
+import 'package:akaontyit/provider/entries_provider.dart';
+import 'package:akaontyit/widgets/entries/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -41,10 +41,7 @@ class _EntriesState extends ConsumerState<Entries> {
       return const Center(
         child: Text(
           "No entry found...",
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       );
     }
@@ -60,19 +57,14 @@ class _EntriesState extends ConsumerState<Entries> {
               body: ListView.builder(
                 itemCount: entries.length,
                 itemBuilder: (context, index) {
-                  return Entry(
-                    entry: entries[index],
-                  );
+                  return Entry(entry: entries[index]);
                 },
               ),
             ),
           );
         } else {
           return const Center(
-            child: SpinKitPulsingGrid(
-              color: Colors.grey,
-              size: 25,
-            ),
+            child: SpinKitPulsingGrid(color: Colors.grey, size: 25),
           );
         }
       },

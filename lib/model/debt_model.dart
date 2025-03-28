@@ -1,4 +1,4 @@
-import 'package:expense/model/expense_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
 
 enum DebtType { self, other, selfTotal }
 
@@ -9,12 +9,13 @@ class DebtItem {
   DebtType type = DebtType.self;
   String? name;
 
-  DebtItem(
-      {required this.date,
-      required this.amount,
-      required this.type,
-      this.id,
-      this.name});
+  DebtItem({
+    required this.date,
+    required this.amount,
+    required this.type,
+    this.id,
+    this.name,
+  });
 
   DebtItem.fromMap(Map<String, dynamic> map) {
     switch (map["type"]) {
@@ -59,7 +60,7 @@ class DebtItem {
       "date": date,
       "amount": amount,
       "type": typeString,
-      "name": name
+      "name": name,
     };
   }
 }

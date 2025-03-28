@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/entry_model.dart';
-import 'package:expense/provider/entries_provider.dart';
-import 'package:expense/provider/expenses_provider.dart';
-import 'package:expense/provider/general_settings_provider.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/entry_model.dart';
+import 'package:akaontyit/provider/entries_provider.dart';
+import 'package:akaontyit/provider/expenses_provider.dart';
+import 'package:akaontyit/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,35 +29,40 @@ class _EntryState extends ConsumerState<Entry> {
     var entry = widget.entry;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Pick a color!'),
-        content: SingleChildScrollView(
-          child: BlockPicker(
-            pickerColor: pickedColor,
-            onColorChanged: (color) {
-              setState(() {
-                pickedColor = color;
-              });
-            },
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Pick a color!'),
+            content: SingleChildScrollView(
+              child: BlockPicker(
+                pickerColor: pickedColor,
+                onColorChanged: (color) {
+                  setState(() {
+                    pickedColor = color;
+                  });
+                },
+              ),
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    newColor = pickedColor;
+                  });
+                  ref
+                      .read(entriesProvider.notifier)
+                      .updateEntry(entry, newColor);
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Validate"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  newColor = pickedColor;
-                });
-                ref.read(entriesProvider.notifier).updateEntry(entry, newColor);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Validate")),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel")),
-        ],
-      ),
     );
   }
 
@@ -86,21 +91,23 @@ class _EntryState extends ConsumerState<Entry> {
     Widget content = const Icon(Icons.color_lens);
 
     return PieMenu(
-      onTap: navigateToExpenses,
+      onPressed: navigateToExpenses,
       theme: const PieTheme(
-          delayDuration: Duration(milliseconds: 250),
-          buttonThemeHovered: PieButtonTheme(
-              backgroundColor: Colors.grey, iconColor: Colors.white),
-          pointerColor: Colors.transparent,
-          tooltipStyle: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          )),
+        delayDuration: Duration(milliseconds: 250),
+        buttonThemeHovered: PieButtonTheme(
+          backgroundColor: Colors.grey,
+          iconColor: Colors.white,
+        ),
+        pointerColor: Colors.transparent,
+        tooltipTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+      ),
       actions: [
         PieAction(
           buttonTheme: PieButtonTheme(
-              backgroundColor: Colors.red.shade800, iconColor: Colors.white),
-          tooltip: "Delete",
+            backgroundColor: Colors.red.shade800,
+            iconColor: Colors.white,
+          ),
+          tooltip: Text("Delete"),
           onSelect: () async {
             await ref.read(entriesProvider.notifier).removeEntry(entry);
             var entries = await DatabaseHelper.fetchEntries();
@@ -114,10 +121,10 @@ class _EntryState extends ConsumerState<Entry> {
           child: const Icon(Icons.delete),
         ),
         PieAction(
-          tooltip: "Change color",
+          tooltip: Text("Change color"),
           onSelect: changeEntryColor,
           child: content,
-        )
+        ),
       ],
       child: InkWell(
         child: Container(
@@ -125,9 +132,11 @@ class _EntryState extends ConsumerState<Entry> {
           margin: const EdgeInsets.only(top: 10, left: 10),
           height: 125,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              gradient: LinearGradient(
-                  colors: [entry.color, darken(entry.color, 0.18)])),
+            borderRadius: BorderRadius.circular(5),
+            gradient: LinearGradient(
+              colors: [entry.color, darken(entry.color, 0.18)],
+            ),
+          ),
           child: Row(
             children: [
               Container(

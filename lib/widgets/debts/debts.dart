@@ -1,10 +1,10 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/debt_model.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/debts_provider.dart';
-import 'package:expense/widgets/debts/debt.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/debt_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
+import 'package:akaontyit/provider/debts_provider.dart';
+import 'package:akaontyit/widgets/debts/debt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,95 +44,86 @@ class _DebtsState extends ConsumerState<Debts> {
     }
 
     return Scaffold(
-        key: ref.watch(scaffoldKeyProvider),
-        body: Column(
-          children: [
-            DefaultTabController(
-              length: 2,
-              child: Expanded(
-                child: Column(
-                  children: [
-                    const TabBar(
-                      indicatorColor: Colors.grey,
-                      indicatorWeight: 3,
-                      tabs: [
-                        Tab(
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.red,
-                              ),
-                              Text("Self")
-                            ],
-                          ),
+      key: ref.watch(scaffoldKeyProvider),
+      body: Column(
+        children: [
+          DefaultTabController(
+            length: 2,
+            child: Expanded(
+              child: Column(
+                children: [
+                  const TabBar(
+                    indicatorColor: Colors.grey,
+                    indicatorWeight: 3,
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_drop_down, color: Colors.red),
+                            Text("Self"),
+                          ],
                         ),
-                        Tab(
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_drop_up,
-                                color: Colors.green,
+                      ),
+                      Tab(
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_drop_up, color: Colors.green),
+                            Text("Other"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        Column(
+                          children: [
+                            SumBanner(
+                              color: Colors.blue.shade400,
+                              type: DebtType.self,
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: selfs.length,
+                                itemBuilder: (context, index) {
+                                  return DebtEntry(selfs[index]);
+                                },
                               ),
-                              Text("Other")
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            SumBanner(
+                              color: Colors.orange.shade400,
+                              type: DebtType.other,
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: others.length,
+                                itemBuilder: (context, index) {
+                                  return DebtEntry(others[index]);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    Expanded(
-                      child: TabBarView(
-                        children: [
-                          Column(
-                            children: [
-                              SumBanner(
-                                color: Colors.blue.shade400,
-                                type: DebtType.self,
-                              ),
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: selfs.length,
-                                  itemBuilder: (context, index) {
-                                    return DebtEntry(selfs[index]);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              SumBanner(
-                                color: Colors.orange.shade400,
-                                type: DebtType.other,
-                              ),
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: others.length,
-                                  itemBuilder: (context, index) {
-                                    return DebtEntry(others[index]);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class SumBanner extends ConsumerStatefulWidget {
-  const SumBanner({
-    super.key,
-    required this.color,
-    required this.type,
-  });
+  const SumBanner({super.key, required this.color, required this.type});
 
   final Color color;
   final DebtType type;
@@ -159,18 +150,19 @@ class _SumBannerState extends ConsumerState<SumBanner> {
       return;
     } else {
       var ctx = ref.read(scaffoldKeyProvider).currentContext!;
-      Navigator.of(ctx).push(
-        MaterialPageRoute(
-          builder: (ctx) => const TotalSelfDebtInput(),
-        ),
-      );
+      Navigator.of(
+        ctx,
+      ).push(MaterialPageRoute(builder: (ctx) => const TotalSelfDebtInput()));
     }
   }
 
   Future<void> initDebtsTotal() async {
     var db = await DatabaseHelper.getDatabase();
-    var res =
-        await db.query("debts", where: "type = ?", whereArgs: ["self_total"]);
+    var res = await db.query(
+      "debts",
+      where: "type = ?",
+      whereArgs: ["self_total"],
+    );
     dynamic selfTotal = 0;
     if (res.isNotEmpty) {
       var first = res.first;
@@ -200,17 +192,19 @@ class _SumBannerState extends ConsumerState<SumBanner> {
 
   @override
   Widget build(BuildContext context) {
-    int sum = widget.type == DebtType.self
-        ? ref.watch(totalDebtsProvider)[0] - totalDebtsOftype(widget.type)
-        : totalDebtsOftype(widget.type);
+    int sum =
+        widget.type == DebtType.self
+            ? ref.watch(totalDebtsProvider)[0] - totalDebtsOftype(widget.type)
+            : totalDebtsOftype(widget.type);
 
-    Widget content = widget.type == DebtType.self
-        ? IconButton(
-            onPressed: editTotal,
-            icon: const Icon(Icons.edit_outlined),
-            color: Colors.white,
-          )
-        : const Text("");
+    Widget content =
+        widget.type == DebtType.self
+            ? IconButton(
+              onPressed: editTotal,
+              icon: const Icon(Icons.edit_outlined),
+              color: Colors.white,
+            )
+            : const Text("");
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -228,20 +222,13 @@ class _SumBannerState extends ConsumerState<SumBanner> {
             widget.type == DebtType.self
                 ? "Total self debt:"
                 : "Total other debt to self:",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          const SizedBox(
-            height: 10,
-          ),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(
-                width: 50,
-              ),
+              const SizedBox(width: 50),
               Column(
                 children: [
                   Row(
@@ -254,12 +241,7 @@ class _SumBannerState extends ConsumerState<SumBanner> {
                           fontSize: 25,
                         ),
                       ),
-                      const Text(
-                        " Fmg",
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
+                      const Text(" Fmg", style: TextStyle(fontSize: 15)),
                     ],
                   ),
                   Row(
@@ -268,25 +250,21 @@ class _SumBannerState extends ConsumerState<SumBanner> {
                       Text(
                         numberFormatter.format(sum / 5),
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: Colors.black54),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.black54,
+                        ),
                       ),
                       const Text(
                         " Ar",
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.black54,
-                        ),
-                      )
+                        style: TextStyle(fontSize: 10, color: Colors.black54),
+                      ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(
-                width: 25,
-              ),
-              content
+              const SizedBox(width: 25),
+              content,
             ],
           ),
         ],
@@ -313,8 +291,9 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
   String selectedDevise = "Fmg";
 
   void updateTotal() async {
-    var value =
-        totalAmountcontroller.text.replaceAll(".", "").replaceAll(" ", "");
+    var value = totalAmountcontroller.text
+        .replaceAll(".", "")
+        .replaceAll(" ", "");
     int amount =
         selectedDevise == "Fmg" ? int.parse(value) : int.parse(value) * 5;
     ref.read(totalDebtsProvider.notifier).setSelfDebt(amount);
@@ -322,9 +301,7 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
     var db = await DatabaseHelper.getDatabase();
     await db.update(
       "debts",
-      {
-        "amount": amount,
-      },
+      {"amount": amount},
       where: "type = ?",
       whereArgs: ["self_total"],
     );
@@ -359,9 +336,7 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
                     onEditingComplete: updateTotal,
                   ),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: DropDownMenu(
                     onChanged: (value) {
@@ -375,9 +350,7 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
                 ),
               ],
             ),
-            const SizedBox(
-              height: 30,
-            ),
+            const SizedBox(height: 30),
             SizedBox(
               height: 75,
               child: Row(
@@ -386,25 +359,23 @@ class _TotalSelfDebtInputState extends ConsumerState<TotalSelfDebtInput> {
                   ElevatedButton(
                     onPressed: updateTotal,
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.green),
+                      backgroundColor: WidgetStateProperty.all(Colors.green),
                     ),
                     child: const Text("Validate"),
                   ),
-                  const SizedBox(
-                    width: 20,
-                  ),
+                  const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      backgroundColor: WidgetStateProperty.all(Colors.red),
                     ),
                     child: const Text("Cancel"),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

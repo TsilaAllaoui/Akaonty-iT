@@ -1,4 +1,4 @@
-import 'package:expense/model/entry_model.dart';
+import 'package:akaontyit/model/entry_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NavBarIndexNotifier extends StateNotifier<int> {
@@ -10,7 +10,8 @@ class NavBarIndexNotifier extends StateNotifier<int> {
 }
 
 final navBarIndexProvider = StateNotifierProvider<NavBarIndexNotifier, int>(
-    (ref) => NavBarIndexNotifier());
+  (ref) => NavBarIndexNotifier(),
+);
 
 class CurrentEntryNotifier extends StateNotifier<EntryItem?> {
   CurrentEntryNotifier() : super(null);
@@ -29,4 +30,5 @@ class CurrentEntryNotifier extends StateNotifier<EntryItem?> {
 
 final currentEntryProvider =
     StateNotifierProvider<CurrentEntryNotifier, EntryItem?>(
-        (ref) => CurrentEntryNotifier());
+      (ref) => CurrentEntryNotifier(),
+    );

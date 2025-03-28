@@ -1,8 +1,8 @@
-import 'package:expense/provider/expenses_provider.dart';
-import 'package:expense/widgets/expenses/expense_input.dart';
+import 'package:akaontyit/provider/expenses_provider.dart';
+import 'package:akaontyit/widgets/expenses/expense_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:expense/widgets/expenses/expense.dart';
-import 'package:expense/model/expense_model.dart';
+import 'package:akaontyit/widgets/expenses/expense.dart';
+import 'package:akaontyit/model/expense_model.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_menu/pie_menu.dart';
 
@@ -25,10 +25,7 @@ class _ExpensesState extends ConsumerState<Expenses> {
       return const Center(
         child: Text(
           "No expense found...",
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       );
     } else {
@@ -59,11 +56,7 @@ class _ExpensesState extends ConsumerState<Expenses> {
               icon: Icons.arrow_drop_down,
               title: "Outcome",
             ),
-            Tab(
-              color: Colors.blue,
-              icon: Icons.numbers,
-              title: "Summary",
-            ),
+            Tab(color: Colors.blue, icon: Icons.numbers, title: "Summary"),
           ],
         ),
         body: TabBarView(
@@ -104,10 +97,10 @@ class _ExpensesState extends ConsumerState<Expenses> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -116,11 +109,12 @@ class _ExpensesState extends ConsumerState<Expenses> {
 }
 
 class Tab extends StatefulWidget {
-  const Tab(
-      {super.key,
-      required this.color,
-      required this.icon,
-      required this.title});
+  const Tab({
+    super.key,
+    required this.color,
+    required this.icon,
+    required this.title,
+  });
 
   final Color color;
   final IconData icon;
@@ -137,21 +131,19 @@ class _TabState extends State<Tab> {
       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
       height: 50,
       child: Row(
-        children: [
-          Icon(
-            widget.icon,
-            color: widget.color,
-          ),
-          Text(widget.title),
-        ],
+        children: [Icon(widget.icon, color: widget.color), Text(widget.title)],
       ),
     );
   }
 }
 
 class ExpenseList extends ConsumerStatefulWidget {
-  const ExpenseList(
-      {super.key, required this.total, required this.list, required this.type});
+  const ExpenseList({
+    super.key,
+    required this.total,
+    required this.list,
+    required this.type,
+  });
 
   final int total;
   final List<ExpenseItem> list;
@@ -168,9 +160,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
         .setCurrentExpense(widget.list[index]);
     showModalBottomSheet(
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
       builder: (context) => const ExpenseInput(),
     );
@@ -193,10 +183,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                   margin: const EdgeInsets.only(top: 5),
                   child: const Text(
                     "Total",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 Expanded(
@@ -205,20 +192,24 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                       Text(
                         "${numberFormatter.format(widget.total)} Fmg",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: widget.type == ExpenseType.income
-                                ? Colors.green
-                                : Colors.red),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color:
+                              widget.type == ExpenseType.income
+                                  ? Colors.green
+                                  : Colors.red,
+                        ),
                       ),
                       Text(
                         "${numberFormatter.format(widget.total / 5)} Ar",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: widget.type == ExpenseType.income
-                                ? Colors.green.shade300
-                                : Colors.red.shade300),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color:
+                              widget.type == ExpenseType.income
+                                  ? Colors.green.shade300
+                                  : Colors.red.shade300,
+                        ),
                       ),
                     ],
                   ),
@@ -239,7 +230,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                       backgroundColor: Colors.red,
                       iconColor: Colors.white,
                     ),
-                    tooltip: "Delete",
+                    tooltip: Text("Delete"),
                     onSelect: () async {
                       await ref
                           .read(expensesProvider.notifier)
@@ -252,14 +243,12 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                       backgroundColor: Colors.orange,
                       iconColor: Colors.white,
                     ),
-                    tooltip: "Update",
+                    tooltip: Text("Update"),
                     onSelect: () => showUpdateInput(index),
                     child: const Icon(Icons.edit),
                   ),
                 ],
-                child: Expense(
-                  expense: widget.list[index],
-                ),
+                child: Expense(expense: widget.list[index]),
               );
             },
           ),

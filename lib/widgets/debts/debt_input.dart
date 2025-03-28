@@ -1,8 +1,8 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
-import 'package:expense/model/debt_model.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/debts_provider.dart';
+import 'package:akaontyit/model/debt_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
+import 'package:akaontyit/provider/debts_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
@@ -33,21 +33,25 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
     var value = amountController.text.replaceAll(".", "");
     var amount = int.tryParse(value);
     if (amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Invalid amount"),
-        dismissDirection: DismissDirection.down,
-        duration: Duration(seconds: 2),
-        elevation: 5,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid amount"),
+          dismissDirection: DismissDirection.down,
+          duration: Duration(seconds: 2),
+          elevation: 5,
+        ),
+      );
       return;
     }
     if (selectedType == DebtType.other && nameController.text == "") {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Invalid name"),
-        dismissDirection: DismissDirection.down,
-        duration: Duration(seconds: 2),
-        elevation: 5,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid name"),
+          dismissDirection: DismissDirection.down,
+          duration: Duration(seconds: 2),
+          elevation: 5,
+        ),
+      );
       return;
     }
     DebtItem debt = DebtItem(
@@ -84,18 +88,10 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
       minutesInterval: 1,
       secondsInterval: 1,
       borderRadius: const BorderRadius.all(Radius.circular(16)),
-      constraints: const BoxConstraints(
-        maxWidth: 350,
-        maxHeight: 650,
-      ),
+      constraints: const BoxConstraints(maxWidth: 350, maxHeight: 650),
       transitionBuilder: (context, anim1, anim2, child) {
         return FadeTransition(
-          opacity: anim1.drive(
-            Tween(
-              begin: 0,
-              end: 1,
-            ),
-          ),
+          opacity: anim1.drive(Tween(begin: 0, end: 1)),
           child: child,
         );
       },
@@ -162,8 +158,10 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                   flex: 3,
                   child: Container(
                     height: 75,
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 0,
+                    ),
                     child: TextField(
                       onTapOutside: (PointerDownEvent e) {
                         FocusManager.instance.primaryFocus?.unfocus();
@@ -174,7 +172,9 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                         label: Text(
                           "Amount",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -196,28 +196,30 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
             selectedType == DebtType.self
                 ? const Text("")
                 : Container(
-                    height: 75,
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    child: TextField(
-                      onTapOutside: (PointerDownEvent e) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      controller: nameController,
-                      maxLength: 30,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        label: Text(
-                          "Name",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                  height: 75,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 0,
+                  ),
+                  child: TextField(
+                    onTapOutside: (PointerDownEvent e) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    controller: nameController,
+                    maxLength: 30,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
+                      label: Text(
+                        "Name",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
-            const SizedBox(
-              height: 20,
-            ),
+                ),
+            const SizedBox(height: 20),
             Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
@@ -229,9 +231,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                       margin: const EdgeInsets.only(left: 10, bottom: 15),
                       child: const Text(
                         "Date:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     Row(
@@ -250,60 +250,60 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
                             margin: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
                               selectedDate,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
+                const SizedBox(width: 20),
                 Expanded(
                   child: DropDownMenu(
-                      title: "Type: ",
-                      onChanged: (value) {
-                        setState(() {
-                          selectedType =
-                              value == "Self" ? DebtType.self : DebtType.other;
-                        });
-                      },
-                      values: const ["Self", "Other"],
-                      value: selectedType == DebtType.self ? "Self" : "Other"),
+                    title: "Type: ",
+                    onChanged: (value) {
+                      setState(() {
+                        selectedType =
+                            value == "Self" ? DebtType.self : DebtType.other;
+                      });
+                    },
+                    values: const ["Self", "Other"],
+                    value: selectedType == DebtType.self ? "Self" : "Other",
+                  ),
                 ),
               ],
             ),
-            const SizedBox(
-              height: 25,
-            ),
+            const SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 5),
                   child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.green),
-                      ),
-                      onPressed: addDebt,
-                      child: const Text("Save")),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.green),
+                    ),
+                    onPressed: addDebt,
+                    child: const Text("Save"),
+                  ),
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.red.shade600),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.red.shade600,
                       ),
-                      onPressed: cancelInput,
-                      child: const Text("Cancel")),
+                    ),
+                    onPressed: cancelInput,
+                    child: const Text("Cancel"),
+                  ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

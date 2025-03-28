@@ -1,5 +1,5 @@
-import 'package:expense/helpers/database_helper.dart';
-import 'package:expense/model/debt_model.dart';
+import 'package:akaontyit/helpers/database_helper.dart';
+import 'package:akaontyit/model/debt_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,7 +55,8 @@ class DebtsNotifier extends StateNotifier<List<DebtItem>> {
 }
 
 final debtsProvider = StateNotifierProvider<DebtsNotifier, List<DebtItem>>(
-    (ref) => DebtsNotifier());
+  (ref) => DebtsNotifier(),
+);
 
 class TotalSelfDebtsNotifier extends StateNotifier<List<int>> {
   TotalSelfDebtsNotifier() : super([0, 0]);
@@ -87,7 +88,8 @@ class TotalSelfDebtsNotifier extends StateNotifier<List<int>> {
 
 final totalDebtsProvider =
     StateNotifierProvider<TotalSelfDebtsNotifier, List<int>>(
-        (ref) => TotalSelfDebtsNotifier());
+      (ref) => TotalSelfDebtsNotifier(),
+    );
 
 class CurrentDebtNotifier extends StateNotifier<DebtItem?> {
   CurrentDebtNotifier() : super(null);
@@ -99,4 +101,5 @@ class CurrentDebtNotifier extends StateNotifier<DebtItem?> {
 
 final currentDebtProvider =
     StateNotifierProvider<CurrentDebtNotifier, DebtItem?>(
-        (ref) => CurrentDebtNotifier());
+      (ref) => CurrentDebtNotifier(),
+    );

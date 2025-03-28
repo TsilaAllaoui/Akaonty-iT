@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:expense/provider/expenses_provider.dart';
+import 'package:akaontyit/provider/expenses_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:expense/model/expense_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
 import 'package:flutter/material.dart';
 
 class Expense extends ConsumerStatefulWidget {
@@ -55,9 +55,10 @@ class _ExpenseState extends ConsumerState<Expense> {
                 const Text(
                   "Delete expense?",
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.white),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +67,8 @@ class _ExpenseState extends ConsumerState<Expense> {
                       margin: const EdgeInsets.symmetric(horizontal: 10),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade400),
+                          backgroundColor: Colors.blue.shade400,
+                        ),
                         onPressed: () {
                           completer.complete(true);
                         },
@@ -77,7 +79,8 @@ class _ExpenseState extends ConsumerState<Expense> {
                       margin: const EdgeInsets.symmetric(horizontal: 5),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade400),
+                          backgroundColor: Colors.red.shade400,
+                        ),
                         onPressed: () {
                           completer.complete(false);
                         },
@@ -96,66 +99,58 @@ class _ExpenseState extends ConsumerState<Expense> {
         margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         height: 91,
         child: Card(
-            color: expense.type == ExpenseType.income
-                ? Colors.green.shade100
-                : Colors.red.shade100,
-            elevation: 5,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      const Spacer(),
-                      Text(
-                        expense.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: expense.title.length > 6 ? 10 : 20,
+          color:
+              expense.type == ExpenseType.income
+                  ? Colors.green.shade100
+                  : Colors.red.shade100,
+          elevation: 5,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Spacer(),
+                    Text(
+                      expense.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: expense.title.length > 6 ? 10 : 20,
+                      ),
+                    ),
+                    const Spacer(),
+                    expense.type == ExpenseType.income
+                        ? const Icon(Icons.arrow_drop_up, color: Colors.green)
+                        : const Icon(Icons.arrow_drop_down, color: Colors.red),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          "${numberFormatter.format(expense.amount)} Fmg",
+                          style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
-                      ),
-                      const Spacer(),
-                      expense.type == ExpenseType.income
-                          ? const Icon(
-                              Icons.arrow_drop_up,
-                              color: Colors.green,
-                            )
-                          : const Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.red,
-                            )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            "${numberFormatter.format(expense.amount)} Fmg",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                            ),
+                        Text(
+                          "${numberFormatter.format(expense.amount / 5)} Ar",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
                           ),
-                          Text(
-                            "${numberFormatter.format(expense.amount / 5)} Ar",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(expense.date.toString()),
-                    ],
-                  ),
-                ],
-              ),
-            )),
+                        ),
+                      ],
+                    ),
+                    Text(expense.date.toString()),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

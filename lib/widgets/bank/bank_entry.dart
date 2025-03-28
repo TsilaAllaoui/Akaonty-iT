@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:expense/model/bank_entry_model.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/bank_provider.dart';
-import 'package:expense/widgets/bank/bank_input.dart';
+import 'package:akaontyit/model/bank_entry_model.dart';
+import 'package:akaontyit/model/expense_model.dart';
+import 'package:akaontyit/provider/bank_provider.dart';
+import 'package:akaontyit/widgets/bank/bank_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
@@ -37,9 +37,7 @@ class _BankEntryState extends ConsumerState<BankEntry> {
         .setCurrentBankEntry(widget.bankEntry);
     showModalBottomSheet(
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
       builder: (context) => const BankEntryInput(),
     );
@@ -72,9 +70,10 @@ class _BankEntryState extends ConsumerState<BankEntry> {
               const Text(
                 "Delete entry?",
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Colors.white),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +82,8 @@ class _BankEntryState extends ConsumerState<BankEntry> {
                     margin: const EdgeInsets.symmetric(horizontal: 10),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade400),
+                        backgroundColor: Colors.blue.shade400,
+                      ),
                       onPressed: () {
                         completer.complete(true);
                       },
@@ -94,7 +94,8 @@ class _BankEntryState extends ConsumerState<BankEntry> {
                     margin: const EdgeInsets.symmetric(horizontal: 5),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400),
+                        backgroundColor: Colors.red.shade400,
+                      ),
                       onPressed: () {
                         completer.complete(false);
                       },
@@ -111,12 +112,9 @@ class _BankEntryState extends ConsumerState<BankEntry> {
       onDismissed: (direction) async {
         completer = Completer<bool>();
         await ref.read(bankEntriesProvider.notifier).removeBankEntry(bankEntry);
-        ScaffoldMessenger.of(ref.read(bankScaffoldKeyProvider).currentContext!)
-            .showSnackBar(
-          const SnackBar(
-            content: Text('Entry deleted'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          ref.read(bankScaffoldKeyProvider).currentContext!,
+        ).showSnackBar(const SnackBar(content: Text('Entry deleted')));
       },
       child: PieMenu(
         theme: const PieTheme(
@@ -129,7 +127,7 @@ class _BankEntryState extends ConsumerState<BankEntry> {
               backgroundColor: Colors.red,
               iconColor: Colors.white,
             ),
-            tooltip: "Delete",
+            tooltip: Text("Delete"),
             onSelect: () async {
               await ref
                   .read(bankEntriesProvider.notifier)
@@ -142,10 +140,10 @@ class _BankEntryState extends ConsumerState<BankEntry> {
               backgroundColor: Colors.orange,
               iconColor: Colors.white,
             ),
-            tooltip: "Update",
+            tooltip: Text("Update"),
             onSelect: showUpdateInput,
             child: const Icon(Icons.edit),
-          )
+          ),
         ],
         child: Card(
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -154,14 +152,17 @@ class _BankEntryState extends ConsumerState<BankEntry> {
             height: 75,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: bankEntry.type == BankEntryType.deposit
-                  ? Colors.green.shade300
-                  : Colors.red.shade300,
+              color:
+                  bankEntry.type == BankEntryType.deposit
+                      ? Colors.green.shade300
+                      : Colors.red.shade300,
               borderRadius: BorderRadius.circular(4),
             ),
             child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
               leading: Column(
                 children: [
                   Text(
@@ -187,10 +188,7 @@ class _BankEntryState extends ConsumerState<BankEntry> {
               trailing: Text(
                 bankEntry.date,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 15),
               ),
             ),
           ),

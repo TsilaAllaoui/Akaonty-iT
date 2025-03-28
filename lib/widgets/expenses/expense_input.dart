@@ -1,7 +1,7 @@
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
-import 'package:expense/model/expense_model.dart';
-import 'package:expense/provider/expenses_provider.dart';
-import 'package:expense/provider/general_settings_provider.dart';
+import 'package:akaontyit/model/expense_model.dart';
+import 'package:akaontyit/provider/expenses_provider.dart';
+import 'package:akaontyit/provider/general_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -34,42 +34,45 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   void addExpense() async {
     if (ref.watch(currentEntryProvider) == null) {
       Fluttertoast.showToast(
-          msg: "No entry found. Add at least one to add expanse.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0);
+        msg: "No entry found. Add at least one to add expanse.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
       return;
     }
     var value = amountController.text.replaceAll(".", "");
     int? amount = int.tryParse(value);
     if (amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Invalid amount"),
-        dismissDirection: DismissDirection.down,
-        duration: Duration(seconds: 2),
-        elevation: 5,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid amount"),
+          dismissDirection: DismissDirection.down,
+          duration: Duration(seconds: 2),
+          elevation: 5,
+        ),
+      );
       return;
     }
     ExpenseItem expense = ExpenseItem(
-        title: titleController.text,
-        amount: selectedDevise == "Fmg" ? amount : amount * 5,
-        date: selectedDate,
-        entryId: ref.read(currentEntryProvider)!.id!,
-        type: selectedType);
+      title: titleController.text,
+      amount: selectedDevise == "Fmg" ? amount : amount * 5,
+      date: selectedDate,
+      entryId: ref.read(currentEntryProvider)!.id!,
+      type: selectedType,
+    );
     var currentExpense = ref.watch(currentExpenseProvider);
 
     if (currentExpense != null) {
       var values = expense.toMap();
 
       values["id"] = currentExpense.id;
-      await ref.read(expensesProvider.notifier).updateExpense(
-            currentExpense.id!,
-            values,
-          );
+      await ref
+          .read(expensesProvider.notifier)
+          .updateExpense(currentExpense.id!, values);
       ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
     } else {
       await ref
@@ -87,9 +90,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     var currentExpense = ref.read(currentExpenseProvider);
     DateTime? pick = await showOmniDateTimePicker(
       context: context,
-      initialDate: currentExpense == null
-          ? now
-          : dateFormatter.parse(currentExpense.date),
+      initialDate:
+          currentExpense == null
+              ? now
+              : dateFormatter.parse(currentExpense.date),
       firstDate: DateTime(now.year, now.month, 1),
       lastDate: now,
       is24HourMode: true,
@@ -97,18 +101,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       minutesInterval: 1,
       secondsInterval: 1,
       borderRadius: const BorderRadius.all(Radius.circular(16)),
-      constraints: const BoxConstraints(
-        maxWidth: 350,
-        maxHeight: 650,
-      ),
+      constraints: const BoxConstraints(maxWidth: 350, maxHeight: 650),
       transitionBuilder: (context, anim1, anim2, child) {
         return FadeTransition(
-          opacity: anim1.drive(
-            Tween(
-              begin: 0,
-              end: 1,
-            ),
-          ),
+          opacity: anim1.drive(Tween(begin: 0, end: 1)),
           child: child,
         );
       },
@@ -169,8 +165,12 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            margin:
-                const EdgeInsets.only(left: 20, top: 50, right: 20, bottom: 10),
+            margin: const EdgeInsets.only(
+              left: 20,
+              top: 50,
+              right: 20,
+              bottom: 10,
+            ),
             width: MediaQuery.of(context).size.width,
             child: TextField(
               onTapOutside: (PointerDownEvent e) {
@@ -182,23 +182,22 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                 counterStyle: TextStyle(color: Colors.blue),
                 label: Text(
                   "Title",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.only(
-                      left: 20, top: 20, right: 20, bottom: 10),
+                    left: 20,
+                    top: 20,
+                    right: 20,
+                    bottom: 10,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -215,7 +214,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                               label: Text(
                                 "Amount",
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -238,9 +239,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
               ),
             ],
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -253,9 +252,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       margin: const EdgeInsets.only(left: 10, bottom: 15),
                       child: const Text(
                         "Date:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     Row(
@@ -276,27 +273,27 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                               ref.read(currentExpenseProvider) == null
                                   ? selectedDate
                                   : ref.read(currentExpenseProvider)!.date,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(
-                width: 20,
-              ),
+              const SizedBox(width: 20),
               Expanded(
                 child: DropDownMenu(
                   title: "Type: ",
                   onChanged: (value) {
                     setState(() {
-                      selectedType = value == "Income"
-                          ? ExpenseType.income
-                          : ExpenseType.outcome;
+                      selectedType =
+                          value == "Income"
+                              ? ExpenseType.income
+                              : ExpenseType.outcome;
                       if (ref.read(currentExpenseProvider) != null) {
                         ref.read(currentExpenseProvider)!.type = selectedType;
                       }
@@ -309,9 +306,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
               ),
             ],
           ),
-          const SizedBox(
-            height: 25,
-          ),
+          const SizedBox(height: 25),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -319,28 +314,30 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 5),
                   child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.green),
-                      ),
-                      onPressed: addExpense,
-                      child: const Text("Save")),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.green),
+                    ),
+                    onPressed: addExpense,
+                    child: const Text("Save"),
+                  ),
                 ),
               ),
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.red.shade600),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.red.shade600,
                       ),
-                      onPressed: cancelInput,
-                      child: const Text("Cancel")),
+                    ),
+                    onPressed: cancelInput,
+                    child: const Text("Cancel"),
+                  ),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
