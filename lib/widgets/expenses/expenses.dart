@@ -1,5 +1,6 @@
 import 'package:akaontyit/provider/expenses_provider.dart';
 import 'package:akaontyit/widgets/expenses/expense_input.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:akaontyit/widgets/expenses/expense.dart';
 import 'package:akaontyit/model/expense_model.dart';
@@ -154,11 +155,11 @@ class ExpenseList extends ConsumerStatefulWidget {
 }
 
 class _ExpenseListState extends ConsumerState<ExpenseList> {
-  void showUpdateInput(int index) {
+  Future<void> showUpdateInput(int index) async {
     ref
         .read(currentExpenseProvider.notifier)
         .setCurrentExpense(widget.list[index]);
-    showModalBottomSheet(
+    await showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
@@ -168,9 +169,11 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
 
   List<ExpenseItem> _filteredItems = [];
 
-  bool _isSearching = true;
+  bool _isSearching = false;
 
   final FocusNode _focusNode = FocusNode();
+
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -179,7 +182,22 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
     _isSearching = false;
   }
 
+  @override
+  void didUpdateWidget(covariant ExpenseList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.list != widget.list) {
+      if (_controller.text.isNotEmpty) {
+        _filterSearchResults(_controller.text);
+      } else {
+        setState(() {
+          _filteredItems = widget.list;
+        });
+      }
+    }
+  }
+
   void _filterSearchResults(String query) {
+    _controller.text = query;
     List<ExpenseItem> filteredList =
         widget.list
             .where(
@@ -192,6 +210,13 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
     });
   }
 
+  Future<void> deleteExpense(expense) async {
+    ExpenseItem expenseItem = widget.list.firstWhere(
+      (expenseItem) => expenseItem.id == expense.id,
+    );
+    await ref.read(expensesProvider.notifier).removeExpense(expenseItem);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -202,6 +227,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
               ? Container(
                 margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: TextField(
+                  controller: _controller,
                   focusNode: _focusNode,
                   decoration: const InputDecoration(
                     hintText: 'Search...',
@@ -215,6 +241,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                         _isSearching = false; // Hide search UI if needed
                       }),
                   onChanged: (String s) => {_filterSearchResults(s)},
+                  onTap: () => {},
                 ),
               )
               : SizedBox(),
@@ -302,11 +329,24 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                         iconColor: Colors.white,
                       ),
                       tooltip: Text("Delete"),
-                      onSelect: () async {
-                        await ref
-                            .read(expensesProvider.notifier)
-                            .removeExpense(_filteredItems[index]);
-                      },
+                      onSelect:
+                          () =>
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.warning,
+                                animType: AnimType.bottomSlide,
+                                title: "Delete entry?",
+                                desc: "This is irreversible!",
+                                btnOkOnPress: () async {
+                                  await deleteExpense(_filteredItems[index]);
+                                  setState(() {
+                                    _filteredItems = ref.read(expensesProvider);
+                                  });
+                                },
+                                btnCancelOnPress: () => {},
+                                btnCancelText: "No",
+                                btnOkText: "Yes",
+                              ).show(),
                       child: const Icon(Icons.delete),
                     ),
                     PieAction(
@@ -315,7 +355,16 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                         iconColor: Colors.white,
                       ),
                       tooltip: Text("Update"),
-                      onSelect: () => showUpdateInput(index),
+                      onSelect: () async {
+                        int expenseIndex = widget.list.indexWhere(
+                          (expenseItem) =>
+                              expenseItem.id == _filteredItems[index].id,
+                        );
+                        await showUpdateInput(expenseIndex);
+                        setState(() {
+                          _filteredItems = ref.read(expensesProvider);
+                        });
+                      },
                       child: const Icon(Icons.edit),
                     ),
                   ],

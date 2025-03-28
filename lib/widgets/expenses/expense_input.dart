@@ -31,7 +31,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedDevise = "Fmg";
 
-  void addExpense() async {
+  Future<void> addExpense() async {
     if (ref.watch(currentEntryProvider) == null) {
       Fluttertoast.showToast(
         msg: "No entry found. Add at least one to add expanse.",
@@ -317,7 +317,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(Colors.green),
                     ),
-                    onPressed: addExpense,
+                    onPressed: () async => await addExpense(),
                     child: const Text("Save"),
                   ),
                 ),
