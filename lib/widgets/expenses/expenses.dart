@@ -220,7 +220,6 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
       child: Column(
         children: [
           _isSearching
@@ -236,10 +235,13 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                       borderSide: BorderSide(color: Colors.black, width: 5),
                     ),
                   ),
-                  onTapOutside:
-                      (PointerDownEvent p) => setState(() {
-                        _isSearching = false; // Hide search UI if needed
-                      }),
+                  onTapOutside: (PointerDownEvent p) {
+                    if (_controller.text.isEmpty) {
+                      setState(() {
+                        _isSearching = false;
+                      });
+                    }
+                  },
                   onChanged: (String s) => {_filterSearchResults(s)},
                   onTap: () => {},
                 ),
