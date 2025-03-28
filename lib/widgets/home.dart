@@ -227,7 +227,7 @@ class _HomeState extends ConsumerState<Home> {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         const SnackBar(
           content: Text(
-            "Databse backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\"",
+            "Database backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\"",
           ),
         ),
       );

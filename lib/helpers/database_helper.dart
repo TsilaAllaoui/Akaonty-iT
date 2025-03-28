@@ -10,6 +10,39 @@ import 'package:sqflite/sqflite.dart';
 
 import '../model/expense_model.dart';
 
+import 'package:permission_handler/permission_handler.dart';
+
+bool _isRequestingPermission = false; // Flag to track ongoing requests
+
+Future<void> requestStoragePermission() async {
+  if (_isRequestingPermission) return; // Prevent multiple requests
+  _isRequestingPermission = true; // Set flag to true
+
+  try {
+    // Request storage permission
+    await Permission.storage.request();
+
+    // Android 13+ media permissions
+    if (await Permission.photos.isDenied ||
+        await Permission.videos.isDenied ||
+        await Permission.audio.isDenied) {
+      await [Permission.photos, Permission.videos, Permission.audio].request();
+    }
+
+    // Android 10+ Scoped Storage
+    if (await Permission.manageExternalStorage.isDenied) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    // Handle permanently denied permissions
+    if (await Permission.storage.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  } finally {
+    _isRequestingPermission = false; // Reset flag
+  }
+}
+
 class DatabaseHelper {
   static DatabaseHelper? dbHelper;
   static Database? db;
@@ -30,14 +63,7 @@ class DatabaseHelper {
       return db!;
     }
 
-    var status = await Permission.storage.status;
-    if (status.isDenied) {
-      await Permission.storage.request();
-    }
-    status = await Permission.manageExternalStorage.status;
-    if (status.isDenied) {
-      await Permission.storage.request();
-    }
+    requestStoragePermission();
     var appDir = await getApplicationDocumentsDirectory();
 
     final database = await openDatabase(
@@ -70,40 +96,33 @@ class DatabaseHelper {
   }
 
   static Future<void> backupDatabase() async {
+    requestStoragePermission();
+
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
-    Directory(
-      "/storage/emulated/0/Android/data/com.allaoui.akaontyit/",
-    ).createSync();
     if (await dbFile.exists()) {
       try {
-        await dbFile.copy(
-          "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db",
-        );
+        final database = await openDatabase("${appDir.path}/database.db");
+        DatabaseHelper.db = database;
       } catch (e) {
-        print("Permission denied to copy db");
+        debugPrint("Permission denied to copy db");
       }
     }
-    final database = await openDatabase("${appDir.path}/database.db");
-    DatabaseHelper.db = database;
   }
 
   static Future<void> restoreDatabaseFromFile() async {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
-    File dbFile = File(
-      "/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db",
-    );
+    File dbFile = File("${appDir.path}/database.db");
     if (await dbFile.exists()) {
       try {
-        await dbFile.copy("${appDir.path}/database.db");
+        final database = await openDatabase("${appDir.path}/database.db");
+        DatabaseHelper.db = database;
       } catch (e) {
-        print("Permission denied to read db");
+        debugPrint("Permission denied to read db");
       }
     }
-    final database = await openDatabase("${appDir.path}/database.db");
-    DatabaseHelper.db = database;
   }
 
   static Future<Database> getDatabase() async {
