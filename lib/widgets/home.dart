@@ -6,7 +6,6 @@ import 'package:akaontyit/widgets/bank/bank_entries.dart';
 import 'package:akaontyit/widgets/bank/bank_input.dart';
 import 'package:akaontyit/widgets/debts/debt_input.dart';
 import 'package:akaontyit/widgets/debts/debts.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -313,137 +312,166 @@ class _HomeState extends ConsumerState<Home> {
     return value;
   }
 
+  final TextEditingController _controller = TextEditingController();
+
   @override
   void initState() {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     pendingTransaction = getExpensesInDb();
     super.initState();
+    _controller.text = "";
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     int navIndex = ref.watch(navBarIndexProvider);
-    Widget content = Entries(entries: ref.watch(entriesProvider));
-    EntryItem? currentEntryItem = ref.watch(currentEntryProvider);
-    if (navIndex == 1) {
-      content = const Expenses();
-    } else if (navIndex == 2) {
-      content = const Bank();
-    } else if (navIndex == 3) {
-      content = const Debts();
+
+    Widget renderContent() {
+      switch (navIndex) {
+        case 0:
+          return Entries(entries: ref.watch(entriesProvider));
+        case 1:
+          return const Expenses();
+        case 2:
+          return const Bank();
+        case 3:
+          return const Debts();
+        default:
+          return Text("This is an error, you should not see this");
+      }
     }
 
-    List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
+    Widget renderLeftPartOfAppBar() {
+      switch (navIndex) {
+        case 0:
+          return const Text(
+            "Akaonty-iT",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          );
+        case 1:
+          return Text(
+            "Expenses",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          );
+        case 2:
+          return Text("Savings", style: TextStyle(fontWeight: FontWeight.bold));
+        case 3:
+          return Text("Debts", style: TextStyle(fontWeight: FontWeight.bold));
+        default:
+          return Text(
+            "This is an error, you shouldn't see this!",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          );
+      }
+    }
 
-    PreferredSizeWidget renderDatabaseTransactionWidget() => AppBar(
+    Widget renderCogMenu() => SizedBox(
+      width: 25,
+      height: 25,
+      child: PieMenu(
+        theme: const PieTheme(
+          delayDuration: Duration.zero,
+          pointerColor: Colors.transparent,
+          buttonTheme: PieButtonTheme(
+            backgroundColor: Colors.red,
+            iconColor: Colors.white,
+          ),
+        ),
+        actions: [
+          PieAction(
+            buttonTheme: const PieButtonTheme(
+              backgroundColor: Colors.red,
+              iconColor: Colors.white,
+            ),
+            tooltip: Text("Clear database"),
+            onSelect:
+                () =>
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.bottomSlide,
+                      title: "Delete all entries?",
+                      desc:
+                          "All entries will be deleted! This is irreversible!",
+                      btnOkOnPress: clearDatabase,
+                      btnCancelOnPress: () => {},
+                      btnCancelText: "No",
+                      btnOkText: "Yes",
+                    ).show(),
+            child: const Icon(Icons.delete),
+          ),
+          PieAction(
+            buttonTheme: const PieButtonTheme(
+              backgroundColor: Colors.green,
+              iconColor: Colors.white,
+            ),
+            tooltip: Text("Backup database"),
+            onSelect:
+                () =>
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.bottomSlide,
+                      title: "Backup database?",
+                      desc: "This will backup the database internally!",
+                      btnOkOnPress: backupDatabase,
+                      btnCancelOnPress: () => {},
+                      btnCancelText: "No",
+                      btnOkText: "Yes",
+                    ).show(),
+            child: const Icon(Icons.backup_outlined),
+          ),
+          PieAction(
+            buttonTheme: const PieButtonTheme(
+              backgroundColor: Colors.purple,
+              iconColor: Colors.white,
+            ),
+            tooltip: Text("Restore database"),
+            child: const Icon(Icons.restart_alt_rounded),
+            onSelect:
+                () =>
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.bottomSlide,
+                      title: "Restore database?",
+                      desc: "This will restore the database!",
+                      btnOkOnPress: restoreDatabase,
+                      btnCancelOnPress: () => {},
+                      btnCancelText: "No",
+                      btnOkText: "Yes",
+                    ).show(),
+          ),
+        ],
+        child: const Icon(CustomIcons.cog),
+      ),
+    );
+
+    PreferredSizeWidget renderAppBar() => AppBar(
       backgroundColor: Theme.of(context).primaryColor,
       title: Row(
         children: [
-          const Text(
-            "Akaonty-iT",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          renderLeftPartOfAppBar(),
           const Spacer(),
-          navIndex != 1
-              ? Text(
-                currentEntryItem == null ? "" : titles[navIndex],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              )
-              : Column(
+          navIndex == 0
+              ? Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    currentEntryItem == null ? "" : currentEntryItem.month,
+                    "Entries",
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    currentEntryItem == null ? "" : currentEntryItem.year,
-                    style: const TextStyle(fontSize: 10),
-                  ),
+                  SizedBox(width: 10),
+                  renderCogMenu(),
                 ],
-              ),
-          const SizedBox(width: 15),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 25,
-            height: 25,
-            child: PieMenu(
-              theme: const PieTheme(
-                delayDuration: Duration.zero,
-                pointerColor: Colors.transparent,
-                buttonTheme: PieButtonTheme(
-                  backgroundColor: Colors.red,
-                  iconColor: Colors.white,
-                ),
-              ),
-              actions: [
-                PieAction(
-                  buttonTheme: const PieButtonTheme(
-                    backgroundColor: Colors.red,
-                    iconColor: Colors.white,
-                  ),
-                  tooltip: Text("Clear database"),
-                  onSelect:
-                      () =>
-                          AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.warning,
-                            animType: AnimType.bottomSlide,
-                            title: "Delete all entries?",
-                            desc:
-                                "All entries will be deleted! This is irreversible!",
-                            btnOkOnPress: clearDatabase,
-                            btnCancelOnPress: () => {},
-                            btnCancelText: "No",
-                            btnOkText: "Yes",
-                          ).show(),
-                  child: const Icon(Icons.delete),
-                ),
-                PieAction(
-                  buttonTheme: const PieButtonTheme(
-                    backgroundColor: Colors.green,
-                    iconColor: Colors.white,
-                  ),
-                  tooltip: Text("Backup database"),
-                  onSelect:
-                      () =>
-                          AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.warning,
-                            animType: AnimType.bottomSlide,
-                            title: "Backup database?",
-                            desc: "This will backup the database internally!",
-                            btnOkOnPress: backupDatabase,
-                            btnCancelOnPress: () => {},
-                            btnCancelText: "No",
-                            btnOkText: "Yes",
-                          ).show(),
-                  child: const Icon(Icons.backup_outlined),
-                ),
-                PieAction(
-                  buttonTheme: const PieButtonTheme(
-                    backgroundColor: Colors.purple,
-                    iconColor: Colors.white,
-                  ),
-                  tooltip: Text("Restore database"),
-                  child: const Icon(Icons.restart_alt_rounded),
-                  onSelect:
-                      () =>
-                          AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.warning,
-                            animType: AnimType.bottomSlide,
-                            title: "Restore database?",
-                            desc: "This will restore the database!",
-                            btnOkOnPress: restoreDatabase,
-                            btnCancelOnPress: () => {},
-                            btnCancelText: "No",
-                            btnOkText: "Yes",
-                          ).show(),
-                ),
-              ],
-              child: const Icon(CustomIcons.cog),
-            ),
-          ),
+              )
+              : SizedBox(),
         ],
       ),
     );
@@ -482,8 +510,8 @@ class _HomeState extends ConsumerState<Home> {
               child: Scaffold(
                 key: _scaffoldKey,
                 extendBody: true,
-                appBar: renderDatabaseTransactionWidget(),
-                body: content,
+                appBar: renderAppBar(),
+                body: renderContent(),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.miniCenterDocked,
                 floatingActionButton: FloatingActionButton(

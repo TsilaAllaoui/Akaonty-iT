@@ -53,7 +53,6 @@ class DebtItem {
       case DebtType.selfTotal:
         typeString = "self_total";
         break;
-      default:
     }
     return {
       "id": id,

@@ -166,94 +166,166 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
     );
   }
 
+  List<ExpenseItem> _filteredItems = [];
+
+  bool _isSearching = true;
+
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = widget.list;
+    _isSearching = false;
+  }
+
+  void _filterSearchResults(String query) {
+    List<ExpenseItem> filteredList =
+        widget.list
+            .where(
+              (item) => item.title.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
+
+    setState(() {
+      _filteredItems = filteredList;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 75,
-          width: double.infinity,
-          margin: const EdgeInsets.only(top: 5),
-          child: Card(
-            elevation: 5,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  child: const Text(
-                    "Total",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Column(
+        children: [
+          _isSearching
+              ? Container(
+                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: TextField(
+                  focusNode: _focusNode,
+                  decoration: const InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 5),
+                    ),
                   ),
+                  onTapOutside:
+                      (PointerDownEvent p) => setState(() {
+                        _isSearching = false; // Hide search UI if needed
+                      }),
+                  onChanged: (String s) => {_filterSearchResults(s)},
                 ),
-                Expanded(
-                  child: Column(
+              )
+              : SizedBox(),
+          Container(
+            height: 75,
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 5),
+            child: Card(
+              elevation: 5,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child: SizedBox(width: 25),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "${numberFormatter.format(widget.total)} Fmg",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color:
-                              widget.type == ExpenseType.income
-                                  ? Colors.green
-                                  : Colors.red,
+                      Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        child: const Text(
+                          "Total",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                      Text(
-                        "${numberFormatter.format(widget.total / 5)} Ar",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color:
-                              widget.type == ExpenseType.income
-                                  ? Colors.green.shade300
-                                  : Colors.red.shade300,
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              "${numberFormatter.format(widget.total)} Fmg",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color:
+                                    widget.type == ExpenseType.income
+                                        ? Colors.green
+                                        : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              "${numberFormatter.format(widget.total / 5)} Ar",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color:
+                                    widget.type == ExpenseType.income
+                                        ? Colors.green.shade300
+                                        : Colors.red.shade300,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.list.length,
-            itemBuilder: (context, index) {
-              return PieMenu(
-                theme: const PieTheme(pointerColor: Colors.transparent),
-                actions: [
-                  PieAction(
-                    buttonTheme: const PieButtonTheme(
-                      backgroundColor: Colors.red,
-                      iconColor: Colors.white,
-                    ),
-                    tooltip: Text("Delete"),
-                    onSelect: () async {
-                      await ref
-                          .read(expensesProvider.notifier)
-                          .removeExpense(widget.list[index]);
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    iconSize: 30,
+                    onPressed: () {
+                      setState(() {
+                        _focusNode.requestFocus();
+                        _isSearching = true;
+                      });
                     },
-                    child: const Icon(Icons.delete),
-                  ),
-                  PieAction(
-                    buttonTheme: const PieButtonTheme(
-                      backgroundColor: Colors.orange,
-                      iconColor: Colors.white,
-                    ),
-                    tooltip: Text("Update"),
-                    onSelect: () => showUpdateInput(index),
-                    child: const Icon(Icons.edit),
                   ),
                 ],
-                child: Expense(expense: widget.list[index]),
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ],
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredItems.length,
+              itemBuilder: (context, index) {
+                return PieMenu(
+                  theme: const PieTheme(pointerColor: Colors.transparent),
+                  actions: [
+                    PieAction(
+                      buttonTheme: const PieButtonTheme(
+                        backgroundColor: Colors.red,
+                        iconColor: Colors.white,
+                      ),
+                      tooltip: Text("Delete"),
+                      onSelect: () async {
+                        await ref
+                            .read(expensesProvider.notifier)
+                            .removeExpense(_filteredItems[index]);
+                      },
+                      child: const Icon(Icons.delete),
+                    ),
+                    PieAction(
+                      buttonTheme: const PieButtonTheme(
+                        backgroundColor: Colors.orange,
+                        iconColor: Colors.white,
+                      ),
+                      tooltip: Text("Update"),
+                      onSelect: () => showUpdateInput(index),
+                      child: const Icon(Icons.edit),
+                    ),
+                  ],
+                  child: Expense(expense: _filteredItems[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
