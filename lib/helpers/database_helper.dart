@@ -48,6 +48,7 @@ class DatabaseHelper {
   static List<Map<String, dynamic>> entriesBackup = [];
   static List<Map<String, dynamic>> bankEntriesBackup = [];
   static List<Map<String, dynamic>> debtsBackup = [];
+  static int databaseVersion = 2;
 
   DatabaseHelper._createInstance();
 
@@ -58,6 +59,10 @@ class DatabaseHelper {
 
   static Future<Database> createDatabase() async {
     if (db != null) {
+      var currentDbVersion = await db!.getVersion();
+      if (currentDbVersion <= databaseVersion) {
+        migrateDb(db!, databaseVersion);
+      }
       return db!;
     }
 
@@ -77,7 +82,7 @@ class DatabaseHelper {
           'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
         );
         db.execute(
-          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT, name TEXT)',
+          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, updateDate TEXT, type TEXT, name TEXT)',
         );
         insertDebt(
           DebtItem(
@@ -88,7 +93,7 @@ class DatabaseHelper {
         );
         return;
       },
-      version: 1,
+      version: databaseVersion,
     );
     return database;
   }
@@ -321,5 +326,16 @@ class DatabaseHelper {
       debts.add(debt);
     }
     return debts;
+  }
+
+  static Future<void> migrateDb(Database db, int newVersion) async {
+    // Adding the new column updateDate as TEXT
+    final result = await db.rawQuery("PRAGMA table_info(debts)");
+    final columns = result.map((row) => row['name'] as String).toList();
+
+    if (!columns.contains('updateDate')) {
+      await db.execute('ALTER TABLE debts ADD COLUMN updateDate TEXT');
+    }
+    // Add more if there is more update in the future
   }
 }

@@ -5,6 +5,7 @@ enum DebtType { self, other, selfTotal }
 class DebtItem {
   int? id;
   String date = dateFormatter.format(DateTime.now());
+  String updateDate = dateFormatter.format(DateTime.now());
   int amount = -1;
   DebtType type = DebtType.self;
   String? name;
@@ -38,6 +39,11 @@ class DebtItem {
     } catch (e) {
       date = dateFormatter.format(DateTime.now());
     }
+    try {
+      updateDate = dateFormatter.format(dateFormatter.parse(map["updateDate"]));
+    } catch (e) {
+      updateDate = "";
+    }
     name = map["name"];
   }
 
@@ -57,6 +63,7 @@ class DebtItem {
     return {
       "id": id,
       "date": date,
+      "updateDate": dateFormatter.format(DateTime.now()),
       "amount": amount,
       "type": typeString,
       "name": name,
