@@ -1,10 +1,12 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:akaontyit/provider/general_settings_provider.dart';
 import 'package:akaontyit/widgets/bank/bank_entries.dart';
 import 'package:akaontyit/widgets/bank/bank_input.dart';
 import 'package:akaontyit/widgets/debts/debt_input.dart';
 import 'package:akaontyit/widgets/debts/debts.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -53,7 +55,7 @@ class _HomeState extends ConsumerState<Home> {
 
     showModalBottomSheet(
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40.0)),
       context: context,
       builder: (context) => const ExpenseInput(),
     );
@@ -333,6 +335,143 @@ class _HomeState extends ConsumerState<Home> {
 
     List<String> titles = ["Entries", "Income.Outcome", "Savings", "Debts"];
 
+    PreferredSizeWidget renderDatabaseTransactionWidget() => AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
+      title: Row(
+        children: [
+          const Text(
+            "Akaonty-iT",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          navIndex != 1
+              ? Text(
+                currentEntryItem == null ? "" : titles[navIndex],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              )
+              : Column(
+                children: [
+                  Text(
+                    currentEntryItem == null ? "" : currentEntryItem.month,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    currentEntryItem == null ? "" : currentEntryItem.year,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+          const SizedBox(width: 15),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 25,
+            height: 25,
+            child: PieMenu(
+              theme: const PieTheme(
+                delayDuration: Duration.zero,
+                pointerColor: Colors.transparent,
+                buttonTheme: PieButtonTheme(
+                  backgroundColor: Colors.red,
+                  iconColor: Colors.white,
+                ),
+              ),
+              actions: [
+                PieAction(
+                  buttonTheme: const PieButtonTheme(
+                    backgroundColor: Colors.red,
+                    iconColor: Colors.white,
+                  ),
+                  tooltip: Text("Clear database"),
+                  onSelect:
+                      () =>
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.warning,
+                            animType: AnimType.bottomSlide,
+                            title: "Delete all entries?",
+                            desc:
+                                "All entries will be deleted! This is irreversible!",
+                            btnOkOnPress: clearDatabase,
+                            btnCancelOnPress: () => {},
+                            btnCancelText: "No",
+                            btnOkText: "Yes",
+                          ).show(),
+                  child: const Icon(Icons.delete),
+                ),
+                PieAction(
+                  buttonTheme: const PieButtonTheme(
+                    backgroundColor: Colors.green,
+                    iconColor: Colors.white,
+                  ),
+                  tooltip: Text("Backup database"),
+                  onSelect:
+                      () =>
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.warning,
+                            animType: AnimType.bottomSlide,
+                            title: "Backup database?",
+                            desc: "This will backup the database internally!",
+                            btnOkOnPress: backupDatabase,
+                            btnCancelOnPress: () => {},
+                            btnCancelText: "No",
+                            btnOkText: "Yes",
+                          ).show(),
+                  child: const Icon(Icons.backup_outlined),
+                ),
+                PieAction(
+                  buttonTheme: const PieButtonTheme(
+                    backgroundColor: Colors.purple,
+                    iconColor: Colors.white,
+                  ),
+                  tooltip: Text("Restore database"),
+                  child: const Icon(Icons.restart_alt_rounded),
+                  onSelect:
+                      () =>
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.warning,
+                            animType: AnimType.bottomSlide,
+                            title: "Restore database?",
+                            desc: "This will restore the database!",
+                            btnOkOnPress: restoreDatabase,
+                            btnCancelOnPress: () => {},
+                            btnCancelText: "No",
+                            btnOkText: "Yes",
+                          ).show(),
+                ),
+              ],
+              child: const Icon(CustomIcons.cog),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Widget renderAnimatedBottomActions() => AnimatedBottomNavigationBar(
+      height: 75,
+      backgroundColor: Theme.of(context).primaryColor,
+      icons: const <IconData>[
+        Icons.date_range_rounded,
+        Icons.attach_money_outlined,
+        CustomIcons.bank,
+        Icons.currency_exchange_outlined,
+      ],
+      iconSize: 30,
+      shadow: Shadow(
+        color: darken(Theme.of(context).primaryColor, 0.5),
+        blurRadius: 5,
+      ),
+      activeColor: Colors.white,
+      activeIndex: navIndex,
+      gapLocation: GapLocation.center,
+      leftCornerRadius: 32,
+      rightCornerRadius: 32,
+      onTap: (index) {
+        ref.read(navBarIndexProvider.notifier).setNavBarIndex(index);
+      },
+    );
+
     return PopScope(
       onPopInvokedWithResult: (didPop, result) => quitApp,
       child: FutureBuilder(
@@ -343,119 +482,23 @@ class _HomeState extends ConsumerState<Home> {
               child: Scaffold(
                 key: _scaffoldKey,
                 extendBody: true,
-                appBar: AppBar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  title: Row(
-                    children: [
-                      const Text(
-                        "Akaonty-iT",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const Spacer(),
-                      navIndex != 1
-                          ? Text(
-                            currentEntryItem == null ? "" : titles[navIndex],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          )
-                          : Column(
-                            children: [
-                              Text(
-                                currentEntryItem == null
-                                    ? ""
-                                    : currentEntryItem.month,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                currentEntryItem == null
-                                    ? ""
-                                    : currentEntryItem.year,
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                            ],
-                          ),
-                      const SizedBox(width: 15),
-                      SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: PieMenu(
-                          theme: const PieTheme(
-                            delayDuration: Duration.zero,
-                            pointerColor: Colors.transparent,
-                            buttonTheme: PieButtonTheme(
-                              backgroundColor: Colors.red,
-                              iconColor: Colors.white,
-                            ),
-                          ),
-                          actions: [
-                            PieAction(
-                              buttonTheme: const PieButtonTheme(
-                                backgroundColor: Colors.red,
-                                iconColor: Colors.white,
-                              ),
-                              tooltip: Text("Clear database"),
-                              onSelect: clearDatabase,
-                              child: const Icon(Icons.delete),
-                            ),
-                            PieAction(
-                              buttonTheme: const PieButtonTheme(
-                                backgroundColor: Colors.green,
-                                iconColor: Colors.white,
-                              ),
-                              tooltip: Text("Backup database"),
-                              onSelect: backupDatabase,
-                              child: const Icon(Icons.backup_outlined),
-                            ),
-                            PieAction(
-                              buttonTheme: const PieButtonTheme(
-                                backgroundColor: Colors.purple,
-                                iconColor: Colors.white,
-                              ),
-                              tooltip: Text("Restore database"),
-                              child: const Icon(Icons.restart_alt_rounded),
-                              onSelect: () => restoreDatabase(),
-                            ),
-                          ],
-                          child: const Icon(CustomIcons.cog),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                appBar: renderDatabaseTransactionWidget(),
                 body: content,
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.miniCenterDocked,
                 floatingActionButton: FloatingActionButton(
                   onPressed: showInput,
-                  backgroundColor: Colors.green.shade500,
-                  child: const Icon(Icons.add, size: 25),
-                ),
-                bottomNavigationBar: AnimatedBottomNavigationBar(
-                  height: 75,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  icons: const <IconData>[
-                    Icons.date_range_rounded,
-                    Icons.attach_money_outlined,
-                    CustomIcons.bank,
-                    Icons.currency_exchange_outlined,
-                  ],
-                  iconSize: 30,
-                  shadow: Shadow(
-                    color: darken(Theme.of(context).primaryColor, 0.5),
-                    blurRadius: 5,
+                  backgroundColor: const Color.fromARGB(255, 73, 171, 76),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50), // Rounded corners
                   ),
-                  activeColor: Colors.white,
-                  activeIndex: navIndex,
-                  gapLocation: GapLocation.center,
-                  leftCornerRadius: 32,
-                  rightCornerRadius: 32,
-                  onTap: (index) {
-                    ref
-                        .read(navBarIndexProvider.notifier)
-                        .setNavBarIndex(index);
-                  },
+                  child: const Icon(
+                    Icons.add,
+                    size: 25,
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
                 ),
+                bottomNavigationBar: renderAnimatedBottomActions(),
               ),
             );
           } else {

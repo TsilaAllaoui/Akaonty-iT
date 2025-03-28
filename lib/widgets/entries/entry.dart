@@ -129,7 +129,7 @@ class _EntryState extends ConsumerState<Entry> {
       child: InkWell(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          margin: const EdgeInsets.only(top: 10, left: 10),
+          margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
           height: 125,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
