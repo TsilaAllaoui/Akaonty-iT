@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -511,7 +513,25 @@ class _HomeState extends ConsumerState<Home> {
                 key: _scaffoldKey,
                 extendBody: true,
                 appBar: renderAppBar(),
-                body: renderContent(),
+                body: PopScope(
+                  canPop: false, // Prevent default back behavior
+                  onPopInvokedWithResult: (didPop, v) async {
+                    if (didPop) return; // If it already popped, do nothing
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.question,
+                      animType: AnimType.bottomSlide,
+                      title: "Quit app?",
+                      btnOkOnPress: () {
+                        exit(0);
+                      },
+                      btnCancelOnPress: () => {},
+                      btnCancelText: "No",
+                      btnOkText: "Yes",
+                    ).show();
+                  },
+                  child: renderContent(),
+                ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.miniCenterDocked,
                 floatingActionButton: FloatingActionButton(

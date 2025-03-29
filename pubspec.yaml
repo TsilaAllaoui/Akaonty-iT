@@ -30,6 +30,9 @@ dependencies:
   flutter_spinkit: ^5.2.0
   currency_textfield: ^4.0.0
   awesome_dialog: ^3.2.1
+  flutter_screen_lock: ^9.2.1
+  local_auth: ^2.3.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
