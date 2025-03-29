@@ -98,35 +98,42 @@ class DatabaseHelper {
     return database;
   }
 
-  static Future<void> backupDatabase() async {
+  static Future<bool> backupDatabase(String path) async {
+    if (path[path.length - 1] == '/' || path[path.length - 1] == '\\') {
+      path = path.substring(0, path.length - 2);
+    }
     requestStoragePermission();
-
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
-    dbFile.copySync("/storage/emulated/0/akaontyit/database.db");
     if (await dbFile.exists()) {
       try {
+        dbFile.copySync("$path/database.db");
         final database = await openDatabase("${appDir.path}/database.db");
         DatabaseHelper.db = database;
-      } catch (e) {
-        debugPrint("Permission denied to copy db");
+        return true;
+      } catch (identifier) {
+        debugPrint("Error while backuping database : $identifier");
       }
     }
+    return false;
   }
 
-  static Future<void> restoreDatabaseFromFile() async {
+  static Future<bool> restoreDatabaseFromFile(String path) async {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
-    File dbFile = File("${appDir.path}/database.db");
+    File dbFile = File(path);
     if (await dbFile.exists()) {
       try {
-        final database = await openDatabase("${appDir.path}/database.db");
+        var file = dbFile.copySync("${appDir.path}/database.db");
+        final database = await openDatabase(file.path);
         DatabaseHelper.db = database;
-      } catch (e) {
-        debugPrint("Permission denied to read db");
+        return true;
+      } catch (identifier) {
+        debugPrint("Error while backuping database : $identifier");
       }
     }
+    return false;
   }
 
   static Future<Database> getDatabase() async {

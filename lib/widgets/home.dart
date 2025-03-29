@@ -8,6 +8,7 @@ import 'package:akaontyit/widgets/bank/bank_entries.dart';
 import 'package:akaontyit/widgets/bank/bank_input.dart';
 import 'package:akaontyit/widgets/debts/debt_input.dart';
 import 'package:akaontyit/widgets/debts/debts.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -224,26 +225,49 @@ class _HomeState extends ConsumerState<Home> {
     ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
   }
 
-  Future<void> backupDatabase({bool showSnackBar = true}) async {
-    await DatabaseHelper.backupDatabase();
-    if (showSnackBar) {
+  Future<void> backupDatabase() async {
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: 'Please select an output file:',
+      fileName: 'database.db',
+    );
+
+    if (outputFile == null) {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Database backup at \"/storage/emulated/0/Android/data/com.allaoui.akaontyit/database.db\"",
-          ),
-        ),
+        const SnackBar(content: Text("Error while backuping database")),
       );
+    } else {
+      bool result = await DatabaseHelper.backupDatabase(outputFile);
+      if (result) {
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          SnackBar(content: Text("Database backup at \"$outputFile\"")),
+        );
+      }
     }
   }
 
   Future<void> restoreDatabase() async {
-    await DatabaseHelper.restoreDatabaseFromFile();
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      const SnackBar(content: Text("Database restored from file.")),
-    );
-    pendingTransaction = getExpensesInDb();
-    ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
+    FilePickerResult? filePickerResult = await FilePicker.platform.pickFiles();
+    if (filePickerResult != null) {
+      String path = filePickerResult.files.single.path!;
+      bool result = await DatabaseHelper.restoreDatabaseFromFile(path);
+      if (result) {
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          SnackBar(
+            content:
+                result
+                    ? Text("Database restored from file")
+                    : Text("Error while restoring database from file"),
+          ),
+        );
+        pendingTransaction = getExpensesInDb();
+        ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
+        setState(() {});
+      }
+    } else {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text("Error while restoring database from file")),
+      );
+    }
   }
 
   Future<bool> quitApp() async {
@@ -280,7 +304,7 @@ class _HomeState extends ConsumerState<Home> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          await backupDatabase(showSnackBar: false);
+                          await backupDatabase();
                           SystemChannels.platform.invokeMethod(
                             'SystemNavigator.pop',
                           );

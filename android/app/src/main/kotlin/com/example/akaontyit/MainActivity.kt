@@ -1,4 +1,4 @@
-package com.tsilaallaoui.akaontyit
+package com.allaoui.akaontyit
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
