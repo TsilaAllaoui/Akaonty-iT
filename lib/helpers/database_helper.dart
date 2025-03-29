@@ -104,6 +104,7 @@ class DatabaseHelper {
     await DatabaseHelper.db!.close();
     var appDir = await getApplicationDocumentsDirectory();
     File dbFile = File("${appDir.path}/database.db");
+    dbFile.copySync("/storage/emulated/0/akaontyit/database.db");
     if (await dbFile.exists()) {
       try {
         final database = await openDatabase("${appDir.path}/database.db");
