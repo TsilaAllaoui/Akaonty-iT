@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:akaontyit/authentification/pin_change_screen.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -408,6 +409,9 @@ class _HomeState extends ConsumerState<Home> {
             backgroundColor: Colors.red,
             iconColor: Colors.white,
           ),
+          spacing: 7,
+          iconSize: 20,
+          buttonSize: 40,
         ),
         actions: [
           PieAction(
@@ -469,6 +473,34 @@ class _HomeState extends ConsumerState<Home> {
                       title: "Restore database?",
                       desc: "This will restore the database!",
                       btnOkOnPress: restoreDatabase,
+                      btnCancelOnPress: () => {},
+                      btnCancelText: "No",
+                      btnOkText: "Yes",
+                    ).show(),
+          ),
+          PieAction(
+            buttonTheme: const PieButtonTheme(
+              backgroundColor: Color.fromARGB(255, 21, 36, 236),
+              iconColor: Colors.white,
+            ),
+            tooltip: Text("Reset secret pin"),
+            child: const Icon(Icons.pin),
+            onSelect:
+                () =>
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.bottomSlide,
+                      title: "Reset secret pin?",
+                      desc: "This will reset secret pin!",
+                      btnOkOnPress: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PINChangeScreen(),
+                          ),
+                        );
+                      },
                       btnCancelOnPress: () => {},
                       btnCancelText: "No",
                       btnOkText: "Yes",

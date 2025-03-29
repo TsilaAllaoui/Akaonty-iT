@@ -90,13 +90,6 @@ class _AuthScreenState extends State<AuthScreen> {
         Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (context) => const Home()));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Error while authenticating"),
-            duration: Duration(seconds: 3),
-          ),
-        );
       }
     } catch (e) {
       debugPrint('Biometric authentication error: $e');

@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  animated_pin_input_text_field:
+    dependency: "direct main"
+    description:
+      name: animated_pin_input_text_field
+      sha256: "06bb64ee95a90e09048251b8416352e27292dd70aa409bf7ffd3a50b542319a0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   args:
     dependency: transitive
     description:
