@@ -172,10 +172,13 @@ class _HomeState extends ConsumerState<Home> {
     var profiles = await DatabaseHelper.fetchProfileEntries();
     ref.read(profileEntriesProvider.notifier).setProfileEntries(profiles);
 
-    if (ref.read(currentProfileEntryProvider)?.name != "default") return true;
-    ref
-        .read(currentProfileEntryProvider.notifier)
-        .setCurrentProfileEntryByName("default");
+    if (ref.read(currentProfileEntryProvider) == null ||
+        ref.read(currentProfileEntryProvider)?.name == "default") {
+      ref
+          .read(currentProfileEntryProvider.notifier)
+          .setCurrentProfileEntryByName("default");
+    }
+
     return true;
   }
 

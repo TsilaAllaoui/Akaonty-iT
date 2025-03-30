@@ -71,38 +71,41 @@ class DatabaseHelper {
       return db!;
     }
 
-    // Request storage permission if needed
-    requestStoragePermission();
+    await requestStoragePermission();
+
     var appDir = await getApplicationDocumentsDirectory();
 
-    final database = await openDatabase(
-      "${appDir.path}/database.db",
-      version: databaseVersion, // Specify the desired version of the DB
-      onCreate: (db, version) async {
-        // Create tables for the initial version of the DB
-        await db.execute(
-          'CREATE TABLE expenses(id INTEGER PRIMARY KEY, title TEXT, amount INTEGER, date TEXT, entry_id INTEGER, type TEXT)',
-        );
-        await db.execute(
-          'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',
-        );
-        await db.execute(
-          'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
-        );
-        await db.execute(
-          'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, updateDate TEXT, type TEXT, name TEXT)',
-        );
-        await insertDebt(
-          DebtItem(
-            date: dateFormatter.format(DateTime.now()),
-            amount: 0,
-            type: DebtType.selfTotal,
-          ),
-        );
-        return;
-      },
-    );
-    return database;
+    try {
+      db = await openDatabase(
+        "${appDir.path}/database.db",
+        version: databaseVersion,
+        onCreate: (db, version) async {
+          await db.execute(
+            'CREATE TABLE expenses(id INTEGER PRIMARY KEY, title TEXT, amount INTEGER, date TEXT, entry_id INTEGER, type TEXT)',
+          );
+          await db.execute(
+            'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',
+          );
+          await db.execute(
+            'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
+          );
+          await db.execute(
+            'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, updateDate TEXT, type TEXT, name TEXT)',
+          );
+          await db.insert('debts', {
+            'amount': 0,
+            'date': dateFormatter.format(DateTime.now()),
+            'updateDate': dateFormatter.format(DateTime.now()),
+            'type': DebtType.selfTotal,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        },
+      );
+
+      return db!;
+    } catch (e) {
+      debugPrint(e.toString());
+      exit(0);
+    }
   }
 
   static Future<bool> backupDatabase(String path) async {
