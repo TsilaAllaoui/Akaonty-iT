@@ -122,6 +122,7 @@ class _ExpenseInputState extends ConsumerState<DebtInput> {
   void initState() {
     var currentDebt = ref.read(currentDebtProvider);
     if (currentDebt != null) {
+      selectedType = currentDebt.type;
       if (currentDebt.type == DebtType.other) {
         nameController.text = currentDebt.name.toString();
         nameController.selection = TextSelection.fromPosition(

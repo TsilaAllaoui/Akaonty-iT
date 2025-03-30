@@ -17,7 +17,7 @@ class _BankState extends ConsumerState<Bank> {
   late Future<bool> pendindFetch;
 
   Future<bool> getBankEntriesInDb() async {
-    await DatabaseHelper.createDatabase();
+    await DatabaseHelper.getOrCreateDatabase();
     ref.read(bankEntriesProvider.notifier).fetchBankEntries();
     return true;
   }

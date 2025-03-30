@@ -12,13 +12,16 @@ class ExpenseItem {
   String date = dateFormatter.format(DateTime.now());
   int entryId = 0;
   ExpenseType type = ExpenseType.outcome;
+  int profileId = 0;
 
-  ExpenseItem(
-      {required this.title,
-      required this.amount,
-      required this.date,
-      required this.entryId,
-      required this.type});
+  ExpenseItem({
+    required this.title,
+    required this.amount,
+    required this.date,
+    required this.entryId,
+    required this.type,
+    required this.profileId,
+  });
 
   ExpenseItem.fromMap(Map<String, dynamic> map) {
     id = map["id"];
@@ -31,6 +34,7 @@ class ExpenseItem {
     }
     entryId = map["entry_id"] ?? 0;
     type = map["type"] == "income" ? ExpenseType.income : ExpenseType.outcome;
+    profileId = map["profileId"];
   }
 
   Map<String, dynamic> toMap() {
@@ -40,7 +44,8 @@ class ExpenseItem {
       "amount": amount,
       "date": date.toString(),
       "entry_id": entryId,
-      "type": type == ExpenseType.income ? "income" : "outcome"
+      "type": type == ExpenseType.income ? "income" : "outcome",
+      "profileId": profileId,
     };
   }
 }

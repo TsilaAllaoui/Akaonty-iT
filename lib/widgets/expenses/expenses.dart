@@ -1,5 +1,8 @@
+import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/provider/expenses_provider.dart';
+import 'package:akaontyit/provider/profiles_provider.dart';
 import 'package:akaontyit/widgets/expenses/expense_input.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:akaontyit/widgets/expenses/expense.dart';
 import 'package:akaontyit/model/expense_model.dart';
@@ -15,8 +18,18 @@ class Expenses extends ConsumerStatefulWidget {
 
 class _ExpensesState extends ConsumerState<Expenses> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    List<ExpenseItem> expenses = ref.watch(expensesProvider);
+    ProfileEntryItem? currentProfile = ref.watch(currentProfileEntryProvider);
+    var profileExpenses = ref
+        .watch(expensesProvider)
+        .where((expense) => expense.profileId == currentProfile?.id);
+    Iterable<ExpenseItem> expenses =
+        currentProfile == null ? [] : profileExpenses;
     List<ExpenseItem> incomes = [];
     List<ExpenseItem> outcomes = [];
     int totalIncome = 0;
@@ -44,8 +57,23 @@ class _ExpensesState extends ConsumerState<Expenses> {
       length: 3,
       child: Scaffold(
         appBar: TabBar(
+          onTap:
+              (value) => {
+                if (value == 0)
+                  {
+                    ref
+                        .read(currentExpenseTabTypeProvider.notifier)
+                        .setCurrentExpenseTabType(ExpenseType.income),
+                  }
+                else if (value == 1)
+                  {
+                    ref
+                        .read(currentExpenseTabTypeProvider.notifier)
+                        .setCurrentExpenseTabType(ExpenseType.outcome),
+                  },
+              },
           indicatorColor: Theme.of(context).primaryColor,
-          tabs: const [
+          tabs: [
             Tab(
               color: Colors.green,
               icon: Icons.arrow_drop_up,
@@ -114,11 +142,14 @@ class Tab extends StatefulWidget {
     required this.color,
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   final Color color;
   final IconData icon;
   final String title;
+
+  final VoidCallback? onTap;
 
   @override
   State<Tab> createState() => _TabState();
@@ -154,106 +185,234 @@ class ExpenseList extends ConsumerStatefulWidget {
 }
 
 class _ExpenseListState extends ConsumerState<ExpenseList> {
-  void showUpdateInput(int index) {
+  Future<void> showUpdateInput(int index) async {
     ref
         .read(currentExpenseProvider.notifier)
         .setCurrentExpense(widget.list[index]);
-    showModalBottomSheet(
+    await showModalBottomSheet(
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
-      builder: (context) => const ExpenseInput(),
+      builder: (context) => ExpenseInput(),
     );
+  }
+
+  List<ExpenseItem> _filteredItems = [];
+
+  bool _isSearching = false;
+
+  final FocusNode _focusNode = FocusNode();
+
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = widget.list;
+    _isSearching = false;
+  }
+
+  @override
+  void didUpdateWidget(covariant ExpenseList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.list != widget.list) {
+      if (_controller.text.isNotEmpty) {
+        _filterSearchResults(_controller.text);
+      } else {
+        setState(() {
+          _filteredItems = widget.list;
+        });
+      }
+    }
+  }
+
+  void _filterSearchResults(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredItems = widget.list;
+      });
+      return;
+    }
+    _controller.text = query;
+    List<ExpenseItem> filteredList =
+        widget.list
+            .where(
+              (item) => item.title.toLowerCase().contains(query.toLowerCase()),
+            )
+            .toList();
+
+    setState(() {
+      _filteredItems = filteredList;
+    });
+  }
+
+  Future<void> deleteExpense(expense) async {
+    ExpenseItem expenseItem = widget.list.firstWhere(
+      (expenseItem) => expenseItem.id == expense.id,
+    );
+    await ref.read(expensesProvider.notifier).removeExpense(expenseItem);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 75,
-          width: double.infinity,
-          margin: const EdgeInsets.only(top: 5),
-          child: Card(
-            elevation: 5,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  child: const Text(
-                    "Total",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+    return GestureDetector(
+      child: Column(
+        children: [
+          _isSearching
+              ? Container(
+                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  decoration: const InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 5),
+                    ),
                   ),
+                  onTapOutside: (PointerDownEvent p) {
+                    if (_controller.text.isEmpty) {
+                      setState(() {
+                        _isSearching = false;
+                      });
+                    }
+                  },
+                  onChanged: (String s) => {_filterSearchResults(s)},
+                  onTap: () => {},
                 ),
-                Expanded(
-                  child: Column(
+              )
+              : SizedBox(),
+          Container(
+            height: 75,
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 5),
+            child: Card(
+              elevation: 5,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child: SizedBox(width: 25),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "${numberFormatter.format(widget.total)} Fmg",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color:
-                              widget.type == ExpenseType.income
-                                  ? Colors.green
-                                  : Colors.red,
+                      Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        child: const Text(
+                          "Total",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                      Text(
-                        "${numberFormatter.format(widget.total / 5)} Ar",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color:
-                              widget.type == ExpenseType.income
-                                  ? Colors.green.shade300
-                                  : Colors.red.shade300,
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              "${numberFormatter.format(widget.total)} Fmg",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color:
+                                    widget.type == ExpenseType.income
+                                        ? Colors.green
+                                        : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              "${numberFormatter.format(widget.total / 5)} Ar",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color:
+                                    widget.type == ExpenseType.income
+                                        ? Colors.green.shade300
+                                        : Colors.red.shade300,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.list.length,
-            itemBuilder: (context, index) {
-              return PieMenu(
-                theme: const PieTheme(pointerColor: Colors.transparent),
-                actions: [
-                  PieAction(
-                    buttonTheme: const PieButtonTheme(
-                      backgroundColor: Colors.red,
-                      iconColor: Colors.white,
-                    ),
-                    tooltip: Text("Delete"),
-                    onSelect: () async {
-                      await ref
-                          .read(expensesProvider.notifier)
-                          .removeExpense(widget.list[index]);
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    iconSize: 30,
+                    onPressed: () {
+                      setState(() {
+                        _focusNode.requestFocus();
+                        _isSearching = true;
+                      });
                     },
-                    child: const Icon(Icons.delete),
-                  ),
-                  PieAction(
-                    buttonTheme: const PieButtonTheme(
-                      backgroundColor: Colors.orange,
-                      iconColor: Colors.white,
-                    ),
-                    tooltip: Text("Update"),
-                    onSelect: () => showUpdateInput(index),
-                    child: const Icon(Icons.edit),
                   ),
                 ],
-                child: Expense(expense: widget.list[index]),
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ],
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredItems.length,
+              itemBuilder: (context, index) {
+                return PieMenu(
+                  theme: const PieTheme(pointerColor: Colors.transparent),
+                  actions: [
+                    PieAction(
+                      buttonTheme: const PieButtonTheme(
+                        backgroundColor: Colors.red,
+                        iconColor: Colors.white,
+                      ),
+                      tooltip: Text("Delete"),
+                      onSelect:
+                          () =>
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.warning,
+                                animType: AnimType.bottomSlide,
+                                title: "Delete entry?",
+                                desc: "This is irreversible!",
+                                btnOkOnPress: () async {
+                                  await deleteExpense(_filteredItems[index]);
+                                  setState(() {
+                                    _filteredItems = ref.read(expensesProvider);
+                                  });
+                                },
+                                btnCancelOnPress: () => {},
+                                btnCancelText: "No",
+                                btnOkText: "Yes",
+                              ).show(),
+                      child: const Icon(Icons.delete),
+                    ),
+                    PieAction(
+                      buttonTheme: const PieButtonTheme(
+                        backgroundColor: Colors.orange,
+                        iconColor: Colors.white,
+                      ),
+                      tooltip: Text("Update"),
+                      onSelect: () async {
+                        int expenseIndex = widget.list.indexWhere(
+                          (expenseItem) =>
+                              expenseItem.id == _filteredItems[index].id,
+                        );
+                        await showUpdateInput(expenseIndex);
+                        setState(() {
+                          _filterSearchResults(_controller.text);
+                        });
+                      },
+                      child: const Icon(Icons.edit),
+                    ),
+                  ],
+                  child: Expense(expense: _filteredItems[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

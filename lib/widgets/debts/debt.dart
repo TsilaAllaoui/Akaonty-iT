@@ -189,10 +189,21 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
                   ),
                 ],
               ),
-              trailing: Text(
-                debt.date,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black, fontSize: 15),
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    debt.date,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black, fontSize: 15),
+                  ),
+                  Text(
+                    debt.updateDate,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black, fontSize: 10),
+                  ),
+                ],
               ),
             ),
           ),

@@ -1,3 +1,4 @@
+import 'package:akaontyit/provider/profiles_provider.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:akaontyit/model/expense_model.dart';
 import 'package:akaontyit/provider/expenses_provider.dart';
@@ -10,8 +11,6 @@ import 'package:currency_textfield/currency_textfield.dart';
 
 class ExpenseInput extends ConsumerStatefulWidget {
   const ExpenseInput({super.key});
-
-  // final bool? isUpdate;
 
   @override
   ConsumerState<ExpenseInput> createState() => _ExpenseInputState();
@@ -31,7 +30,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedDevise = "Fmg";
 
-  void addExpense() async {
+  Future<void> addExpense() async {
     if (ref.watch(currentEntryProvider) == null) {
       Fluttertoast.showToast(
         msg: "No entry found. Add at least one to add expanse.",
@@ -63,6 +62,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       date: selectedDate,
       entryId: ref.read(currentEntryProvider)!.id!,
       type: selectedType,
+      profileId: ref.read(currentProfileEntryProvider)!.id!,
     );
     var currentExpense = ref.watch(currentExpenseProvider);
 
@@ -73,13 +73,13 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       await ref
           .read(expensesProvider.notifier)
           .updateExpense(currentExpense.id!, values);
-      ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
     } else {
       await ref
           .read(expensesProvider.notifier)
           .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
     }
 
+    ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
     var currentEntryId = ref.read(currentEntryProvider)!.id!;
     ref.read(expensesProvider.notifier).setExpenses(currentEntryId);
     Navigator.of(scaffoldKey.currentContext!).pop();
@@ -301,7 +301,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                   },
                   values: const ["Income", "Outcome"],
                   value:
-                      selectedType == ExpenseType.income ? "Income" : "Outcome",
+                      ref.read(currentExpenseTabTypeProvider) ==
+                              ExpenseType.income
+                          ? "Income"
+                          : "Outcome",
                 ),
               ),
             ],
@@ -317,8 +320,11 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(Colors.green),
                     ),
-                    onPressed: addExpense,
-                    child: const Text("Save"),
+                    onPressed: () async => await addExpense(),
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -332,7 +338,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       ),
                     ),
                     onPressed: cancelInput,
-                    child: const Text("Cancel"),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),

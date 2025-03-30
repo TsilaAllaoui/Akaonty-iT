@@ -19,7 +19,7 @@ class Debts extends ConsumerStatefulWidget {
 
 class _DebtsState extends ConsumerState<Debts> {
   Future<bool> getDebtsInDb() async {
-    await DatabaseHelper.createDatabase();
+    await DatabaseHelper.getOrCreateDatabase();
     ref.read(debtsProvider.notifier).fetchDebts();
     return true;
   }
