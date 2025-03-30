@@ -18,6 +18,11 @@ class Expenses extends ConsumerStatefulWidget {
 
 class _ExpensesState extends ConsumerState<Expenses> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ProfileEntryItem? currentProfile = ref.watch(currentProfileEntryProvider);
     var profileExpenses = ref
@@ -52,8 +57,23 @@ class _ExpensesState extends ConsumerState<Expenses> {
       length: 3,
       child: Scaffold(
         appBar: TabBar(
+          onTap:
+              (value) => {
+                if (value == 0)
+                  {
+                    ref
+                        .read(currentExpenseTabTypeProvider.notifier)
+                        .setCurrentExpenseTabType(ExpenseType.income),
+                  }
+                else if (value == 1)
+                  {
+                    ref
+                        .read(currentExpenseTabTypeProvider.notifier)
+                        .setCurrentExpenseTabType(ExpenseType.outcome),
+                  },
+              },
           indicatorColor: Theme.of(context).primaryColor,
-          tabs: const [
+          tabs: [
             Tab(
               color: Colors.green,
               icon: Icons.arrow_drop_up,
@@ -122,11 +142,14 @@ class Tab extends StatefulWidget {
     required this.color,
     required this.icon,
     required this.title,
+    this.onTap,
   });
 
   final Color color;
   final IconData icon;
   final String title;
+
+  final VoidCallback? onTap;
 
   @override
   State<Tab> createState() => _TabState();
@@ -170,7 +193,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       context: context,
-      builder: (context) => const ExpenseInput(),
+      builder: (context) => ExpenseInput(),
     );
   }
 

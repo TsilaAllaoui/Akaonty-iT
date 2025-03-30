@@ -6,10 +6,7 @@ import 'package:sqflite/sqflite.dart';
 class ProfilesNotifier extends StateNotifier<List<ProfileEntryItem>> {
   ProfilesNotifier() : super([]);
 
-  Future<void> addProfileEntry(
-    ProfileEntryItem profileEntry, {
-    int entryId = -1,
-  }) async {
+  Future<void> addProfileEntry(ProfileEntryItem profileEntry) async {
     await DatabaseHelper.insertProfileEntry(profileEntry);
     var res = await DatabaseHelper.fetchProfileEntries();
     state = [...res];

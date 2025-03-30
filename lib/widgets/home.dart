@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:akaontyit/authentification/pin_change_screen.dart';
 import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/provider/profiles_provider.dart';
+import 'package:akaontyit/widgets/profile/new_profile_screen.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -170,6 +171,8 @@ class _HomeState extends ConsumerState<Home> {
     // Profiles
     var profiles = await DatabaseHelper.fetchProfileEntries();
     ref.read(profileEntriesProvider.notifier).setProfileEntries(profiles);
+
+    if (ref.read(currentProfileEntryProvider)?.name != "default") return true;
     ref
         .read(currentProfileEntryProvider.notifier)
         .setCurrentProfileEntryByName("default");
@@ -481,6 +484,11 @@ class _HomeState extends ConsumerState<Home> {
                     children: [
                       SizedBox(),
                       DropdownButton<String>(
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
                         value: selectedProfile!.name,
                         onChanged: (String? newProfileName) {
                           if (newProfileName != null) {
@@ -505,6 +513,83 @@ class _HomeState extends ConsumerState<Home> {
                                 child: Text(profile.name ?? "Unknown"),
                               );
                             }).toList(),
+                      ),
+                      SizedBox(width: 20),
+                      PieMenu(
+                        theme: const PieTheme(
+                          delayDuration: Duration.zero,
+                          pointerColor: Colors.transparent,
+                          fadeDuration: Duration(milliseconds: 750),
+                        ),
+                        actions: [
+                          PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Colors.orange,
+                              iconColor: Colors.white,
+                            ),
+                            tooltip: Text("Delete profile"),
+                            onSelect: () async {
+                              if (profiles!.length == 1) {
+                                ScaffoldMessenger.of(
+                                  _scaffoldKey.currentContext!,
+                                ).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Cannot delete the only profile available",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.question,
+                                animType: AnimType.bottomSlide,
+                                title: "Delete profile?",
+                                desc: "This is irreversible!",
+                                btnOkOnPress: () async {
+                                  var profile = ref.read(
+                                    currentProfileEntryProvider,
+                                  );
+                                  await DatabaseHelper.deleteProfileEntry(
+                                    profile!,
+                                  );
+
+                                  var newProfiles =
+                                      await DatabaseHelper.fetchProfileEntries();
+                                  ref
+                                      .read(profileEntriesProvider.notifier)
+                                      .setProfileEntries(newProfiles);
+                                  ref
+                                      .read(
+                                        currentProfileEntryProvider.notifier,
+                                      )
+                                      .setCurrentProfileEntry(newProfiles[0]);
+                                },
+                                btnCancelOnPress: () => {},
+                                btnCancelText: "No",
+                                btnOkText: "Yes",
+                              ).show();
+                            },
+                            child: const Icon(Icons.person_off_rounded),
+                          ),
+                          PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Color.fromARGB(255, 41, 218, 41),
+                              iconColor: Colors.white,
+                            ),
+                            tooltip: Text("Add new profile"),
+                            onSelect: () async {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => NewProfileScreen(),
+                                ),
+                              );
+                            },
+                            child: const Icon(Icons.person_add),
+                          ),
+                        ],
+                        child: Icon(Icons.person_add),
                       ),
                     ],
                   )
@@ -556,7 +641,7 @@ class _HomeState extends ConsumerState<Home> {
                       context: context,
                       dialogType: DialogType.question,
                       animType: AnimType.bottomSlide,
-                      title: "com.allaoui.akaontyit?",
+                      title: "Quit app?",
                       btnOkOnPress: () {
                         exit(0);
                       },

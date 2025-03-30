@@ -20,6 +20,7 @@ class ExpenseItem {
     required this.date,
     required this.entryId,
     required this.type,
+    required this.profileId,
   });
 
   ExpenseItem.fromMap(Map<String, dynamic> map) {
