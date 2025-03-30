@@ -31,12 +31,12 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
   }
 
   Future<void> setExpenses(int entryId) async {
-    var res = await DatabaseHelper.fetchExpenses();
+    var res = await DatabaseHelper.fetchExpenses(entryId: entryId);
     if (entryId < 0) {
       state = res;
       return;
     }
-    state = res.where((element) => element.entryId == entryId).toList();
+    state = res;
   }
 
   Future<void> updateExpense(int id, Map<String, dynamic> map) async {

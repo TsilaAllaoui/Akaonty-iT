@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:akaontyit/model/bank_entry_model.dart';
 import 'package:akaontyit/model/debt_model.dart';
 import 'package:akaontyit/model/entry_model.dart';
+import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,7 +49,8 @@ class DatabaseHelper {
   static List<Map<String, dynamic>> entriesBackup = [];
   static List<Map<String, dynamic>> bankEntriesBackup = [];
   static List<Map<String, dynamic>> debtsBackup = [];
-  static int databaseVersion = 2;
+  static List<Map<String, dynamic>> profilesBackup = [];
+  static int databaseVersion = 4;
 
   DatabaseHelper._createInstance();
 
@@ -57,34 +59,40 @@ class DatabaseHelper {
     return dbHelper!;
   }
 
-  static Future<Database> createDatabase() async {
+  static Future<Database> getOrCreateDatabase() async {
     if (db != null) {
       var currentDbVersion = await db!.getVersion();
-      if (currentDbVersion <= databaseVersion) {
-        migrateDb(db!, databaseVersion);
+
+      if (currentDbVersion < databaseVersion) {
+        await migrateDb(db!, currentDbVersion, databaseVersion);
+        await db!.setVersion(databaseVersion);
       }
+
       return db!;
     }
 
+    // Request storage permission if needed
     requestStoragePermission();
     var appDir = await getApplicationDocumentsDirectory();
 
     final database = await openDatabase(
       "${appDir.path}/database.db",
-      onCreate: (db, version) {
-        db.execute(
+      version: databaseVersion, // Specify the desired version of the DB
+      onCreate: (db, version) async {
+        // Create tables for the initial version of the DB
+        await db.execute(
           'CREATE TABLE expenses(id INTEGER PRIMARY KEY, title TEXT, amount INTEGER, date TEXT, entry_id INTEGER, type TEXT)',
         );
-        db.execute(
+        await db.execute(
           'CREATE TABLE entries(id INTEGER PRIMARY KEY, month TEXT, year TEXT, red INTEGER, green INTEGER, blue INTEGER)',
         );
-        db.execute(
+        await db.execute(
           'CREATE TABLE bank_entries(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, type TEXT)',
         );
-        db.execute(
+        await db.execute(
           'CREATE TABLE debts(id INTEGER PRIMARY KEY, amount INTEGER, date TEXT, updateDate TEXT, type TEXT, name TEXT)',
         );
-        insertDebt(
+        await insertDebt(
           DebtItem(
             date: dateFormatter.format(DateTime.now()),
             amount: 0,
@@ -93,7 +101,6 @@ class DatabaseHelper {
         );
         return;
       },
-      version: databaseVersion,
     );
     return database;
   }
@@ -137,7 +144,7 @@ class DatabaseHelper {
   }
 
   static Future<Database> getDatabase() async {
-    db ??= await createDatabase();
+    db ??= await getOrCreateDatabase();
     return db!;
   }
 
@@ -336,14 +343,79 @@ class DatabaseHelper {
     return debts;
   }
 
-  static Future<void> migrateDb(Database db, int newVersion) async {
-    // Adding the new column updateDate as TEXT
-    final result = await db.rawQuery("PRAGMA table_info(debts)");
-    final columns = result.map((row) => row['name'] as String).toList();
+  static Future<void> migrateDb(
+    Database db,
+    int currentVersion,
+    int newVersion,
+  ) async {
+    if (currentVersion < 4) {
+      var result = await db.rawQuery("PRAGMA table_info(debts)");
+      var columns = result.map((row) => row['name'] as String).toList();
+      if (!columns.contains('updateDate')) {
+        await db.execute('ALTER TABLE debts ADD COLUMN updateDate TEXT');
+      }
 
-    if (!columns.contains('updateDate')) {
-      await db.execute('ALTER TABLE debts ADD COLUMN updateDate TEXT');
+      // Check if expenses table has profileId column
+      result = await db.rawQuery("PRAGMA table_info(expenses)");
+      columns = result.map((row) => row['name'] as String).toList();
+      if (!columns.contains('profileId')) {
+        await db.execute('ALTER TABLE expenses ADD COLUMN profileId INTEGER');
+      }
+
+      // Check if profiles table exists and create it if not
+      result = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'",
+      );
+      if (result.isEmpty) {
+        await db.execute('''
+    CREATE TABLE profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    )
+  ''');
+      }
+
+      // Check if profiles table is empty and insert "default" profile if needed
+      result = await db.rawQuery("SELECT COUNT(*) as count FROM profiles");
+      int count = Sqflite.firstIntValue(result) ?? 0;
+      if (count == 0) {
+        var defaultProfileId = await db.insert('profiles', {'name': 'default'});
+        await db.execute(
+          "UPDATE expenses SET profileId = ? WHERE profileId IS NULL",
+          [defaultProfileId],
+        );
+      }
     }
-    // Add more if there is more update in the future
+  }
+
+  static Future<void> insertProfileEntry(ProfileEntryItem profile) async {
+    var db = await getDatabase();
+    await db.insert(
+      "profiles",
+      profile.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<List<ProfileEntryItem>> fetchProfileEntries() async {
+    List<ProfileEntryItem> profileEntries = [];
+    var db = await getDatabase();
+
+    var res = await db.query("profiles", orderBy: 'name ASC');
+    for (final entry in res) {
+      ProfileEntryItem profileEntry = ProfileEntryItem.fromMap(entry);
+      profileEntries.add(profileEntry);
+    }
+    return profileEntries;
+  }
+
+  static deleteProfileEntry(ProfileEntryItem profileEntry) async {
+    var db = await getDatabase();
+    await db.delete("profiles", where: "id = ?", whereArgs: [profileEntry.id]);
+    await db.delete(
+      "expenses",
+      where: "profileId = ?",
+      whereArgs: [profileEntry.id],
+    );
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:akaontyit/authentification/pin_change_screen.dart';
+import 'package:akaontyit/model/profile_entry_model.dart';
+import 'package:akaontyit/provider/profiles_provider.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -148,8 +150,9 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<bool> getExpensesInDb() async {
-    await DatabaseHelper.createDatabase();
+    await DatabaseHelper.getOrCreateDatabase();
 
+    // Entries
     var entries = await DatabaseHelper.fetchEntries();
     if (entries.isEmpty) {
       ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
@@ -157,11 +160,19 @@ class _HomeState extends ConsumerState<Home> {
     } else {
       var first = entries.first;
       ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
+
+      // Expenses
       ref
           .read(expensesProvider.notifier)
           .setExpenses(ref.read(currentEntryProvider)!.id!);
     }
 
+    // Profiles
+    var profiles = await DatabaseHelper.fetchProfileEntries();
+    ref.read(profileEntriesProvider.notifier).setProfileEntries(profiles);
+    ref
+        .read(currentProfileEntryProvider.notifier)
+        .setCurrentProfileEntryByName("default");
     return true;
   }
 
@@ -272,6 +283,9 @@ class _HomeState extends ConsumerState<Home> {
 
   final TextEditingController _controller = TextEditingController();
 
+  ProfileEntryItem? selectedProfile;
+  List<ProfileEntryItem>? profiles;
+
   @override
   void initState() {
     _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -289,6 +303,8 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     int navIndex = ref.watch(navBarIndexProvider);
+    selectedProfile = ref.watch(currentProfileEntryProvider);
+    profiles = ref.watch(profileEntriesProvider);
 
     Widget renderContent() {
       switch (navIndex) {
@@ -460,7 +476,39 @@ class _HomeState extends ConsumerState<Home> {
                   renderCogMenu(),
                 ],
               )
-              : SizedBox(),
+              : (navIndex == 1
+                  ? Row(
+                    children: [
+                      SizedBox(),
+                      DropdownButton<String>(
+                        value: selectedProfile!.name,
+                        onChanged: (String? newProfileName) {
+                          if (newProfileName != null) {
+                            ProfileEntryItem? newProfile = profiles?.firstWhere(
+                              (profile) => profile.name == newProfileName,
+                            );
+
+                            if (newProfile != null) {
+                              setState(() {
+                                selectedProfile = newProfile;
+                                ref
+                                    .read(currentProfileEntryProvider.notifier)
+                                    .setCurrentProfileEntry(newProfile);
+                              });
+                            }
+                          }
+                        },
+                        items:
+                            profiles?.map((profile) {
+                              return DropdownMenuItem<String>(
+                                value: profile.name,
+                                child: Text(profile.name ?? "Unknown"),
+                              );
+                            }).toList(),
+                      ),
+                    ],
+                  )
+                  : SizedBox()),
         ],
       ),
     );

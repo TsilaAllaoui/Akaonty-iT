@@ -1,4 +1,6 @@
+import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/provider/expenses_provider.dart';
+import 'package:akaontyit/provider/profiles_provider.dart';
 import 'package:akaontyit/widgets/expenses/expense_input.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +19,12 @@ class Expenses extends ConsumerStatefulWidget {
 class _ExpensesState extends ConsumerState<Expenses> {
   @override
   Widget build(BuildContext context) {
-    List<ExpenseItem> expenses = ref.watch(expensesProvider);
+    ProfileEntryItem? currentProfile = ref.watch(currentProfileEntryProvider);
+    var profileExpenses = ref
+        .watch(expensesProvider)
+        .where((expense) => expense.profileId == currentProfile?.id);
+    Iterable<ExpenseItem> expenses =
+        currentProfile == null ? [] : profileExpenses;
     List<ExpenseItem> incomes = [];
     List<ExpenseItem> outcomes = [];
     int totalIncome = 0;

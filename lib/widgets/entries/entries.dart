@@ -22,7 +22,7 @@ class _EntriesState extends ConsumerState<Entries> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<bool> getEntriesFromDb() async {
-    await DatabaseHelper.createDatabase();
+    await DatabaseHelper.getOrCreateDatabase();
     var res = await DatabaseHelper.fetchEntries();
     ref.read(entriesProvider.notifier).setEntries(res);
     return true;
