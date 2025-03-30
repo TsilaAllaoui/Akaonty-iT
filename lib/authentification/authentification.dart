@@ -4,6 +4,7 @@ import 'package:akaontyit/authentification/pin_change_screen.dart';
 import 'package:akaontyit/authentification/pin_manager.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screen_lock/flutter_screen_lock.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:akaontyit/widgets/home.dart';
@@ -32,7 +33,7 @@ class _AuthScreenState extends State<AuthScreen> {
           animType: AnimType.bottomSlide,
           title: "Quit app?",
           btnOkOnPress: () {
-            exit(0);
+            SystemNavigator.pop();
           },
           btnCancelOnPress: () => {},
           btnCancelText: "No",
@@ -178,7 +179,7 @@ class _AuthConfirmationState extends State<AuthConfirmation> {
           animType: AnimType.bottomSlide,
           title: "Quit app?",
           btnOkOnPress: () {
-            exit(0);
+            SystemNavigator.pop();
           },
           btnCancelOnPress: () => {},
           btnCancelText: "No",

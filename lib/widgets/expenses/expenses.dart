@@ -197,6 +197,12 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
   }
 
   void _filterSearchResults(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredItems = widget.list;
+      });
+      return;
+    }
     _controller.text = query;
     List<ExpenseItem> filteredList =
         widget.list
@@ -364,7 +370,7 @@ class _ExpenseListState extends ConsumerState<ExpenseList> {
                         );
                         await showUpdateInput(expenseIndex);
                         setState(() {
-                          _filteredItems = ref.read(expensesProvider);
+                          _filterSearchResults(_controller.text);
                         });
                       },
                       child: const Icon(Icons.edit),

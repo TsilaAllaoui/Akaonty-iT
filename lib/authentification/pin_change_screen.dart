@@ -5,6 +5,7 @@ import 'package:akaontyit/authentification/authentification.dart';
 import 'package:animated_pin_input_text_field/animated_pin_input_text_field.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PINChangeScreen extends StatefulWidget {
   const PINChangeScreen({super.key});
@@ -59,15 +60,15 @@ class PINChangeScreenState extends State<PINChangeScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        AwesomeDialog(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        await AwesomeDialog(
           context: context,
           dialogType: DialogType.question,
           animType: AnimType.bottomSlide,
           title: "Quit app?",
           btnOkOnPress: () {
-            exit(0);
+            SystemNavigator.pop();
           },
           btnCancelOnPress: () {},
           btnCancelText: "No",

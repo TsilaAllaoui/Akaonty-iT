@@ -318,7 +318,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       backgroundColor: WidgetStateProperty.all(Colors.green),
                     ),
                     onPressed: () async => await addExpense(),
-                    child: const Text("Save"),
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -332,7 +335,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                       ),
                     ),
                     onPressed: cancelInput,
-                    child: const Text("Cancel"),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),

@@ -10,7 +10,6 @@ import 'package:akaontyit/widgets/bank/bank_input.dart';
 import 'package:akaontyit/widgets/debts/debt_input.dart';
 import 'package:akaontyit/widgets/debts/debts.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:akaontyit/widgets/expenses/expense_input.dart';
@@ -271,74 +270,6 @@ class _HomeState extends ConsumerState<Home> {
     }
   }
 
-  Future<bool> quitApp() async {
-    bool value = false;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              height: 150,
-              width: MediaQuery.of(context).size.width - 20,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 15),
-                    child: const Text(
-                      "Exit?",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          await backupDatabase();
-                          SystemChannels.platform.invokeMethod(
-                            'SystemNavigator.pop',
-                          );
-                          value = true;
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(Colors.red),
-                        ),
-                        child: const Text("Yes"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(
-                            Colors.blueGrey,
-                          ),
-                        ),
-                        child: const Text("No"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    return value;
-  }
-
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -559,7 +490,7 @@ class _HomeState extends ConsumerState<Home> {
     );
 
     return PopScope(
-      onPopInvokedWithResult: (didPop, result) => quitApp,
+      onPopInvokedWithResult: (didPop, result) {},
       child: FutureBuilder(
         future: pendingTransaction,
         builder: (context, snapshot) {
@@ -577,7 +508,7 @@ class _HomeState extends ConsumerState<Home> {
                       context: context,
                       dialogType: DialogType.question,
                       animType: AnimType.bottomSlide,
-                      title: "Quit app?",
+                      title: "com.allaoui.akaontyit?",
                       btnOkOnPress: () {
                         exit(0);
                       },
