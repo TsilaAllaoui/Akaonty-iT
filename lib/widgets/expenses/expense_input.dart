@@ -135,6 +135,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   @override
   void initState() {
+    super.initState();
     var currentExpense = ref.read(currentExpenseProvider);
     if (currentExpense != null) {
       titleController.text = currentExpense.title;
@@ -145,10 +146,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       amountController.selection = TextSelection.fromPosition(
         TextPosition(offset: amountController.text.length),
       );
-      selectedType = currentExpense.type;
+      selectedType = ref.read(currentExpenseTabTypeProvider)!;
       selectedDate = currentExpense.date;
     }
-    super.initState();
   }
 
   @override
@@ -159,6 +159,8 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   @override
   Widget build(BuildContext context) {
+    selectedType = ref.watch(currentExpenseTabTypeProvider)!;
+
     return Scaffold(
       key: scaffoldKey,
       body: Column(
@@ -301,10 +303,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                   },
                   values: const ["Income", "Outcome"],
                   value:
-                      ref.read(currentExpenseTabTypeProvider) ==
-                              ExpenseType.income
-                          ? "Income"
-                          : "Outcome",
+                      selectedType == ExpenseType.income ? "Income" : "Outcome",
                 ),
               ),
             ],

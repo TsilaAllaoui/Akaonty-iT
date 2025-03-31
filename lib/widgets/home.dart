@@ -72,7 +72,7 @@ class _HomeState extends ConsumerState<Home> {
       context: context,
       initialDate: now,
       firstDate: DateTime(1998, 1, 1),
-      lastDate: now,
+      lastDate: DateTime(3000),
     );
     if (selectedDate == null) {
       Fluttertoast.showToast(
@@ -168,6 +168,11 @@ class _HomeState extends ConsumerState<Home> {
           .setExpenses(ref.read(currentEntryProvider)!.id!);
     }
 
+    // Current expense type
+    ref
+        .read(currentExpenseTabTypeProvider.notifier)
+        .setCurrentExpenseTabType(ExpenseType.income);
+
     // Profiles
     var profiles = await DatabaseHelper.fetchProfileEntries();
     ref.read(profileEntriesProvider.notifier).setProfileEntries(profiles);
@@ -243,20 +248,27 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   Future<void> backupDatabase() async {
-    String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Please select an output file:',
-      fileName: 'database.db',
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: "Select folder to save database",
     );
-
-    if (outputFile == null) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(content: Text("Error while backuping database")),
-      );
+    if (selectedDirectory == null) {
+      ScaffoldMessenger.of(
+        _scaffoldKey.currentContext!,
+      ).showSnackBar(const SnackBar(content: Text("User cancelled action")));
     } else {
-      bool result = await DatabaseHelper.backupDatabase(outputFile);
+      var date = DateTime.now();
+      DateFormat format = DateFormat("dd_MMMM_yyyy_HH_mm_ss");
+      var parsedDate = format.format(date);
+      bool result = await DatabaseHelper.backupDatabase(
+        "$selectedDirectory/database_$parsedDate.db",
+      );
       if (result) {
         ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          SnackBar(content: Text("Database backup at \"$outputFile\"")),
+          SnackBar(content: Text("$selectedDirectory/database_$parsedDate.db")),
+        );
+      } else {
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+          SnackBar(content: Text("Erro while backuping database")),
         );
       }
     }
@@ -492,7 +504,7 @@ class _HomeState extends ConsumerState<Home> {
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
-                        value: selectedProfile!.name,
+                        value: selectedProfile?.name,
                         onChanged: (String? newProfileName) {
                           if (newProfileName != null) {
                             ProfileEntryItem? newProfile = profiles?.firstWhere(

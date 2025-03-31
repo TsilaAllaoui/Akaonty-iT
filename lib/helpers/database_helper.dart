@@ -5,9 +5,11 @@ import 'package:akaontyit/model/debt_model.dart';
 import 'package:akaontyit/model/entry_model.dart';
 import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart' as Path;
 
 import '../model/expense_model.dart';
 
@@ -19,7 +21,8 @@ Future<void> requestStoragePermission() async {
 
   try {
     // Request storage permission
-    await Permission.storage.request();
+    var status = await Permission.storage.request();
+    debugPrint(status.toString());
 
     // Android 13+ media permissions
     if (await Permission.photos.isDenied ||
@@ -30,7 +33,8 @@ Future<void> requestStoragePermission() async {
 
     // Android 10+ Scoped Storage
     if (await Permission.manageExternalStorage.isDenied) {
-      await Permission.manageExternalStorage.request();
+      var status = await Permission.manageExternalStorage.request();
+      debugPrint(status.toString());
     }
 
     // Handle permanently denied permissions
@@ -60,7 +64,7 @@ class DatabaseHelper {
   }
 
   static Future<Database> getOrCreateDatabase() async {
-    if (db != null) {
+    if (db != null && db!.isOpen) {
       var currentDbVersion = await db!.getVersion();
 
       if (currentDbVersion < databaseVersion) {
@@ -96,35 +100,53 @@ class DatabaseHelper {
             'amount': 0,
             'date': dateFormatter.format(DateTime.now()),
             'updateDate': dateFormatter.format(DateTime.now()),
-            'type': DebtType.selfTotal,
+            'type': "self_total",
           }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+          var currentDbVersion = await db.getVersion();
+          await migrateDb(db, currentDbVersion, databaseVersion);
         },
       );
 
       return db!;
     } catch (e) {
       debugPrint(e.toString());
+      var date = DateTime.now();
+      DateFormat format = DateFormat("dd_MMMM_yyyy_HH_mm_ss");
+      var parsedDate = format.format(date);
+      backupDatabase("/storage/emulated/0/akaontyit/database_$parsedDate.db");
       exit(0);
     }
   }
 
-  static Future<bool> backupDatabase(String path) async {
-    if (path[path.length - 1] == '/' || path[path.length - 1] == '\\') {
-      path = path.substring(0, path.length - 2);
-    }
-    requestStoragePermission();
-    await DatabaseHelper.db!.close();
-    var appDir = await getApplicationDocumentsDirectory();
-    File dbFile = File("${appDir.path}/database.db");
+  static Future<bool> backupDatabase(String filePath) async {
+    await requestStoragePermission();
+
+    // Close the database before copying
+    await DatabaseHelper.db?.close();
+
+    // Get the path to the database file
+    Directory appDir = await getApplicationDocumentsDirectory();
+    String dbPath = Path.join(appDir.path, "database.db");
+    File dbFile = File(dbPath);
+
     if (await dbFile.exists()) {
       try {
-        dbFile.copySync("$path/database.db");
-        final database = await openDatabase("${appDir.path}/database.db");
-        DatabaseHelper.db = database;
+        // Copy the database file to the target location
+        await dbFile.copy(filePath);
+
+        // Reopen the database
+        DatabaseHelper.db = await openDatabase(dbPath);
         return true;
-      } catch (identifier) {
-        debugPrint("Error while backuping database : $identifier");
+      } catch (e) {
+        debugPrint("Error while backing up database");
+        var date = DateTime.now();
+        DateFormat format = DateFormat("dd_MMMM_yyyy_HH_mm_ss");
+        var parsedDate = format.format(date);
+        backupDatabase("/storage/emulated/0/akaontyit/database_$parsedDate.db");
       }
+    } else {
+      debugPrint("Database file does not exist at path: $dbPath");
     }
     return false;
   }
@@ -135,19 +157,23 @@ class DatabaseHelper {
     File dbFile = File(path);
     if (await dbFile.exists()) {
       try {
-        var file = dbFile.copySync("${appDir.path}/database.db");
+        var file = dbFile.copySync(Path.join(appDir.path, "database.db"));
         final database = await openDatabase(file.path);
         DatabaseHelper.db = database;
         return true;
-      } catch (identifier) {
-        debugPrint("Error while backuping database : $identifier");
+      } catch (e) {
+        debugPrint("Error while backuping database");
+        var date = DateTime.now();
+        DateFormat format = DateFormat("dd_MMMM_yyyy_HH_mm_ss");
+        var parsedDate = format.format(date);
+        backupDatabase("/storage/emulated/0/akaontyit/database_$parsedDate.db");
       }
     }
     return false;
   }
 
   static Future<Database> getDatabase() async {
-    db ??= await getOrCreateDatabase();
+    db = await getOrCreateDatabase();
     return db!;
   }
 
@@ -351,43 +377,41 @@ class DatabaseHelper {
     int currentVersion,
     int newVersion,
   ) async {
-    if (currentVersion < 4) {
-      var result = await db.rawQuery("PRAGMA table_info(debts)");
-      var columns = result.map((row) => row['name'] as String).toList();
-      if (!columns.contains('updateDate')) {
-        await db.execute('ALTER TABLE debts ADD COLUMN updateDate TEXT');
-      }
+    var result = await db.rawQuery("PRAGMA table_info(debts)");
+    var columns = result.map((row) => row['name'] as String).toList();
+    if (!columns.contains('updateDate')) {
+      await db.execute('ALTER TABLE debts ADD COLUMN updateDate TEXT');
+    }
 
-      // Check if expenses table has profileId column
-      result = await db.rawQuery("PRAGMA table_info(expenses)");
-      columns = result.map((row) => row['name'] as String).toList();
-      if (!columns.contains('profileId')) {
-        await db.execute('ALTER TABLE expenses ADD COLUMN profileId INTEGER');
-      }
+    // Check if expenses table has profileId column
+    result = await db.rawQuery("PRAGMA table_info(expenses)");
+    columns = result.map((row) => row['name'] as String).toList();
+    if (!columns.contains('profileId')) {
+      await db.execute('ALTER TABLE expenses ADD COLUMN profileId INTEGER');
+    }
 
-      // Check if profiles table exists and create it if not
-      result = await db.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'",
-      );
-      if (result.isEmpty) {
-        await db.execute('''
+    // Check if profiles table exists and create it if not
+    result = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'",
+    );
+    if (result.isEmpty) {
+      await db.execute('''
     CREATE TABLE profiles (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL
     )
   ''');
-      }
+    }
 
-      // Check if profiles table is empty and insert "default" profile if needed
-      result = await db.rawQuery("SELECT COUNT(*) as count FROM profiles");
-      int count = Sqflite.firstIntValue(result) ?? 0;
-      if (count == 0) {
-        var defaultProfileId = await db.insert('profiles', {'name': 'default'});
-        await db.execute(
-          "UPDATE expenses SET profileId = ? WHERE profileId IS NULL",
-          [defaultProfileId],
-        );
-      }
+    // Check if profiles table is empty and insert "default" profile if needed
+    result = await db.rawQuery("SELECT COUNT(*) as count FROM profiles");
+    int count = Sqflite.firstIntValue(result) ?? 0;
+    if (count == 0) {
+      var defaultProfileId = await db.insert('profiles', {'name': 'default'});
+      await db.execute(
+        "UPDATE expenses SET profileId = ? WHERE profileId IS NULL",
+        [defaultProfileId],
+      );
     }
   }
 
