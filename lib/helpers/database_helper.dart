@@ -445,4 +445,14 @@ class DatabaseHelper {
       whereArgs: [profileEntry.id],
     );
   }
+
+  static updateProfileEntry(ProfileEntryItem profileEntry) async {
+    var db = await getDatabase();
+    await db.update(
+      "profiles",
+      {"name": profileEntry.name},
+      where: "id = ?",
+      whereArgs: [profileEntry.id],
+    );
+  }
 }

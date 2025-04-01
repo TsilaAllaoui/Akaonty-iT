@@ -17,6 +17,7 @@ class ExpenseInput extends ConsumerStatefulWidget {
 }
 
 class _ExpenseInputState extends ConsumerState<ExpenseInput> {
+  bool firstInit = true;
   var titleController = TextEditingController();
   var amountController = CurrencyTextFieldController(
     currencySymbol: "",
@@ -82,6 +83,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
     ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
     var currentEntryId = ref.read(currentEntryProvider)!.id!;
     ref.read(expensesProvider.notifier).setExpenses(currentEntryId);
+    ref
+        .read(currentExpenseTabTypeProvider.notifier)
+        .setCurrentExpenseTabType(selectedType);
     Navigator.of(scaffoldKey.currentContext!).pop();
   }
 
@@ -94,8 +98,8 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
           currentExpense == null
               ? now
               : dateFormatter.parse(currentExpense.date),
-      firstDate: DateTime(now.year, now.month, 1),
-      lastDate: now,
+      firstDate: DateTime(1997),
+      lastDate: DateTime(3000),
       is24HourMode: true,
       isShowSeconds: false,
       minutesInterval: 1,
@@ -130,6 +134,9 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   void cancelInput() {
     ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
+    ref
+        .read(currentExpenseTabTypeProvider.notifier)
+        .setCurrentExpenseTabType(selectedType);
     Navigator.of(context).pop();
   }
 
@@ -148,6 +155,7 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
       );
       selectedType = ref.read(currentExpenseTabTypeProvider)!;
       selectedDate = currentExpense.date;
+      firstInit = true;
     }
   }
 
@@ -159,7 +167,10 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   @override
   Widget build(BuildContext context) {
-    selectedType = ref.watch(currentExpenseTabTypeProvider)!;
+    if (ref.read(currentExpenseTabTypeProvider) != null && firstInit) {
+      selectedType = ref.read(currentExpenseTabTypeProvider)!;
+      firstInit = false;
+    }
 
     return Scaffold(
       key: scaffoldKey,
@@ -296,9 +307,6 @@ class _ExpenseInputState extends ConsumerState<ExpenseInput> {
                           value == "Income"
                               ? ExpenseType.income
                               : ExpenseType.outcome;
-                      if (ref.read(currentExpenseProvider) != null) {
-                        ref.read(currentExpenseProvider)!.type = selectedType;
-                      }
                     });
                   },
                   values: const ["Income", "Outcome"],

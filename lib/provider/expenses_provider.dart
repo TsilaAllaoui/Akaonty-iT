@@ -74,7 +74,7 @@ final currentExpenseProvider =
 class CurrentExpenseTabTypeNotifier extends StateNotifier<ExpenseType?> {
   CurrentExpenseTabTypeNotifier() : super(null);
 
-  void setCurrentExpenseTabType(ExpenseType type) {
+  void setCurrentExpenseTabType(ExpenseType? type) {
     state = type;
   }
 }

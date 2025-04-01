@@ -16,14 +16,26 @@ class Expenses extends ConsumerStatefulWidget {
   ConsumerState<Expenses> createState() => _ExpensesState();
 }
 
-class _ExpensesState extends ConsumerState<Expenses> {
+class _ExpensesState extends ConsumerState<Expenses>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
+    var currentType = ref.read(currentExpenseTabTypeProvider);
+    if (currentType != null && currentType == ExpenseType.income) {
+      _tabController.index = 0;
+    } else if (currentType != null && currentType == ExpenseType.outcome) {
+      _tabController.index = 1;
+    } else {
+      _tabController.index = 2;
+    }
     ProfileEntryItem? currentProfile = ref.watch(currentProfileEntryProvider);
     var profileExpenses = ref
         .watch(expensesProvider)
@@ -57,6 +69,7 @@ class _ExpensesState extends ConsumerState<Expenses> {
       length: 3,
       child: Scaffold(
         appBar: TabBar(
+          controller: _tabController,
           onTap:
               (value) => {
                 if (value == 0)
@@ -78,16 +91,36 @@ class _ExpensesState extends ConsumerState<Expenses> {
               color: Colors.green,
               icon: Icons.arrow_drop_up,
               title: "Income",
+              onTap: () {
+                setState(() {
+                  _tabController.index = 0;
+                });
+              },
             ),
             Tab(
               color: Colors.red,
               icon: Icons.arrow_drop_down,
               title: "Outcome",
+              onTap: () {
+                setState(() {
+                  _tabController.index = 1;
+                });
+              },
             ),
-            Tab(color: Colors.blue, icon: Icons.numbers, title: "Summary"),
+            Tab(
+              color: Colors.blue,
+              icon: Icons.numbers,
+              title: "Summary",
+              onTap: () {
+                setState(() {
+                  _tabController.index = 2;
+                });
+              },
+            ),
           ],
         ),
         body: TabBarView(
+          controller: _tabController,
           children: [
             ExpenseList(
               total: totalIncome,

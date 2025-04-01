@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:akaontyit/authentification/pin_change_screen.dart';
 import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/provider/profiles_provider.dart';
+import 'package:akaontyit/widgets/profile/edit_profile_screen.dart';
 import 'package:akaontyit/widgets/profile/new_profile_screen.dart';
+import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -90,9 +92,7 @@ class _HomeState extends ConsumerState<Home> {
     var parsedDate = format.format(selectedDate);
     var splits = parsedDate.split(" ");
     EntryItem entry = EntryItem(
-      color: Color(
-        (math.Random().nextDouble() * 0xFFFFFF).toInt(),
-      ).withOpacity(1.0),
+      color: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()),
       month: splits[1],
       year: splits[2],
     );
@@ -179,9 +179,23 @@ class _HomeState extends ConsumerState<Home> {
 
     if (ref.read(currentProfileEntryProvider) == null ||
         ref.read(currentProfileEntryProvider)?.name == "default") {
-      ref
-          .read(currentProfileEntryProvider.notifier)
-          .setCurrentProfileEntryByName("default");
+      ProfileEntryItem? defaultProfile;
+      for (var profile in profiles) {
+        if (profile.name == "default") {
+          defaultProfile = profile;
+          break;
+        }
+      }
+
+      if (defaultProfile != null) {
+        ref
+            .read(currentProfileEntryProvider.notifier)
+            .setCurrentProfileEntryByName("default");
+      } else {
+        ref
+            .read(currentProfileEntryProvider.notifier)
+            .setCurrentProfileEntry(profiles[0]);
+      }
     }
 
     return true;
@@ -206,7 +220,10 @@ class _HomeState extends ConsumerState<Home> {
 
     Future.delayed(
       const Duration(seconds: 4),
-      () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+      () =>
+          ScaffoldMessenger.of(
+            _scaffoldKey.currentContext!,
+          ).hideCurrentMaterialBanner(),
     );
 
     final materialBanner = MaterialBanner(
@@ -535,6 +552,9 @@ class _HomeState extends ConsumerState<Home> {
                           delayDuration: Duration.zero,
                           pointerColor: Colors.transparent,
                           fadeDuration: Duration(milliseconds: 750),
+                          spacing: 7,
+                          iconSize: 20,
+                          buttonSize: 40,
                         ),
                         actions: [
                           PieAction(
@@ -544,17 +564,11 @@ class _HomeState extends ConsumerState<Home> {
                             ),
                             tooltip: Text("Delete profile"),
                             onSelect: () async {
-                              if (profiles!.length == 1) {
-                                ScaffoldMessenger.of(
-                                  _scaffoldKey.currentContext!,
-                                ).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Cannot delete the only profile available",
-                                    ),
-                                  ),
+                              if (profiles!.length <= 1) {
+                                await showSnackBar(
+                                  context,
+                                  "Cannot delete the only profile available",
                                 );
-                                return;
                               }
                               AwesomeDialog(
                                 context: context,
@@ -602,6 +616,27 @@ class _HomeState extends ConsumerState<Home> {
                               );
                             },
                             child: const Icon(Icons.person_add),
+                          ),
+                          PieAction(
+                            buttonTheme: const PieButtonTheme(
+                              backgroundColor: Color.fromARGB(
+                                255,
+                                41,
+                                106,
+                                218,
+                              ),
+                              iconColor: Colors.white,
+                            ),
+                            tooltip: Text("Edit profile"),
+                            onSelect: () async {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => EditProfileScreen(),
+                                ),
+                              );
+                            },
+
+                            child: const Icon(Icons.edit),
                           ),
                         ],
                         child: Icon(Icons.person_add),
