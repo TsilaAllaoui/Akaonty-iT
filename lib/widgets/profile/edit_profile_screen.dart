@@ -1,6 +1,7 @@
 import 'package:akaontyit/helpers/database_helper.dart';
 import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/widgets/home.dart';
+import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,13 +35,7 @@ class EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       selectedProfile!.name = _nameController.text.trim();
       DatabaseHelper.updateProfileEntry(selectedProfile!);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Profile updated successfully!'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSnackBar(context, 'Profile updated successfully!');
 
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
@@ -48,6 +43,8 @@ class EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           context,
         ).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
       });
+    } else {
+      showSnackBar(context, "Choose a profile to edit", color: Colors.grey);
     }
   }
 

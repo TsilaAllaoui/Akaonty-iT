@@ -1,20 +1,23 @@
+import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:akaontyit/model/bank_entry_model.dart';
-import 'package:akaontyit/model/expense_model.dart';
 import 'package:akaontyit/provider/bank_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+
+var dateFormatter = DateFormat("dd/MM/yy HH:mm");
 
 class BankEntryInput extends ConsumerStatefulWidget {
   const BankEntryInput({super.key});
 
   @override
-  ConsumerState<BankEntryInput> createState() => _ExpenseInputState();
+  ConsumerState<BankEntryInput> createState() => _BankEntryInputState();
 }
 
-class _ExpenseInputState extends ConsumerState<BankEntryInput> {
+class _BankEntryInputState extends ConsumerState<BankEntryInput> {
   var amountController = CurrencyTextFieldController(
     currencySymbol: "",
     initIntValue: 0,
@@ -32,13 +35,10 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
     var value = amountController.text.replaceAll(".", "");
     var amount = int.tryParse(value);
     if (amount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid amount"),
-          dismissDirection: DismissDirection.down,
-          duration: Duration(seconds: 2),
-          elevation: 5,
-        ),
+      showSnackBar(
+        scaffoldKey.currentContext!,
+        "Invalid amount",
+        color: Colors.red,
       );
       return;
     }
@@ -87,11 +87,10 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
     );
 
     if (pick == null) {
-      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
-        const SnackBar(
-          content: Text("Current date used"),
-          duration: Duration(seconds: 2),
-        ),
+      showSnackBar(
+        scaffoldKey.currentContext!,
+        "Current date used",
+        color: Colors.grey,
       );
       pick = DateTime.now();
     }
@@ -128,165 +127,152 @@ class _ExpenseInputState extends ConsumerState<BankEntryInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      body: Container(
-        padding: const EdgeInsets.fromLTRB(10, 50, 10, 10),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(
-                      left: 20,
-                      top: 20,
-                      right: 20,
-                      bottom: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            child: TextField(
-                              onTapOutside: (PointerDownEvent e) {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                              },
-                              controller: amountController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                label: Text(
-                                  "Amount",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: DropDownMenu(
-                            onChanged: (value) {
-                              setState(() {
-                                selectedDevise = value!;
-                              });
-                            },
-                            values: const ["Fmg", "Ar"],
-                            value: selectedDevise,
-                          ),
-                        ),
-                      ],
-                    ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, _) {
+        cancelInput();
+      },
+      child: Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          title: const Text('Bank Entry'),
+          backgroundColor:
+              selectedType == BankEntryType.deposit
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Amount",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color:
+                        selectedType == BankEntryType.deposit
+                            ? Colors.greenAccent
+                            : Colors.redAccent,
+                    width: 1.5,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 10, bottom: 15),
-                      child: const Text(
-                        "Date:",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                child: TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter amount',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Currency",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              DropDownMenu(
+                onChanged: (value) {
+                  setState(() {
+                    selectedDevise = value!;
+                  });
+                },
+                values: const ["Fmg", "Ar"],
+                value: selectedDevise,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Date",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: pickDate,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color:
+                          selectedType == BankEntryType.deposit
+                              ? Colors.greenAccent
+                              : Colors.redAccent,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.date_range_outlined,
+                        size: 30,
+                        color:
+                            selectedType == BankEntryType.deposit
+                                ? Colors.greenAccent
+                                : Colors.redAccent,
                       ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: pickDate,
-                          icon: const Icon(
-                            Icons.date_range_outlined,
-                            size: 35,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: pickDate,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              ref.read(currentBankEntryProvider) == null
-                                  ? selectedDate
-                                  : ref.read(currentBankEntryProvider)!.date,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: DropDownMenu(
-                    title: "Type: ",
-                    onChanged: (value) {
-                      setState(() {
-                        selectedType =
-                            value == "Deposit"
-                                ? BankEntryType.deposit
-                                : BankEntryType.withdrawal;
-                        if (ref.read(currentBankEntryProvider) != null) {
-                          ref.read(currentBankEntryProvider)!.type =
-                              selectedType;
-                        }
-                      });
-                    },
-                    values: const ["Deposit", "Withdrawal"],
-                    value:
-                        ref.read(currentBankEntryProvider) == null
-                            ? (selectedType == BankEntryType.deposit
-                                ? "Deposit"
-                                : "Withdrawal")
-                            : (ref.read(currentBankEntryProvider)!.type ==
-                                    BankEntryType.deposit
-                                ? "Deposit"
-                                : "Withdrawal"),
+                      const SizedBox(width: 10),
+                      Text(selectedDate, style: const TextStyle(fontSize: 16)),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.green),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Transaction Type",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              DropDownMenu(
+                title: "Type: ",
+                onChanged: (value) {
+                  setState(() {
+                    selectedType =
+                        value == "Deposit"
+                            ? BankEntryType.deposit
+                            : BankEntryType.withdrawal;
+                  });
+                },
+                values: const ["Deposit", "Withdrawal"],
+                value:
+                    selectedType == BankEntryType.deposit
+                        ? "Deposit"
+                        : "Withdrawal",
+              ),
+              const SizedBox(height: 30),
+              Center(
+                child: ElevatedButton(
+                  onPressed: addBankEntry,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onPressed: addBankEntry,
-                    child: const Text("Save"),
+                    backgroundColor:
+                        selectedType == BankEntryType.deposit
+                            ? Colors.greenAccent
+                            : Colors.redAccent,
+                  ),
+                  child: Text(
+                    "Save Entry",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Colors.red.shade600,
-                      ),
-                    ),
-                    onPressed: cancelInput,
-                    child: const Text("Cancel"),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -51,160 +51,99 @@ class _BankEntryState extends ConsumerState<DebtEntry> {
   Widget build(BuildContext context) {
     DebtItem debt = widget.debt;
 
-    return Dismissible(
-      key: UniqueKey(),
-      background: Card(
+    return PieMenu(
+      theme: const PieTheme(
+        pointerColor: Colors.transparent,
+        fadeDuration: Duration(milliseconds: 750),
+      ),
+      actions: [
+        PieAction(
+          buttonTheme: const PieButtonTheme(
+            backgroundColor: Colors.red,
+            iconColor: Colors.white,
+          ),
+          tooltip: Text("Delete"),
+          onSelect: () async {
+            await ref.read(debtsProvider.notifier).removeDebt(debt);
+          },
+          child: const Icon(Icons.delete),
+        ),
+        PieAction(
+          buttonTheme: const PieButtonTheme(
+            backgroundColor: Colors.purple,
+            iconColor: Colors.white,
+          ),
+          tooltip: Text("Update"),
+          onSelect: showUpdateInput,
+          child: const Icon(Icons.edit),
+        ),
+      ],
+      child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         elevation: 5,
         child: Container(
           height: 75,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.red,
+            color:
+                debt.type == DebtType.self
+                    ? Colors.blue.shade200
+                    : Colors.orange.shade200,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Column(
-            children: [
-              const Text(
-                "Delete debt?",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Colors.white,
+          child: ListTile(
+            title:
+                debt.type == DebtType.other
+                    ? Text(
+                      debt.name!,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: debt.name!.length > 6 ? 10 : 20,
+                      ),
+                    )
+                    : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
+            ),
+            leading: Column(
+              children: [
+                Text(
+                  "${numberFormatter.format(debt.amount)} Fmg",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade400,
-                      ),
-                      onPressed: () {
-                        completer.complete(true);
-                      },
-                      child: const Text("Yes"),
-                    ),
+                Text(
+                  "${numberFormatter.format(debt.amount / 5)} Ar",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade400,
-                      ),
-                      onPressed: () {
-                        completer.complete(false);
-                      },
-                      child: const Text("No"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      confirmDismiss: dismissDebt,
-      onDismissed: (direction) async {
-        completer = Completer<bool>();
-        await ref.read(debtsProvider.notifier).removeDebt(debt);
-      },
-      child: PieMenu(
-        theme: const PieTheme(
-          pointerColor: Colors.transparent,
-          fadeDuration: Duration(milliseconds: 750),
-        ),
-        actions: [
-          PieAction(
-            buttonTheme: const PieButtonTheme(
-              backgroundColor: Colors.red,
-              iconColor: Colors.white,
+                ),
+              ],
             ),
-            tooltip: Text("Delete"),
-            onSelect: () async {
-              await ref.read(debtsProvider.notifier).removeDebt(debt);
-            },
-            child: const Icon(Icons.delete),
-          ),
-          PieAction(
-            buttonTheme: const PieButtonTheme(
-              backgroundColor: Colors.purple,
-              iconColor: Colors.white,
-            ),
-            tooltip: Text("Update"),
-            onSelect: showUpdateInput,
-            child: const Icon(Icons.edit),
-          ),
-        ],
-        child: Card(
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          elevation: 5,
-          child: Container(
-            height: 75,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color:
-                  debt.type == DebtType.self
-                      ? Colors.blue.shade200
-                      : Colors.orange.shade200,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: ListTile(
-              title:
-                  debt.type == DebtType.other
-                      ? Text(
-                        debt.name!,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: debt.name!.length > 6 ? 10 : 20,
-                        ),
-                      )
-                      : null,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 10,
-              ),
-              leading: Column(
-                children: [
-                  Text(
-                    "${numberFormatter.format(debt.amount)} Fmg",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Text(
-                    "${numberFormatter.format(debt.amount / 5)} Ar",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    debt.date,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black, fontSize: 15),
-                  ),
-                  Text(
-                    debt.updateDate,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black, fontSize: 10),
-                  ),
-                ],
-              ),
+            trailing: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  debt.date,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.black, fontSize: 15),
+                ),
+                Text(
+                  debt.updateDate,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.black, fontSize: 10),
+                ),
+              ],
             ),
           ),
         ),

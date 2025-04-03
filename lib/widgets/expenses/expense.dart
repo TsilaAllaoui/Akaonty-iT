@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:akaontyit/model/expense_model.dart';
 import 'package:flutter/material.dart';
@@ -14,19 +12,6 @@ class Expense extends ConsumerStatefulWidget {
 }
 
 class _ExpenseState extends ConsumerState<Expense> {
-  Completer completer = Completer();
-
-  Future<bool> dismissExpense(direction) async {
-    Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (completer.isCompleted) {
-        timer.cancel();
-      }
-    });
-    var res = await completer.future;
-    completer = Completer<bool>();
-    return res;
-  }
-
   @override
   Widget build(BuildContext context) {
     ExpenseItem expense = widget.expense;

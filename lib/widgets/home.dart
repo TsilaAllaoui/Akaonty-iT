@@ -8,7 +8,6 @@ import 'package:akaontyit/widgets/profile/new_profile_screen.dart';
 import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:akaontyit/provider/general_settings_provider.dart';
 import 'package:akaontyit/widgets/bank/bank_entries.dart';
 import 'package:akaontyit/widgets/bank/bank_input.dart';
@@ -218,42 +217,6 @@ class _HomeState extends ConsumerState<Home> {
     ref.read(expensesProvider.notifier).removeAllExpenses();
     ref.read(entriesProvider.notifier).removeAllEntries();
 
-    Future.delayed(
-      const Duration(seconds: 4),
-      () =>
-          ScaffoldMessenger.of(
-            _scaffoldKey.currentContext!,
-          ).hideCurrentMaterialBanner(),
-    );
-
-    final materialBanner = MaterialBanner(
-      dividerColor: Colors.transparent,
-      forceActionsBelow: true,
-      content: AwesomeSnackbarContent(
-        messageTextStyle: TextStyle(fontSize: 15),
-        titleTextStyle: TextStyle(fontSize: 20),
-        title: 'Info',
-        message: 'Database cleared!',
-        contentType: ContentType.warning,
-        inMaterialBanner: true,
-      ),
-      actions: [
-        Align(
-          alignment: Alignment.center,
-          child: SnackBarAction(
-            label: "Undo",
-            onPressed: restoreAll,
-            backgroundColor: Colors.yellow.shade400,
-            textColor: Colors.orange.shade800,
-          ),
-        ),
-      ],
-    );
-
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!)
-      ..hideCurrentMaterialBanner()
-      ..showMaterialBanner(materialBanner);
-
     var entries = await DatabaseHelper.fetchEntries();
     if (entries.isEmpty) {
       ref.read(currentEntryProvider.notifier).setCurrentEntry(null);
@@ -262,6 +225,12 @@ class _HomeState extends ConsumerState<Home> {
       ref.read(currentEntryProvider.notifier).setCurrentEntry(first);
     }
     ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
+
+    showSnackBar(
+      _scaffoldKey.currentContext!,
+      "Database deleted",
+      color: Colors.red,
+    );
   }
 
   Future<void> backupDatabase() async {
@@ -269,9 +238,11 @@ class _HomeState extends ConsumerState<Home> {
       dialogTitle: "Select folder to save database",
     );
     if (selectedDirectory == null) {
-      ScaffoldMessenger.of(
+      showSnackBar(
         _scaffoldKey.currentContext!,
-      ).showSnackBar(const SnackBar(content: Text("User cancelled action")));
+        "User cancelled action",
+        color: Colors.grey,
+      );
     } else {
       var date = DateTime.now();
       DateFormat format = DateFormat("dd_MMMM_yyyy_HH_mm_ss");
@@ -280,12 +251,15 @@ class _HomeState extends ConsumerState<Home> {
         "$selectedDirectory/database_$parsedDate.db",
       );
       if (result) {
-        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          SnackBar(content: Text("$selectedDirectory/database_$parsedDate.db")),
+        showSnackBar(
+          _scaffoldKey.currentContext!,
+          "$selectedDirectory/database_$parsedDate.db",
         );
       } else {
-        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          SnackBar(content: Text("Erro while backuping database")),
+        showSnackBar(
+          _scaffoldKey.currentContext!,
+          "Error while backuping database from file",
+          color: Colors.red,
         );
       }
     }
@@ -297,21 +271,22 @@ class _HomeState extends ConsumerState<Home> {
       String path = filePickerResult.files.single.path!;
       bool result = await DatabaseHelper.restoreDatabaseFromFile(path);
       if (result) {
-        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          SnackBar(
-            content:
-                result
-                    ? Text("Database restored from file")
-                    : Text("Error while restoring database from file"),
-          ),
+        showSnackBar(
+          _scaffoldKey.currentContext!,
+          result
+              ? "Database restored from file"
+              : "Error while restoring database from file",
+          color: result ? Colors.green : Colors.red,
         );
         pendingTransaction = getExpensesInDb();
         ref.read(navBarIndexProvider.notifier).setNavBarIndex(0);
         setState(() {});
       }
     } else {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text("Error while restoring database from file")),
+      showSnackBar(
+        _scaffoldKey.currentContext!,
+        "Error while restoring database from file",
+        color: Colors.red,
       );
     }
   }
@@ -565,9 +540,10 @@ class _HomeState extends ConsumerState<Home> {
                             tooltip: Text("Delete profile"),
                             onSelect: () async {
                               if (profiles!.length <= 1) {
-                                await showSnackBar(
+                                showSnackBar(
                                   context,
                                   "Cannot delete the only profile available",
+                                  color: Colors.grey,
                                 );
                               }
                               AwesomeDialog(

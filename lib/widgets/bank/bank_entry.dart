@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:akaontyit/model/bank_entry_model.dart';
 import 'package:akaontyit/model/expense_model.dart';
 import 'package:akaontyit/provider/bank_provider.dart';
@@ -18,19 +16,6 @@ class BankEntry extends ConsumerStatefulWidget {
 }
 
 class _BankEntryState extends ConsumerState<BankEntry> {
-  Completer<bool> completer = Completer<bool>();
-
-  Future<bool> dismissBankEntry(direction) async {
-    Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (completer.isCompleted) {
-        timer.cancel();
-      }
-    });
-    var res = await completer.future;
-    completer = Completer<bool>();
-    return res;
-  }
-
   void showUpdateInput() {
     ref
         .read(currentBankEntryProvider.notifier)
@@ -45,7 +30,6 @@ class _BankEntryState extends ConsumerState<BankEntry> {
 
   @override
   void dispose() {
-    completer = Completer<bool>();
     super.dispose();
   }
 
@@ -53,143 +37,79 @@ class _BankEntryState extends ConsumerState<BankEntry> {
   Widget build(BuildContext context) {
     BankEntryItem bankEntry = widget.bankEntry;
 
-    return Dismissible(
-      key: UniqueKey(),
-      background: Card(
+    return PieMenu(
+      theme: const PieTheme(
+        pointerColor: Colors.transparent,
+        fadeDuration: Duration(milliseconds: 750),
+      ),
+      actions: [
+        PieAction(
+          buttonTheme: const PieButtonTheme(
+            backgroundColor: Colors.red,
+            iconColor: Colors.white,
+          ),
+          tooltip: Text("Delete"),
+          onSelect: () async {
+            await ref
+                .read(bankEntriesProvider.notifier)
+                .removeBankEntry(bankEntry);
+          },
+          child: const Icon(Icons.delete),
+        ),
+        PieAction(
+          buttonTheme: const PieButtonTheme(
+            backgroundColor: Colors.orange,
+            iconColor: Colors.white,
+          ),
+          tooltip: Text("Update"),
+          onSelect: showUpdateInput,
+          child: const Icon(Icons.edit),
+        ),
+      ],
+      child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         elevation: 5,
         child: Container(
           height: 75,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.red,
+            color:
+                bankEntry.type == BankEntryType.deposit
+                    ? Colors.green.shade300
+                    : Colors.red.shade300,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Column(
-            children: [
-              const Text(
-                "Delete entry?",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Colors.white,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
+            ),
+            leading: Column(
+              children: [
+                Text(
+                  "${numberFormatter.format(bankEntry.amount)} Fmg",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade400,
-                      ),
-                      onPressed: () {
-                        completer.complete(true);
-                      },
-                      child: const Text("Yes"),
-                    ),
+                Text(
+                  "${numberFormatter.format(bankEntry.amount / 5)} Ar",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade400,
-                      ),
-                      onPressed: () {
-                        completer.complete(false);
-                      },
-                      child: const Text("No"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      confirmDismiss: dismissBankEntry,
-      onDismissed: (direction) async {
-        completer = Completer<bool>();
-        await ref.read(bankEntriesProvider.notifier).removeBankEntry(bankEntry);
-        ScaffoldMessenger.of(
-          ref.read(bankScaffoldKeyProvider).currentContext!,
-        ).showSnackBar(const SnackBar(content: Text('Entry deleted')));
-      },
-      child: PieMenu(
-        theme: const PieTheme(
-          pointerColor: Colors.transparent,
-          fadeDuration: Duration(milliseconds: 750),
-        ),
-        actions: [
-          PieAction(
-            buttonTheme: const PieButtonTheme(
-              backgroundColor: Colors.red,
-              iconColor: Colors.white,
+                ),
+              ],
             ),
-            tooltip: Text("Delete"),
-            onSelect: () async {
-              await ref
-                  .read(bankEntriesProvider.notifier)
-                  .removeBankEntry(bankEntry);
-            },
-            child: const Icon(Icons.delete),
-          ),
-          PieAction(
-            buttonTheme: const PieButtonTheme(
-              backgroundColor: Colors.orange,
-              iconColor: Colors.white,
-            ),
-            tooltip: Text("Update"),
-            onSelect: showUpdateInput,
-            child: const Icon(Icons.edit),
-          ),
-        ],
-        child: Card(
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          elevation: 5,
-          child: Container(
-            height: 75,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color:
-                  bankEntry.type == BankEntryType.deposit
-                      ? Colors.green.shade300
-                      : Colors.red.shade300,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 10,
-              ),
-              leading: Column(
-                children: [
-                  Text(
-                    "${numberFormatter.format(bankEntry.amount)} Fmg",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Text(
-                    "${numberFormatter.format(bankEntry.amount / 5)} Ar",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Text(
-                bankEntry.date,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
-              ),
+            trailing: Text(
+              bankEntry.date,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
             ),
           ),
         ),

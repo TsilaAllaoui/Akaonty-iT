@@ -2,7 +2,7 @@ name: akaontyit
 description: "Expense managment app"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.2.0
 
 environment:
   sdk: ^3.7.2
@@ -22,7 +22,6 @@ dependencies:
   month_picker_dialog: ^6.0.3
   pie_menu: ^3.2.7
   flutter_colorpicker: ^1.0.3
-  awesome_snackbar_content: ^0.1.1
   drop_down_list_menu: ^0.0.9
   omni_datetime_picker: ^2.1.1
   flutter_flushbar: ^0.0.2

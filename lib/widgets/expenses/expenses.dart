@@ -132,38 +132,54 @@ class _ExpensesState extends ConsumerState<Expenses>
               list: outcomes,
               type: ExpenseType.outcome,
             ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Remains"),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 25,
-                          ),
-                        ),
-                        Text(
-                          "${numberFormatter.format((totalIncome - totalOutcome) / 5)} Ar",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            Summary(totalIncome: totalIncome, totalOutcome: totalOutcome),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class Summary extends StatelessWidget {
+  const Summary({
+    super.key,
+    required this.totalIncome,
+    required this.totalOutcome,
+  });
+
+  final int totalIncome;
+  final int totalOutcome;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Remains"),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${numberFormatter.format(totalIncome - totalOutcome)} Fmg",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25,
+                  ),
+                ),
+                Text(
+                  "${numberFormatter.format((totalIncome - totalOutcome) / 5)} Ar",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

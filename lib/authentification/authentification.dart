@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:akaontyit/authentification/pin_change_screen.dart';
 import 'package:akaontyit/authentification/pin_manager.dart';
+import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,11 +44,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
       maxRetries: 5,
       onMaxRetries: (value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Max retry reached. The app will exit now"),
-            duration: Duration(seconds: 3),
-          ),
+        showSnackBar(
+          context,
+          "Max retry reached. The app will exit now",
+          color: Colors.red,
         );
 
         // Reset after 3 seconds

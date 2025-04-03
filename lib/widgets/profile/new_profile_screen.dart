@@ -2,6 +2,7 @@ import 'package:akaontyit/helpers/database_helper.dart';
 import 'package:akaontyit/model/profile_entry_model.dart';
 import 'package:akaontyit/provider/profiles_provider.dart';
 import 'package:akaontyit/widgets/home.dart';
+import 'package:akaontyit/widgets/utils/utilities.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,17 +58,17 @@ class NewProfileScreenState extends ConsumerState<NewProfileScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Profile "$profileName" added successfully!'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSnackBar(context, 'Profile "$profileName" added successfully!');
 
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (context) => Home()));
+    } else {
+      showSnackBar(
+        context,
+        "Profile name should not be empty",
+        color: Colors.red,
+      );
     }
   }
 
