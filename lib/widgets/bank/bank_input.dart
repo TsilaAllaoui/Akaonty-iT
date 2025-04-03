@@ -127,81 +127,31 @@ class _BankEntryInputState extends ConsumerState<BankEntryInput> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (_, _) {
-        cancelInput();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          title: const Text('Bank Entry'),
-          backgroundColor:
-              selectedType == BankEntryType.deposit
-                  ? Colors.greenAccent
-                  : Colors.redAccent,
-          centerTitle: true,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Amount",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color:
-                        selectedType == BankEntryType.deposit
-                            ? Colors.greenAccent
-                            : Colors.redAccent,
-                    width: 1.5,
-                  ),
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        title: const Text('Bank Entry'),
+        backgroundColor:
+            selectedType == BankEntryType.deposit
+                ? Colors.greenAccent
+                : Colors.redAccent,
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Amount",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
-                child: TextField(
-                  controller: amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Enter amount',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Currency",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              DropDownMenu(
-                onChanged: (value) {
-                  setState(() {
-                    selectedDevise = value!;
-                  });
-                },
-                values: const ["Fmg", "Ar"],
-                value: selectedDevise,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Date",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: pickDate,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -213,65 +163,124 @@ class _BankEntryInputState extends ConsumerState<BankEntryInput> {
                       width: 1.5,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.date_range_outlined,
-                        size: 30,
+                  child: TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Enter amount',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Currency",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 10),
+                DropDownMenu(
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDevise = value!;
+                    });
+                  },
+                  values: const ["Fmg", "Ar"],
+                  value: selectedDevise,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Date",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: pickDate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
                         color:
                             selectedType == BankEntryType.deposit
                                 ? Colors.greenAccent
                                 : Colors.redAccent,
+                        width: 1.5,
                       ),
-                      const SizedBox(width: 10),
-                      Text(selectedDate, style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Transaction Type",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              DropDownMenu(
-                title: "Type: ",
-                onChanged: (value) {
-                  setState(() {
-                    selectedType =
-                        value == "Deposit"
-                            ? BankEntryType.deposit
-                            : BankEntryType.withdrawal;
-                  });
-                },
-                values: const ["Deposit", "Withdrawal"],
-                value:
-                    selectedType == BankEntryType.deposit
-                        ? "Deposit"
-                        : "Withdrawal",
-              ),
-              const SizedBox(height: 30),
-              Center(
-                child: ElevatedButton(
-                  onPressed: addBankEntry,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    backgroundColor:
-                        selectedType == BankEntryType.deposit
-                            ? Colors.greenAccent
-                            : Colors.redAccent,
-                  ),
-                  child: Text(
-                    "Save Entry",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.date_range_outlined,
+                          size: 30,
+                          color:
+                              selectedType == BankEntryType.deposit
+                                  ? Colors.greenAccent
+                                  : Colors.redAccent,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          selectedDate,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                Text(
+                  "Transaction Type",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 10),
+                DropDownMenu(
+                  title: "Type: ",
+                  onChanged: (value) {
+                    setState(() {
+                      selectedType =
+                          value == "Deposit"
+                              ? BankEntryType.deposit
+                              : BankEntryType.withdrawal;
+                    });
+                  },
+                  values: const ["Deposit", "Withdrawal"],
+                  value:
+                      selectedType == BankEntryType.deposit
+                          ? "Deposit"
+                          : "Withdrawal",
+                ),
+                const SizedBox(height: 30),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: addBankEntry,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor:
+                          selectedType == BankEntryType.deposit
+                              ? Colors.greenAccent
+                              : Colors.redAccent,
+                    ),
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

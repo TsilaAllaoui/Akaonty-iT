@@ -105,95 +105,104 @@ class _DebtInputState extends ConsumerState<DebtInput> {
         centerTitle: true,
         elevation: 5,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Amount", style: _labelStyle),
-            const SizedBox(height: 10),
-            Row(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildTextField(
-                    _amountController,
-                    "Enter amount",
-                    keyboardType: TextInputType.number,
+                Text("Amount", style: _labelStyle),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        _amountController,
+                        "Enter amount",
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _buildDropdown(["Fmg", "Ar"], _selectedCurrency, (value) {
+                      setState(() => _selectedCurrency = value!);
+                    }),
+                  ],
+                ),
+                if (_selectedType == DebtType.other) ...[
+                  const SizedBox(height: 20),
+                  Text("Name", style: _labelStyle),
+                  const SizedBox(height: 10),
+                  _buildTextField(_nameController, "Enter name"),
+                ],
+                const SizedBox(height: 20),
+                Text("Date", style: _labelStyle),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: _pickDate,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.date_range,
+                        size: 30,
+                        color:
+                            _selectedType == DebtType.self
+                                ? Colors.blue.shade400
+                                : Colors.orange.shade400,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        _selectedDate,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                _buildDropdown(["Fmg", "Ar"], _selectedCurrency, (value) {
-                  setState(() => _selectedCurrency = value!);
-                }),
+                const SizedBox(height: 20),
+                Text("Type", style: _labelStyle),
+                _buildDropdown(
+                  ["Self", "Other"],
+                  _selectedType == DebtType.self ? "Self" : "Other",
+                  (value) {
+                    setState(
+                      () =>
+                          _selectedType =
+                              value == "Self" ? DebtType.self : DebtType.other,
+                    );
+                  },
+                ),
+                const SizedBox(height: 30),
+                // Save button inside the scrollable content
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _addDebt,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor:
+                          _selectedType == DebtType.self
+                              ? Colors.blue.shade400
+                              : Colors.orange.shade400,
+                    ),
+                    child: Text(
+                      "Save",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            if (_selectedType == DebtType.other) ...[
-              const SizedBox(height: 20),
-              Text("Name", style: _labelStyle),
-              const SizedBox(height: 10),
-              _buildTextField(_nameController, "Enter name"),
-            ],
-            const SizedBox(height: 20),
-            Text("Date", style: _labelStyle),
-            const SizedBox(height: 10),
-            InkWell(
-              onTap: _pickDate,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.date_range,
-                    size: 30,
-                    color:
-                        _selectedType == DebtType.self
-                            ? Colors.blue.shade400
-                            : Colors.orange.shade400,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    _selectedDate,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text("Type", style: _labelStyle),
-            _buildDropdown(
-              ["Self", "Other"],
-              _selectedType == DebtType.self ? "Self" : "Other",
-              (value) {
-                setState(
-                  () =>
-                      _selectedType =
-                          value == "Self" ? DebtType.self : DebtType.other,
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            Center(
-              child: ElevatedButton(
-                onPressed: _addDebt,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor:
-                      _selectedType == DebtType.self
-                          ? Colors.blue.shade400
-                          : Colors.orange.shade400,
-                ),
-                child: Text(
-                  "Save",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

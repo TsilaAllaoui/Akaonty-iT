@@ -1,5 +1,6 @@
 import 'package:akaontyit/provider/general_settings_provider.dart';
 import 'package:akaontyit/provider/profiles_provider.dart';
+import 'package:drop_down_list_menu/drop_down_list_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,6 +18,7 @@ class ExpenseInput extends ConsumerStatefulWidget {
 }
 
 class ExpenseInputState extends ConsumerState<ExpenseInput> {
+  bool firstInit = true;
   final _titleController = TextEditingController();
   final _amountController = CurrencyTextFieldController(
     currencySymbol: "",
@@ -33,6 +35,7 @@ class ExpenseInputState extends ConsumerState<ExpenseInput> {
   void initState() {
     super.initState();
     _initializeExpenseData();
+    firstInit = true;
   }
 
   void _initializeExpenseData() {
@@ -83,14 +86,20 @@ class ExpenseInputState extends ConsumerState<ExpenseInput> {
 
     final currentExpense = ref.watch(currentExpenseProvider);
     if (currentExpense != null) {
-      await ref
-          .read(expensesProvider.notifier)
-          .updateExpense(currentExpense.id!, expense.toMap());
+      expense.id = currentExpense.id;
+      await ref.read(expensesProvider.notifier).updateExpense(expense.toMap());
     } else {
       await ref
           .read(expensesProvider.notifier)
           .addExpense(expense, entryId: ref.read(currentEntryProvider)!.id!);
     }
+
+    ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
+    var currentEntryId = ref.read(currentEntryProvider)!.id!;
+    ref.read(expensesProvider.notifier).setExpenses(currentEntryId);
+    ref
+        .read(currentExpenseTabTypeProvider.notifier)
+        .setCurrentExpenseTabType(_selectedType);
 
     if (!mounted) return;
     Navigator.pop(context);
@@ -98,88 +107,130 @@ class ExpenseInputState extends ConsumerState<ExpenseInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Expense'),
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
-        elevation: 5,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Title",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            _buildTextField(_titleController, "Enter title"),
-            const SizedBox(height: 20),
-            Text(
-              "Amount",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    _amountController,
-                    "Enter amount",
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                _buildDropdown(
-                  ["Fmg", "Ar"],
-                  _selectedCurrency,
-                  (value) => setState(() => _selectedCurrency = value!),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Date",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            InkWell(
-              onTap: _pickDate,
-              child: Row(
+    if (ref.read(currentExpenseTabTypeProvider) != null && firstInit) {
+      _selectedType = ref.read(currentExpenseTabTypeProvider)!;
+      firstInit = false;
+    }
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (_, _) {
+        ref.read(currentExpenseProvider.notifier).setCurrentExpense(null);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Add Expense'),
+          backgroundColor:
+              _selectedType == ExpenseType.income
+                  ? Colors.green.shade300
+                  : Colors.red.shade300,
+          centerTitle: true,
+          elevation: 5,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Title",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(_titleController, "Enter title"),
+              const SizedBox(height: 20),
+              Text(
+                "Amount",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Row(
                 children: [
-                  Icon(Icons.date_range, size: 30, color: Colors.blueAccent),
+                  Expanded(
+                    child: _buildTextField(
+                      _amountController,
+                      "Enter amount",
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  Text(
-                    _selectedDate,
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  _buildDropdown(
+                    ["Fmg", "Ar"],
+                    _selectedCurrency,
+                    (value) => setState(() => _selectedCurrency = value!),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: _addExpense,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: Colors.blueAccent,
+              const SizedBox(height: 20),
+              Text(
+                "Date",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: _pickDate,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.date_range,
+                      size: 30,
+                      color:
+                          _selectedType == ExpenseType.income
+                              ? Colors.green.shade300
+                              : Colors.red.shade300,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _selectedDate,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  "Save",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: DropDownMenu(
+                  title: "Type: ",
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedType =
+                          value == "Income"
+                              ? ExpenseType.income
+                              : ExpenseType.outcome;
+                    });
+                  },
+                  values: const ["Income", "Outcome"],
+                  value:
+                      _selectedType == ExpenseType.income
+                          ? "Income"
+                          : "Outcome",
+                ),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _addExpense,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor:
+                        _selectedType == ExpenseType.income
+                            ? Colors.green.shade300
+                            : Colors.red.shade300,
+                  ),
+                  child: Text(
+                    "Save",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -199,7 +250,12 @@ class ExpenseInputState extends ConsumerState<ExpenseInput> {
         fillColor: Colors.grey[100],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.blueAccent),
+          borderSide: BorderSide(
+            color:
+                _selectedType == ExpenseType.income
+                    ? Colors.green.shade300
+                    : Colors.red.shade300,
+          ),
         ),
       ),
     );

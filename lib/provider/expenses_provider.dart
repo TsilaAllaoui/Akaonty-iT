@@ -39,13 +39,13 @@ class ExpensesNotifier extends StateNotifier<List<ExpenseItem>> {
     state = res;
   }
 
-  Future<void> updateExpense(int id, Map<String, dynamic> map) async {
+  Future<void> updateExpense(Map<String, dynamic> map) async {
     var db = await DatabaseHelper.getDatabase();
     await db.update(
       "expenses",
       map,
       where: "id = ?",
-      whereArgs: [id],
+      whereArgs: [map["id"]],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     var expenses = await DatabaseHelper.fetchExpenses();
